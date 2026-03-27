@@ -1,0 +1,37 @@
+{
+  "name": "editorjs-text",
+  "version": "0.1.7",
+  "type": "module",
+  "description": "Text-element block for Editor.js",
+  "license": "MIT",
+  "keywords": [
+    "editorjs-text"
+  ],
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/text-element.umd.js",
+  "module": "./dist/text-element.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/text-element.mjs",
+      "require": "./dist/text-element.umd.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "author": {
+    "name": "kibblewhite",
+    "email": "kibblewhite@live.com"
+  },
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "vite": "^7.0.0",
+    "vite-plugin-css-injected-by-js": "^3.5.2"
+  },
+  "dependencies": {
+    "@codexteam/icons": "^0.3.3"
+  }
+}

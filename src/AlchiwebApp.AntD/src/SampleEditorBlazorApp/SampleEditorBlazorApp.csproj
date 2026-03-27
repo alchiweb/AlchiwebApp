@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Authentication\CustomAuthStateProvider.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="AntDesign" />
+	  <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+	  <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" PrivateAssets="all" />
+
+	  <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" />
+
+	  <PackageReference Include="AntDesign.Charts" />
+	  <PackageReference Include="AntDesign.Extensions.Localization" />
+	  
+	  <PackageReference Include="AntDesign.ProLayout" />
+	  <PackageReference Include="Blazored.LocalStorage" />
+	  <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+	  <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AlchiwebApp.AntD\AlchiwebApp.AntD.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Authentication\" />
+  </ItemGroup>
+
+</Project>

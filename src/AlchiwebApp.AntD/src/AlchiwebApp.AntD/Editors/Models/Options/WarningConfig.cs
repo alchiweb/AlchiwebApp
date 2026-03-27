@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
+namespace AlchiwebApp.AntD.Editors.Models.Options
+{
+    public class WarningConfig
+    {
+        [JsonPropertyName("titlePlaceholder")]
+        public string? TitlePlaceholder { get; set; }
+        [JsonPropertyName("messagePlaceholder")]
+        public string? MessagePlaceholder { get; set; }
+
+    }
+}

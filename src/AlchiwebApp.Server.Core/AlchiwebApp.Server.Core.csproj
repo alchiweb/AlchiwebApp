@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+   
+  <ItemGroup>
+      <ProjectReference Include="..\AlchiwebApp.Core\AlchiwebApp.Core.csproj" />
+    <ProjectReference Include="..\Ardalis.Specification.EntityFrameworkCore\Ardalis.Specification.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
+</Project>

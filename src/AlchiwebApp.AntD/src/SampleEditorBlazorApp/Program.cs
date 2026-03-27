@@ -1,0 +1,22 @@
+using AlchiwebApp.AntD.Editors;
+using AlchiwebApp.AntD.Editors.Converters;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+
+namespace SampleEditorBlazorApp;
+public class Program
+{
+    public static async Task Main(string[] args)
+    {
+        WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
+        builder.RootComponents.Add<App>("#app");
+        builder.RootComponents.Add<HeadOutlet>("head::after");
+        builder.Services.AddAntDesign();
+
+        builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+
+        builder.Services.AddScopedEditorJsInterop();
+        builder.Services.AddScopedEditorJsonProcessorServices();
+        await builder.Build().RunAsync();
+    }
+}

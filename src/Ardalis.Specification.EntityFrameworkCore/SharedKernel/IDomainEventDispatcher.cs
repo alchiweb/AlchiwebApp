@@ -1,0 +1,9 @@
+﻿namespace Ardalis.Specification.EntityFrameworkCore.SharedKernel;
+
+/// <summary>
+/// A simple interface for sending domain events. Can use Mediator or any other implementation.
+/// </summary>
+public interface IDomainEventDispatcher
+{
+  Task DispatchAndClearEvents(IEnumerable<IHasDomainEvents> entitiesWithEvents);
+}

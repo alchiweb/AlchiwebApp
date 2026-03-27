@@ -1,0 +1,59 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <!--<Version>1.2.0.22</Version>-->
+		<AssemblyName>AlchiwebApp.AntD</AssemblyName>
+		<RootNamespace>AlchiwebApp.AntD</RootNamespace>
+		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+		<!--<Description>A Blazor component implementation for EditorJS.io a block styled editor.</Description>
+		<PackageTags>editorjs;blazor;blazor-editorjs;editorjs-blazor</PackageTags>
+		<PackageIcon>editorjs.png</PackageIcon>
+		<ApplicationIcon>editorjs.ico</ApplicationIcon>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<IsPackable>true</IsPackable>-->
+		<BlazorWebAssemblyEnableCompression>true</BlazorWebAssemblyEnableCompression>
+		<CompressionEnabled>true</CompressionEnabled>
+		<IsAotCompatible>true</IsAotCompatible>
+		<PublishAot>true</PublishAot>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="editorjs.ico" Pack="true" PackagePath="" />
+		<None Include="editorjs.png" Pack="true" PackagePath="" />
+		<Compile Remove="wwwroot\lib\editorjs\**" />
+		<Content Remove="wwwroot\lib\**\.*" />
+		<Content Remove="wwwroot\lib\editorjs\**" />
+		<EmbeddedResource Remove="wwwroot\lib\editorjs\**" />
+		<None Remove="wwwroot\lib\editorjs\**" />
+	</ItemGroup>
+
+	<!--<Import Project="libman.targets" />-->
+
+	<ItemGroup>
+	  <Compile Remove="Editors\Converters\StringValueAttribute.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="AntDesign" />
+    </ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\AlchiwebApp.AntD.Editors.Abstractions\AlchiwebApp.AntD.Editors.Abstractions.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="wwwroot\lib\editorjs-bundle.js">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="wwwroot\lib\editorjs-interop.js">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+</Project>

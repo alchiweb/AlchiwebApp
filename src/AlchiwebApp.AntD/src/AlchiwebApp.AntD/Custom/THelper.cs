@@ -1,0 +1,122 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
+using System.Collections;
+using System.Reflection;
+
+namespace AntDesign.Custom
+{
+    internal static class THelper
+    {
+        public static T? ChangeType<T>(object value)
+        {
+            return ChangeType<T>(value, null);
+        }
+
+        public static T ChangeType<T>(object value, IFormatProvider? provider)
+        {
+            Type t = typeof(T);
+            Type? targetType = null;
+
+            if (t.IsGenericType && t.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
+            {
+                if (value == null)
+                {
+                    return default!;
+                }
+
+                targetType = Nullable.GetUnderlyingType(t);
+            }
+            if (targetType != null)
+            {
+                t = targetType;
+            }
+
+            return provider == null ? (T)Convert.ChangeType(value, t) : (T)Convert.ChangeType(value, t, provider);
+        }
+
+        public static bool IsTypeNullable<T>()
+        {
+            return IsTypeNullable(typeof(T));
+        }
+
+        public static bool IsTypeNullable(Type type)
+        {
+            return Nullable.GetUnderlyingType(type) != null;
+        }
+
+        public static Type GetNullableType<T>()
+        {
+            var type = typeof(T);
+            type = Nullable.GetUnderlyingType(type) ?? type;
+            if (type.IsValueType)
+            {
+                return typeof(Nullable<>).MakeGenericType(type);
+            }
+            else
+            {
+                return type;
+            }
+        }
+
+        public static Type GetUnderlyingType<T>()
+        {
+            var type = typeof(T);
+
+            Type? targetType = null;
+            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                targetType = Nullable.GetUnderlyingType(type);
+            }
+
+            return targetType ?? type;
+        }
+
+        public static Type GetUnderlyingType(this Type type)
+        {
+            Type? targetType = null;
+            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                targetType = Nullable.GetUnderlyingType(type);
+            }
+            return targetType ?? type;
+        }
+
+        public static bool IsNumericType(this Type type)
+        {
+            return type != null
+                && Type.GetTypeCode(type)
+                       is TypeCode.Byte
+                       or TypeCode.Decimal
+                       or TypeCode.Double
+                       or TypeCode.Int16
+                       or TypeCode.Int32
+                       or TypeCode.Int64
+                       or TypeCode.SByte
+                       or TypeCode.Single
+                       or TypeCode.UInt16
+                       or TypeCode.UInt32
+                       or TypeCode.UInt64;
+        }
+
+        public static bool IsDateType(this Type type)
+        {
+            return type != null && (type == typeof(DateTime)
+                || type == typeof(DateTimeOffset)
+#if NET6_0_OR_GREATER
+                || type == typeof(TimeOnly)
+                || type == typeof(DateOnly)
+#endif
+                );
+        }
+
+        public static bool IsArrayOrList(this Type that) => that != null && (that.IsArray || typeof(IList).IsAssignableFrom(that));
+
+        public static bool IsEnumerable(this Type that) => that != null && (that.IsArray || typeof(IEnumerable).IsAssignableFrom(that));
+
+        public static bool IsUserDefinedClass(this Type thta) =>
+            thta.IsClass && thta.Namespace != null && !thta.Namespace.StartsWith("System");
+    }
+}

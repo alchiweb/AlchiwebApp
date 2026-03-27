@@ -1,0 +1,9 @@
+﻿@namespace AlchiwebApp.AntD.Editors
+@inherits AntDesign.AntInputComponentBase<string>
+
+@* All mouse and keyboard events: *@
+@*  @onmouseenter:stopPropagation @onmouseleave:stopPropagation @onmousemove:stopPropagation @onmouseout:stopPropagation @onmouseover:stopPropagation @onmousewheel:stopPropagation @onmouseup:stopPropagation @onmousedown:stopPropagation @onkeypress:stopPropagation @onkeyup:stopPropagation @onkeydown:stopPropagation @onclick:stopPropagation *@
+@* Needed: @onmouseup:stopPropagation *@
+<div @ref="@Ref" id="@Id" name="@Name" style="@Style" class="@ClassMapper.OriginalClass" title="@Title" @onmouseup:stopPropagation>
+</div>
+

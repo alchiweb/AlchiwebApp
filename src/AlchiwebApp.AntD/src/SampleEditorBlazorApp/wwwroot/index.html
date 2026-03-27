@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SampleEditorBlazorApp</title>
+    <base href="/" />
+    <link rel="stylesheet" href="css/app.css" />
+    <!-- If you add any scoped CSS files, uncomment the following to load them
+    <link href="SampleEditorBlazorApp.styles.css" rel="stylesheet" /> -->
+    <link href="manifest.webmanifest" rel="manifest" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <div id="app">
+        <svg class="loading-progress">
+            <circle r="40%" cx="50%" cy="50%" />
+            <circle r="40%" cx="50%" cy="50%" />
+        </svg>
+        <div class="loading-progress-text"></div>
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/editorjs/dist/editorjs.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/attaches/dist/bundle.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/checklist/dist/checklist.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/code/dist/code.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/delimiter/dist/delimiter.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/embed/dist/embed.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/header/dist/header.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/image/dist/image.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/inline-code/dist/inline-code.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/link/dist/link.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/list/dist/list.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/marker/dist/marker.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/nested-list/dist/nested-list.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/opensea/dist/OpenseaTool.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/paragraph/dist/paragraph.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/quote/dist/quote.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/raw/dist/raw.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/simple-image/dist/simple-image.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/table/dist/table.umd.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/text/dist/bundle.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/underline/dist/bundle.min.js" asp-append-version="true" async defer></script>
+    <script src="_content/AlchiwebApp.AntD/lib/editorjs/warning/dist/warning.umd.min.js" asp-append-version="true" async defer></script>
+
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
+</body>
+
+</html>
