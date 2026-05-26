@@ -17,6 +17,10 @@
     <File Path="src/Directory.Packages.props" />
     <File Path="vs-spell.dic" />
   </Folder>
+  <Folder Name="/AlchiwebApp.Console/">
+    <Project Path="src/AlchiwebApp.Console/AlchiwebApp.Console.AddToBitPlatform/AlchiwebApp.Console.AddToBitPlatform.csproj" />
+    <Project Path="src/AlchiwebApp.Console/AlchiwebApp.Console.Core/AlchiwebApp.Console.Core.csproj" />
+  </Folder>
   <Project Path="src/AlchiwebApp.Client.Core/AlchiwebApp.Client.Core.csproj" />
   <Project Path="src/AlchiwebApp.Core/AlchiwebApp.Core.csproj" />
   <Project Path="src/AlchiwebApp.PagingFiltering/AlchiwebApp.PagingFiltering.csproj" />
