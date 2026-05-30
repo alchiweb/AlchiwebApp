@@ -40,6 +40,7 @@ internal class Program
 
                 await ReplaceForwardedPortsAndUserSecretsAsync();
 
+                await MoveFilesToServerCoreProjectAsync();
             }
             catch (Exception ex)
             {
@@ -60,6 +61,78 @@ internal class Program
         }
     }
 
+    private static async Task MoveFilesToServerCoreProjectAsync()
+    {
+        MoveOrRenameFile(
+            Path.Combine(_bitPlatformProjectFolder, $@"src\{_projectName}.Core\Infrastructure\Extensions\ActivitySourceExtensions.cs"),
+            Path.Combine(_bitPlatformProjectFolder, $@"src\Server\{_projectName}.Server.Core\Infrastructure\Extensions\ActivitySourceExtensions.cs")
+            );
+        MoveOrRenameFile(
+            Path.Combine(_bitPlatformProjectFolder, $@"src\{_projectName}.Core\Infrastructure\Extensions\MeterExtensions.cs"),
+            Path.Combine(_bitPlatformProjectFolder, $@"src\Server\{_projectName}.Server.Core\Infrastructure\Extensions\MeterExtensions.cs")
+        );
+        string targetResourcesProjectDirectory = Path.Combine(_bitPlatformProjectFolder, $@"src\Server\{_projectName}.Server.Api");
+        string targetResourcesProjectFile = Path.Combine(targetResourcesProjectDirectory, $@"{_projectName}.Server.Api.csproj");
+        MoveOrRenameFiles(
+            Path.Combine(_bitPlatformProjectFolder, $@"src\{_projectName}.Core\Resources\IdentityStrings.*"),
+            Path.Combine(targetResourcesProjectDirectory, $@"Features\Identity\Resources")
+        );
+        try
+        {
+            var sourceResourcesProjectFilePath = Path.Combine(_bitPlatformProjectFolder,
+                $@"src\{_projectName}.Core\{_projectName}.Core.csproj");
+            var sourceXDoc = XDocument.Load(sourceResourcesProjectFilePath);
+            var sourceItemGroup = GetRessourcesItemGroupFromCsproj(sourceXDoc, @"Resources\AppStrings.resx");
+            if (sourceItemGroup == null)
+            {
+                _errors.Add($@"ItemGroup section not found in source csproj file (for moving resources files).");
+                return;
+            }
+            sourceItemGroup.Remove();
+            var targetXDoc = XDocument.Load(targetResourcesProjectFile);
+            var targetItemGroup = GetRessourcesItemGroupFromCsproj(targetXDoc, @"Resources\AppStrings.resx");
+            if (targetItemGroup != null)
+            {
+                _errors.Add($@"ItemGroup section found in target csproj file (for moving resources files).");
+                return;
+            }
+            var targetItemGroupBefore = GetRessourcesItemGroupFromCsproj(targetXDoc, @"Features\Identity\Resources\EmailStrings.resx");
+            if (targetItemGroupBefore == null)
+            {
+                _errors.Add($@"ItemGroup section (for Email resources) not found in target csproj file (for moving resources files).");
+                return;
+            }
+            targetXDoc.Document?.Element("Project")?.Add(sourceItemGroup);
+            var test = targetXDoc.ToString();
+            //targetXDoc.Save(targetResourcesProjectFile);
+            //sourceXDoc.Save(sourceResourcesProjectFilePath);
+        }
+        catch (Exception)
+        {
+            _errors.Add($@"Error in moving ItemGroup in csproj file (for moving resources files).");
+        }
+    }
+
+    private static XElement? GetRessourcesItemGroupFromCsproj(XDocument sourceXDoc, string updateValue)
+    {
+        var itemGroup = sourceXDoc.Document?.Element("Project")?.Elements("ItemGroup")
+            ?.Where(el => el.Element("EmbeddedResource")?.Attribute("Update")?.Value == updateValue
+            ).FirstOrDefault();
+        return itemGroup;
+    }
+
+    static void MoveOrRenameFiles(
+        string sourcePattern,
+        string targetDirectoryPath
+    )
+    {
+        string[] filenames = Directory.GetFiles(Path.GetDirectoryName(sourcePattern), Path.GetFileName(sourcePattern));
+        foreach (string filename in filenames)
+        {
+            MoveOrRenameFile(filename, Path.Combine(targetDirectoryPath, Path.GetFileName(filename)));
+        }
+    }
+    
     private static async Task ReplaceForwardedPortsAndUserSecretsAsync()
     {
         string launchSettingsFilename = @"launchSettings.json";
@@ -150,8 +223,8 @@ internal class Program
 
     private static async Task RenameServerSharedProjectAsync(bool matchCase = false)
     {
-        if (!RenameDirectory($@"src\Server\{_projectName}.Server.Shared", $@"src\Server\{_projectName}.Server.Core") ||
-            !RenameFile($@"src\Server\{_projectName}.Server.Core\{_projectName}.Server.Shared.csproj", $@"src\Server\{_projectName}.Server.Core\{_projectName}.Server.Core.csproj")
+        if (!MoveOrRenameDirectory($@"src\Server\{_projectName}.Server.Shared", $@"src\Server\{_projectName}.Server.Core") ||
+            !MoveOrRenameFile($@"src\Server\{_projectName}.Server.Core\{_projectName}.Server.Shared.csproj", $@"src\Server\{_projectName}.Server.Core\{_projectName}.Server.Core.csproj")
             )
         {
             _errors.Add($@"Aborted: the project ""{_projectName}.Server.Shared"" must exist.");
@@ -163,8 +236,8 @@ internal class Program
     private static async Task RenameSharedProjectAsync(bool matchCase = false)
     {
 
-        if (!RenameDirectory($@"src\Shared", $@"src\{_projectName}.Core") ||
-            !RenameFile($@"src\{_projectName}.Core\{_projectName}.Shared.csproj", $@"src\{_projectName}.Core\{_projectName}.Core.csproj")
+        if (!MoveOrRenameDirectory($@"src\Shared", $@"src\{_projectName}.Core") ||
+            !MoveOrRenameFile($@"src\{_projectName}.Core\{_projectName}.Shared.csproj", $@"src\{_projectName}.Core\{_projectName}.Core.csproj")
             )
         {
             _errors.Add($@"Aborted: the project ""{_projectName}.Shared"" must exist.");
@@ -204,7 +277,7 @@ internal class Program
         }
         return listFiles.Count;
     }
-    private static bool RenameDirectory(string oldRelativePath, string newRelativePath)
+    private static bool MoveOrRenameDirectory(string oldRelativePath, string newRelativePath)
     {
         var oldFullPath = Path.Combine(_bitPlatformProjectFolder, oldRelativePath);
         var newFullPath = Path.Combine(_bitPlatformProjectFolder, newRelativePath);
@@ -221,12 +294,12 @@ internal class Program
         }
         catch (Exception)
         {
-            _errors.Add($@"The directory ""{oldRelativePath}"" cannot be renamed.");
+            _errors.Add($@"The directory ""{oldRelativePath}"" cannot be moved (or renamed).");
             return false;
         }
         return true;
     }
-    private static bool RenameFile(string oldRelativePath, string newRelativePath)
+    private static bool MoveOrRenameFile(string oldRelativePath, string newRelativePath)
     {
         var oldFullPath = Path.Combine(_bitPlatformProjectFolder, oldRelativePath);
         var newFullPath = Path.Combine(_bitPlatformProjectFolder, newRelativePath);
@@ -241,7 +314,7 @@ internal class Program
         }
         catch (Exception)
         {
-            _errors.Add($@"The file ""{oldRelativePath}"" cannot be renamed.");
+            _errors.Add($@"The file ""{oldRelativePath}"" cannot be moved (or renamed).");
             return false;
         }
         return true;
