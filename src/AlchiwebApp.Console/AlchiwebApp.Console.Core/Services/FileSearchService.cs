@@ -21,9 +21,10 @@ public class FileSearchService
         bool useRegex = false,
         bool useExtendedSearch = false,
         Action<string, int, int>? progressCallback = null,
+        string[]? excludeDirectories = null,
         CancellationToken cancellationToken = default)
     {
-        var allFiles = await GetFilesToSearchAsync(directories, filters, searchInSubFolders, cancellationToken);
+        var allFiles = await GetFilesToSearchAsync(directories, filters, searchInSubFolders, excludeDirectories, cancellationToken);
         var matches = new List<SearchResult>();
         
         OnStatusUpdate?.Invoke("Searching files...");
@@ -73,7 +74,7 @@ public class FileSearchService
         return matches;
     }
 
-    internal async Task<List<string>> GetFilesToSearchAsync(string[] directories, string[] filters, bool searchInSubFolders, CancellationToken cancellationToken = default)
+    internal async Task<List<string>> GetFilesToSearchAsync(string[] directories, string[] filters, bool searchInSubFolders, string[]? excludeDirectories, CancellationToken cancellationToken = default)
     {
         var allFiles = new List<string>();
         if (filters.Length == 0)
@@ -85,7 +86,7 @@ public class FileSearchService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (!Directory.Exists(directory))
+            if ((excludeDirectories != null && excludeDirectories.Any(d => directory.EndsWith($@"\{d}"))) || !Directory.Exists(directory))
             {
                 continue;
             }
@@ -102,11 +103,11 @@ public class FileSearchService
 
                 if (searchInSubFolders)
                 {
-                    var subDirectories = await Task.Run(() => Directory.GetDirectories(directory), cancellationToken);
+                    var subDirectories = await Task.Run(() => Directory.GetDirectories(directory).SkipWhile(d => excludeDirectories != null && excludeDirectories.Any(d => directory.EndsWith($@"\{d}"))), cancellationToken);
                     foreach (var subDir in subDirectories)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
-                        allFiles.AddRange(await GetFilesRecursivelyAsync(subDir, filters, cancellationToken));
+                        allFiles.AddRange(await GetFilesRecursivelyAsync(subDir, filters, excludeDirectories, cancellationToken));
                     }
                 }
             }
@@ -127,7 +128,7 @@ public class FileSearchService
         return allFiles.Distinct().ToList();
     }
 
-    private async Task<List<string>> GetFilesRecursivelyAsync(string directory, string[] filters, CancellationToken cancellationToken = default)
+    private async Task<List<string>> GetFilesRecursivelyAsync(string directory, string[] filters, string[]? excludeDirectories, CancellationToken cancellationToken = default)
     {
         var files = new List<string>();
 
@@ -142,11 +143,11 @@ public class FileSearchService
                 files.AddRange(filesInCurrentDir);
             }
 
-            var subDirectories = await Task.Run(() => Directory.GetDirectories(directory), cancellationToken);
+            var subDirectories = await Task.Run(() => Directory.GetDirectories(directory).SkipWhile(d => excludeDirectories != null && excludeDirectories.Any(d => directory.EndsWith($@"\{d}"))), cancellationToken);
             foreach (var subDir in subDirectories)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                files.AddRange(await GetFilesRecursivelyAsync(subDir, filters, cancellationToken));
+                files.AddRange(await GetFilesRecursivelyAsync(subDir, filters, excludeDirectories, cancellationToken));
             }
         }
         catch (UnauthorizedAccessException)

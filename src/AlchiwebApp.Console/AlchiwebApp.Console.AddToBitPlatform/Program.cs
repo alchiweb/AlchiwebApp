@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Transactions;
+using System.Xml.Linq;
 using AlchiwebApp.Console.Core.Services;
 using Rejigs;
 
@@ -71,41 +72,83 @@ internal class Program
             Path.Combine(_bitPlatformProjectFolder, $@"src\{_projectName}.Core\Infrastructure\Extensions\MeterExtensions.cs"),
             Path.Combine(_bitPlatformProjectFolder, $@"src\Server\{_projectName}.Server.Core\Infrastructure\Extensions\MeterExtensions.cs")
         );
-        string targetResourcesProjectDirectory = Path.Combine(_bitPlatformProjectFolder, $@"src\Server\{_projectName}.Server.Api");
-        string targetResourcesProjectFile = Path.Combine(targetResourcesProjectDirectory, $@"{_projectName}.Server.Api.csproj");
+
+        MoveResources();
+    }
+
+    private static void MoveResources()
+    {
+        string resourcesToMove = "IdentityStrings.";
+        string resourcesTargetBefore = "EmailStrings.";
+
+        string sourceProject = $@"{_projectName}.Core";
+        string sourceResourcesDirectory = @"Resources";
+        string sourceProjectDirectory = Path.Combine(_bitPlatformProjectFolder, @"src", $"{sourceProject}");
+
+        string targetProject = $@"{_projectName}.Server.Api";
+        string targetResourcesDirectory = @"Features\Identity\Resources";
+        string targetProjectDirectory = Path.Combine(_bitPlatformProjectFolder, @"src\Server", $"{targetProject}");
         MoveOrRenameFiles(
-            Path.Combine(_bitPlatformProjectFolder, $@"src\{_projectName}.Core\Resources\IdentityStrings.*"),
-            Path.Combine(targetResourcesProjectDirectory, $@"Features\Identity\Resources")
+            Path.Combine(sourceProjectDirectory, sourceResourcesDirectory, $"{resourcesToMove}*"),
+            Path.Combine(targetProjectDirectory, targetResourcesDirectory)
         );
         try
         {
-            var sourceResourcesProjectFilePath = Path.Combine(_bitPlatformProjectFolder,
-                $@"src\{_projectName}.Core\{_projectName}.Core.csproj");
-            var sourceXDoc = XDocument.Load(sourceResourcesProjectFilePath);
-            var sourceItemGroup = GetRessourcesItemGroupFromCsproj(sourceXDoc, @"Resources\AppStrings.resx");
-            if (sourceItemGroup == null)
+            string sourceResourcesProjectFile = Path.Combine(sourceProjectDirectory, $"{sourceProject}.csproj");
+            var sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
+            var sourceItems = GetRessourcesItemsFromCsproj(sourceXDoc, Path.Combine(sourceResourcesDirectory, resourcesToMove));
+            if (sourceItems.Count == 0)
             {
                 _errors.Add($@"ItemGroup section not found in source csproj file (for moving resources files).");
                 return;
             }
-            sourceItemGroup.Remove();
+
+            string targetResourcesProjectFile = Path.Combine(targetProjectDirectory, $"{targetProject}.csproj");
             var targetXDoc = XDocument.Load(targetResourcesProjectFile);
-            var targetItemGroup = GetRessourcesItemGroupFromCsproj(targetXDoc, @"Resources\AppStrings.resx");
-            if (targetItemGroup != null)
+            var targetItems = GetRessourcesItemsFromCsproj(targetXDoc, Path.Combine(targetResourcesDirectory, resourcesToMove));
+            if (targetItems.Count > 0)
             {
                 _errors.Add($@"ItemGroup section found in target csproj file (for moving resources files).");
                 return;
             }
-            var targetItemGroupBefore = GetRessourcesItemGroupFromCsproj(targetXDoc, @"Features\Identity\Resources\EmailStrings.resx");
-            if (targetItemGroupBefore == null)
+            var targetItemsBefore = GetRessourcesItemsFromCsproj(targetXDoc, Path.Combine(targetResourcesDirectory, resourcesTargetBefore));
+            if (targetItemsBefore.Count == 0)
             {
                 _errors.Add($@"ItemGroup section (for Email resources) not found in target csproj file (for moving resources files).");
                 return;
             }
-            targetXDoc.Document?.Element("Project")?.Add(sourceItemGroup);
-            var test = targetXDoc.ToString();
-            //targetXDoc.Save(targetResourcesProjectFile);
-            //sourceXDoc.Save(sourceResourcesProjectFilePath);
+
+            foreach (var item in sourceItems)
+            {
+                var attributeWithResourcesPath = item.Attribute("Update");
+                if (attributeWithResourcesPath != null)
+                {
+                    attributeWithResourcesPath.Value = attributeWithResourcesPath.Value.Replace(sourceResourcesDirectory, targetResourcesDirectory);
+                }
+                var elementWithResourcesPath = item.Element("LastGenOutput");
+                if (elementWithResourcesPath != null)
+                {
+                    elementWithResourcesPath.Value = elementWithResourcesPath.Value.Replace(sourceResourcesDirectory, targetResourcesDirectory);
+                }
+                elementWithResourcesPath = item.Element("DependentUpon");
+                if (elementWithResourcesPath != null)
+                {
+                    elementWithResourcesPath.Value = elementWithResourcesPath.Value.Replace(sourceResourcesDirectory, targetResourcesDirectory);
+                }
+
+                var elementWithNamespace = item.Element("StronglyTypedNamespace");
+                if (elementWithNamespace != null)
+                {
+                    elementWithNamespace.Value = $"{targetProject}.{targetResourcesDirectory.Replace('\\', '.')}";
+                }
+            }
+
+            targetItemsBefore.FirstOrDefault()?.AddBeforeSelf(sourceItems);
+            targetXDoc.Save(targetResourcesProjectFile);
+
+            sourceItems.Remove();
+            sourceXDoc.Descendants("ItemGroup").Where(ig => ig.IsEmpty).Remove();
+            sourceXDoc.Save(sourceResourcesProjectFile);
         }
         catch (Exception)
         {
@@ -113,12 +156,27 @@ internal class Program
         }
     }
 
-    private static XElement? GetRessourcesItemGroupFromCsproj(XDocument sourceXDoc, string updateValue)
+    private static List<XElement> GetRessourcesItemsFromCsproj(XDocument sourceXDoc, string updateValue)
     {
-        var itemGroup = sourceXDoc.Document?.Element("Project")?.Elements("ItemGroup")
-            ?.Where(el => el.Element("EmbeddedResource")?.Attribute("Update")?.Value == updateValue
-            ).FirstOrDefault();
-        return itemGroup;
+        //var items = sourceXDoc.Document?.Element("Project")?.Elements("ItemGroup")?.SelectMany(
+        //    el => el?.Elements("EmbeddedResource") ?? new List<XElement>(), (el, c) => c)
+        //    //.Where(e =>
+        //    //    {
+        //    //        var attributeValue = e?.Attribute("Update")?.Value;
+        //    //        return attributeValue != null;// && attributeValue.StartsWith(updateValue);
+        //    //    }
+        //    //)
+        //    .ToList();
+
+        var items = sourceXDoc.Descendants("EmbeddedResource")
+            .Where(e =>
+                {
+                    var attributeValue = e?.Attribute("Update")?.Value;
+                    return attributeValue != null && attributeValue.StartsWith(updateValue);
+                }
+            )
+            .ToList();
+        return items;
     }
 
     static void MoveOrRenameFiles(
@@ -256,17 +314,21 @@ internal class Program
 
         await ReplaceTextAsync($@"Shared project to", $@"shared project (`{_projectName}.Core`) to", matchCase, expectedReplacements: 1);
     }
-    private static async Task<int> ReplaceTextAsync(string searchText, string replaceText, bool matchCase = false, bool matchWholeWord = false, string[]? directories = null, string[]? filters = null, int? expectedReplacements = null)
+    private static async Task<int> ReplaceTextAsync(string searchText, string replaceText, bool matchCase = false, bool matchWholeWord = false, string[]? directories = null, string[]? filters = null, int? expectedReplacements = null, string[]? excludeDirectories = null)
     {
         if (directories == null || directories.Length == 0)
         {
             directories = [_bitPlatformProjectFolder];
         }
+        if (excludeDirectories == null)
+        {
+            excludeDirectories = ["bin", "obj"];
+        }
         if (filters == null || filters.Length == 0)
         {
             filters = ["*.*"];
         }
-        var listFiles = await _searchService.SearchFilesAsync(directories, filters, true, searchText, matchCase, matchWholeWord);
+        var listFiles = await _searchService.SearchFilesAsync(directories, filters, true, searchText, matchCase, matchWholeWord, excludeDirectories: excludeDirectories);
         if (listFiles.Count != 0)
         {
             await _searchService.ReplaceInFilesAsync(searchText, replaceText, listFiles, matchCase);
