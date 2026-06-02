@@ -1,5 +1,7 @@
 ﻿using System.Transactions;
+using System.Xml;
 using System.Xml.Linq;
+using AlchiwebApp.Console.AddToBitPlatform.Extensions;
 using AlchiwebApp.Console.Core.Services;
 using Rejigs;
 
@@ -19,7 +21,7 @@ internal class Program
     {
         _bitPlatformProjectFolder = Directory.GetCurrentDirectory();
         _projectName = Path.GetFileName(_bitPlatformProjectFolder);
-        _sourceProjectFolder = Path.Combine(_bitPlatformProjectFolder, @"..\..");
+        _sourceProjectFolder = Path.Combine(_bitPlatformProjectFolder, "..", "..");
         Console.WriteLine($"AlchiwebApp / Add To BitPlatform");
         Console.WriteLine($"Project name: {_projectName} / Project directory: {_bitPlatformProjectFolder}");
 
@@ -64,16 +66,310 @@ internal class Program
 
     private static async Task MoveFilesToServerCoreProjectAsync()
     {
+        string sourceCorePath = Path.Combine(_bitPlatformProjectFolder, "src", $"{_projectName}.Core");
+        string sourceServerCorePath = Path.Combine(_bitPlatformProjectFolder, "src", "Server", $"{_projectName}.Server.Core");
+        string sourceServerApiPath = Path.Combine(_bitPlatformProjectFolder, "src", "Server", $"{_projectName}.Server.Api");
+
         MoveOrRenameFile(
-            Path.Combine(_bitPlatformProjectFolder, $@"src\{_projectName}.Core\Infrastructure\Extensions\ActivitySourceExtensions.cs"),
-            Path.Combine(_bitPlatformProjectFolder, $@"src\Server\{_projectName}.Server.Core\Infrastructure\Extensions\ActivitySourceExtensions.cs")
+            Path.Combine(sourceCorePath, "Infrastructure", "Extensions", "ActivitySourceExtensions.cs"),
+            Path.Combine(sourceServerCorePath, "Infrastructure", "Extensions", "ActivitySourceExtensions.cs")
             );
         MoveOrRenameFile(
-            Path.Combine(_bitPlatformProjectFolder, $@"src\{_projectName}.Core\Infrastructure\Extensions\MeterExtensions.cs"),
-            Path.Combine(_bitPlatformProjectFolder, $@"src\Server\{_projectName}.Server.Core\Infrastructure\Extensions\MeterExtensions.cs")
+            Path.Combine(sourceCorePath, "Infrastructure", "Extensions", "MeterExtensions.cs"),
+            Path.Combine(sourceServerCorePath, "Infrastructure", "Extensions", "MeterExtensions.cs")
         );
 
         MoveResources();
+
+        string sourcePath = Path.Combine(sourceServerApiPath, "Features");
+
+        MoveOrRenameFile(
+            Path.Combine(sourceServerApiPath, "ServerApiSettings.cs"),
+            Path.Combine(sourceServerCorePath, "ServerCoreSettings.cs")
+            );
+        await ReplaceTextAsync("ServerApiSettings", "ServerCoreSettings", true, true, [
+            sourceServerApiPath,
+            sourceServerCorePath
+            ]);
+
+        MoveFilesRecursively(
+            sourcePath,
+            Path.Combine(sourceServerCorePath, "Features"),
+            true,
+            "Controller."
+            ).Select(filename => new SearchResult() { FilePath = filename }).ToList();
+        sourcePath = Path.Combine(sourceServerApiPath, "Infrastructure");
+
+        // TODO: merge to two files (with regex)
+        var extensionsCsFile1 = Path.Combine("Infrastructure", "Extensions", "HttpContextExtensions");
+        var extensionsCsFile2 = Path.Combine(sourceServerApiPath, "Infrastructure", "Extensions", "HttpRequestExtensions");
+        MoveOrRenameFile(
+            Path.Combine(sourceServerApiPath, $"{extensionsCsFile1}.cs"),
+            Path.Combine(sourceServerApiPath, $"{extensionsCsFile1}.FromApi.cs")
+            );
+        // TODO: merge to two files (with regex)
+        MoveOrRenameFile(
+            Path.Combine(sourceServerApiPath, $"{extensionsCsFile2}.cs"),
+            Path.Combine(sourceServerApiPath, $"{extensionsCsFile2}.FromApi.cs")
+            );
+        string[] arrayExtensionsFiles = [
+            Path.Combine(sourceServerCorePath, $"{extensionsCsFile1}.cs"),
+            Path.Combine(sourceServerApiPath, $"{extensionsCsFile1}.FromApi.cs"),
+            Path.Combine(sourceServerCorePath, $"{extensionsCsFile2}.cs"),
+            Path.Combine(sourceServerApiPath, $"{extensionsCsFile2}.FromApi.cs")
+            ];
+        var listExtensionsFiles = arrayExtensionsFiles.Select(text => new SearchResult() { FilePath = text }).ToList();
+        await _searchService.ReplaceInFilesAsync("public static class", "public static partial class", listExtensionsFiles, true, true);
+        await _searchService.ReplaceInFilesAsync("internal static class", "public static partial class", listExtensionsFiles, true, true);
+
+        MoveFilesRecursively(
+            sourcePath,
+            Path.Combine(sourceServerCorePath, "Infrastructure"),
+            true,
+            excludeDirectory: "Controllers"
+            ).Select(filename => new SearchResult() { FilePath = filename }).ToList();
+
+        ChangeCsprojFiles(sourceServerCorePath, sourceServerApiPath);
+
+        await ReplaceTextAsync($@"{_projectName}.Server.Api", $@"{_projectName}.Server.Core", true, true,
+            [ sourceServerCorePath ]);
+
+        await ReplaceTextAsync($@"using {_projectName}.Server.Api.Infrastructure", $@"using {_projectName}.Server.Core.Infrastructure", true, true,
+            [sourceServerApiPath]);
+        await ReplaceTextAsync($@"using {_projectName}.Server.Api.Features", $@"using {_projectName}.Server.Core.Features", true, true,
+            [sourceServerApiPath]);
+        //await _searchService.ReplaceInFilesAsync($"(\\n\\n^namespace ({_projectName}\\.Server\\.)Api(\\.Features\\..*);$)", "\\nusing $2Core$3;$1",
+        //    [new SearchResult() { FilePath = Path.Combine(sourceServerApiPath, "Features", "*.*")}],
+        //    useRegex: true);
+        //await _searchService.ReplaceInFilesAsync($"(\\n\\n^namespace ({_projectName}\\.Server\\.)Api(\\.Infrastruture\\..*);$)", "\\nusing $2Core$3;$1",
+        //    [new SearchResult() { FilePath = Path.Combine(sourceServerApiPath, "Infrastructure", "*.*") }],
+        //    useRegex: true);
+        //await _searchService.ReplaceInFilesAsync($"(\\n\\n^namespace ({_projectName}\\.Server\\.)Api;$)", "\\nusing $2Core;$1",
+        //    [new SearchResult() { FilePath = Path.Combine(sourceServerApiPath, "Program.*") }],
+        //    useRegex:true);
+        await ReplaceTextAsync("<Infrastructure.SignalR.", "<", true, false,
+            [sourceServerApiPath],
+            ["Program*.*"]);
+        await ReplaceTextAsync(" Features.Identity.Models.", " ", true, false,
+            [sourceServerApiPath],
+            ["Program*.*"]);
+    }
+
+    private static void ChangeCsprojFiles(string sourceServerCorePath, string sourceServerApiPath)
+    {
+        var serverApiCsprojPath = Path.Combine(sourceServerApiPath, $"{_projectName}.Server.Api.csproj");
+        var serverCoreCsprojPath = Path.Combine(sourceServerCorePath, $"{_projectName}.Server.Core.csproj");
+        var serverApiXDoc = XDocument.Load(serverApiCsprojPath);
+        var serverCoreXDoc = XDocument.Load(serverCoreCsprojPath);
+        List<XElement> usingsListForApi = serverApiXDoc.Descendants("Using").ToList();
+        //List<XElement> newUsingsListForCore = serverCoreXDoc.Descendants("Using").ToList();
+        List<string> usingsTextListForCore = serverCoreXDoc.Descendants("Using")
+            .Select(elt => elt?.Attribute("Include")?.Value)
+            .Where(val => !string.IsNullOrEmpty(val)).ToList();
+        string controllersUsing = $"{_projectName}.Server.Api.Infrastructure.Controllers";
+        List<XElement> controllersUsings = usingsListForApi.Where(u => u.Attribute("Include")?.Value.StartsWith(controllersUsing) == true).ToList();
+
+        foreach (var us in usingsListForApi.Except(controllersUsings))
+        {
+            var includeAttribute = us.Attribute("Include");
+            if (includeAttribute?.Value != null &&
+                    (
+                        includeAttribute.Value.StartsWith($"{_projectName}.Server.Api.Features") ||
+                        includeAttribute.Value.StartsWith($"{_projectName}.Server.Api.Infrastructure")
+                    )
+                )
+            {
+                includeAttribute.Value = includeAttribute.Value.Replace($"{_projectName}.Server.Api", $"{_projectName}.Server.Core");
+            }
+        }
+
+        var newUsingsListForCore = new List<XElement>();
+        newUsingsListForCore = usingsListForApi.Distinct().Except(controllersUsings).Where(us =>
+        {
+            var includeValueAttribute = us.Attribute("Include")?.Value;
+            if (includeValueAttribute == null || usingsTextListForCore.Contains(includeValueAttribute))
+                return false;
+            var moveToCore =
+                !includeValueAttribute.Equals("Asp.Versioning")
+            ;
+            if (moveToCore && !includeValueAttribute.StartsWith($"{_projectName}.Server.Core"))
+            {
+                us.Remove();
+            }
+            return moveToCore;
+        }
+            ).ToList();
+
+        List<XElement> packageReferencesListForApi = serverApiXDoc.Descendants("PackageReference").ToList();
+        //List<XElement> packageReferencesListForCore = serverCoreXDoc.Descendants("PackageReference").ToList();
+        List<string> packageReferencesTextListForCore = serverCoreXDoc.Descendants("PackageReference")
+            .Select(elt => elt?.Attribute("Include")?.Value)
+            .Where(val => !string.IsNullOrEmpty(val)).ToList();
+        var newPackageReferencesCore = packageReferencesListForApi.Distinct().Where(pr =>
+        {
+            var includeValueAttribute = pr.Attribute("Include")?.Value;
+            if (includeValueAttribute == null || packageReferencesTextListForCore.Contains(includeValueAttribute))
+                return false;
+            var moveToCore =
+                !includeValueAttribute.StartsWith("Asp.Versioning")
+            ;
+            if (moveToCore)
+            {
+                pr.Remove();
+            }
+            return moveToCore;
+        }
+            ).ToList();
+
+        var serverCoreProject = serverCoreXDoc.Element("Project");
+        if (serverCoreProject != null)
+        {
+            serverCoreProject.Attribute("Sdk")?.SetValue("Microsoft.NET.Sdk.Razor");
+            var newItemGroup = new XElement("ItemGroup");
+
+            var newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", "Microsoft.AspNetCore.Http");
+            newItemGroup.Add(newElement);
+            newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", "Microsoft.Extensions.Hosting");
+            newItemGroup.Add(newElement);
+            newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", "Microsoft.Extensions.Logging");
+            newItemGroup.Add(newElement);
+            newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", "System.Net.Http.Json");
+            newItemGroup.Add(newElement);
+
+            newUsingsListForCore.ForEach(us => newItemGroup.Add(us));
+            serverCoreProject.Add(newItemGroup);
+
+            newItemGroup = new XElement("ItemGroup");
+            newPackageReferencesCore.ForEach(pr => newItemGroup.Add(pr));
+            serverCoreProject.Add(newItemGroup);
+
+            newItemGroup = new XElement("ItemGroup");
+
+            foreach (var item in serverApiXDoc.Descendants("EmbeddedResource"))
+            {
+                newItemGroup.Add(item);
+            }
+            if (newItemGroup.HasElements)
+            {
+                serverCoreProject.Add(newItemGroup);
+            }
+            serverApiXDoc.Descendants("ItemGroup").Where(ig => ig.Elements("EmbeddedResource").Count() == ig.Elements().Count()).Remove();
+        }
+
+
+        var serverApiProject = serverApiXDoc.Element("Project");
+        if (serverApiProject != null)
+        {
+            var newItemGroup = new XElement("ItemGroup");
+
+            var newElement = new XElement("PackageReference");
+            newElement.SetAttributeValue("Include", $"Microsoft.EntityFrameworkCore");
+            newItemGroup.Add(newElement);
+            newElement = new XElement("PackageReference");
+            newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.OpenApi");
+            newItemGroup.Add(newElement);
+            serverApiProject.Add(newItemGroup);
+
+
+            newItemGroup = new XElement("ItemGroup");
+
+            newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", $"Microsoft.Extensions.Options");
+            newItemGroup.Add(newElement);
+            newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.Authorization");
+            newItemGroup.Add(newElement);
+            newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.Identity");
+            newItemGroup.Add(newElement);
+            newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", $"Microsoft.EntityFrameworkCore");
+            newItemGroup.Add(newElement);
+            newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.OData.Query");
+            newItemGroup.Add(newElement);
+            newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.Mvc");
+            newItemGroup.Add(newElement);
+            newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", $"Microsoft.Extensions.AI");
+            newItemGroup.Add(newElement);
+            newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", $"Hangfire");
+            newItemGroup.Add(newElement);
+            newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", $"ZiggyCreatures.Caching.Fusion");
+            newItemGroup.Add(newElement);
+
+
+
+            newElement = new XElement("Using");
+            newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core");
+            newItemGroup.Add(newElement);
+            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Infrastructure", "SignalR")))
+            {
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Infrastructure.SignalR");
+                newItemGroup.Add(newElement);
+            }
+            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Attachments")))
+            {
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Attachments");
+                newItemGroup.Add(newElement);
+            }
+            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Categories")))
+            {
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Categories");
+                newItemGroup.Add(newElement);
+            }
+            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Chatbot")))
+            {
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Chatbot");
+                newItemGroup.Add(newElement);
+            }
+            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Identity")))
+            {
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Identity");
+                newItemGroup.Add(newElement);
+            }
+            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Products")))
+            {
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Products");
+                newItemGroup.Add(newElement);
+            }
+            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "PushNotification")))
+            {
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.PushNotification");
+                newItemGroup.Add(newElement);
+            }
+            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Statistics")))
+            {
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Statistics");
+                newItemGroup.Add(newElement);
+            }
+            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Todo")))
+            {
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Todo");
+                newItemGroup.Add(newElement);
+            }
+            serverApiProject.Add(newItemGroup);
+        }
+
+
+        serverApiXDoc.SaveCsproj(serverApiCsprojPath);
+        serverCoreXDoc.SaveCsproj(serverCoreCsprojPath);
     }
 
     private static void MoveResources()
@@ -81,13 +377,13 @@ internal class Program
         string resourcesToMove = "IdentityStrings.";
         string resourcesTargetBefore = "EmailStrings.";
 
-        string sourceProject = $@"{_projectName}.Core";
-        string sourceResourcesDirectory = @"Resources";
-        string sourceProjectDirectory = Path.Combine(_bitPlatformProjectFolder, @"src", $"{sourceProject}");
+        string sourceProject = $"{_projectName}.Core";
+        string sourceResourcesDirectory = "Resources";
+        string sourceProjectDirectory = Path.Combine(_bitPlatformProjectFolder, "src", $"{sourceProject}");
 
-        string targetProject = $@"{_projectName}.Server.Api";
-        string targetResourcesDirectory = @"Features\Identity\Resources";
-        string targetProjectDirectory = Path.Combine(_bitPlatformProjectFolder, @"src\Server", $"{targetProject}");
+        string targetProject = $"{_projectName}.Server.Api";
+        string targetResourcesDirectory = Path.Combine("Features", "Identity", "Resources");
+        string targetProjectDirectory = Path.Combine(_bitPlatformProjectFolder, "src", "Server", $"{targetProject}");
         MoveOrRenameFiles(
             Path.Combine(sourceProjectDirectory, sourceResourcesDirectory, $"{resourcesToMove}*"),
             Path.Combine(targetProjectDirectory, targetResourcesDirectory)
@@ -144,11 +440,11 @@ internal class Program
             }
 
             targetItemsBefore.FirstOrDefault()?.AddBeforeSelf(sourceItems);
-            targetXDoc.Save(targetResourcesProjectFile);
+            targetXDoc.SaveCsproj(targetResourcesProjectFile);
 
             sourceItems.Remove();
             sourceXDoc.Descendants("ItemGroup").Where(ig => ig.IsEmpty).Remove();
-            sourceXDoc.Save(sourceResourcesProjectFile);
+            sourceXDoc.SaveCsproj(sourceResourcesProjectFile);
         }
         catch (Exception)
         {
@@ -179,6 +475,38 @@ internal class Program
         return items;
     }
 
+    private static List<string> MoveFilesRecursively(string sourcePath, string targetPath, bool deleteEmptyDirectory, string? excludeFilesPattern = null, string? excludeDirectory = null)
+    {
+        var sourceDirectories = Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories).Where(filename => excludeDirectory == null || !filename.Split(['\\']).Contains(excludeDirectory));
+        var sourceFiles = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories).Where(filename => (string.IsNullOrEmpty(excludeFilesPattern) || !filename.Contains(excludeFilesPattern)) && (excludeDirectory == null || !filename.Split(['\\']).Contains(excludeDirectory)));
+        //Now Create all of the directories
+        foreach (string dirPath in sourceDirectories)
+        {
+            Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+        }
+
+        List<string> movedFiles = new();
+        //Copy all the files & Replaces any files with the same name
+        foreach (string newPath in sourceFiles)
+        {
+            var destPath = newPath.Replace(sourcePath, targetPath);
+            File.Move(newPath, destPath, true);
+            movedFiles.Add(destPath);
+        }
+        if (deleteEmptyDirectory)
+        {
+            foreach (var dir in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories).Reverse())
+            {
+                try
+                {
+                    Directory.Delete(dir);
+                }
+                catch { }
+            }
+        }
+        return movedFiles;
+    }
+
     static void MoveOrRenameFiles(
         string sourcePattern,
         string targetDirectoryPath
@@ -193,12 +521,12 @@ internal class Program
     
     private static async Task ReplaceForwardedPortsAndUserSecretsAsync()
     {
-        string launchSettingsFilename = @"launchSettings.json";
-        string csprojFilename = $@"{_projectName}.Server.*.csproj";
+        string launchSettingsFilename = "launchSettings.json";
+        string csprojFilename = $"{_projectName}.Server.*.csproj";
 
         if (!string.Equals(_sourceUserSecrets, _bitPlatformUserSecrets, StringComparison.OrdinalIgnoreCase))
         {
-            await ReplaceTextAsync(_bitPlatformUserSecrets, _sourceUserSecrets, false, true, [Path.Combine(_bitPlatformProjectFolder, $@"src")], [launchSettingsFilename, csprojFilename], expectedReplacements: 5);
+            await ReplaceTextAsync(_bitPlatformUserSecrets, _sourceUserSecrets, false, true, [Path.Combine(_bitPlatformProjectFolder, "src")], [launchSettingsFilename, csprojFilename], expectedReplacements: 5);
         }
         if (_sourceForwardPorts?.Length != 6 || _bitPlatformForwardPorts?.Length != 6)
         {
@@ -219,20 +547,20 @@ internal class Program
             if (_sourceForwardPorts[i] != _bitPlatformForwardPorts[i])
             {
                 await ReplaceTextAsync(_bitPlatformForwardPorts[i].ToString(), _sourceForwardPorts[i].ToString(), false, true,
-                    [Path.Combine(_bitPlatformProjectFolder, $@".devcontainer")], ["devcontainer.json"],
+                    [Path.Combine(_bitPlatformProjectFolder, ".devcontainer")], ["devcontainer.json"],
                     expectedReplacements: expectedReplacements[i][0]);
                 await ReplaceTextAsync(_bitPlatformForwardPorts[i].ToString(), _sourceForwardPorts[i].ToString(), false, true,
-                    [Path.Combine(_bitPlatformProjectFolder, $@".docs")], ["*.md"],
+                    [Path.Combine(_bitPlatformProjectFolder, ".docs")], ["*.md"],
                     expectedReplacements: expectedReplacements[i][1]);
                 await ReplaceTextAsync(_bitPlatformForwardPorts[i].ToString(), _sourceForwardPorts[i].ToString(), false, true,
-                    [Path.Combine(_bitPlatformProjectFolder, $@"src\Server\{_projectName}.Server.AppHost")], ["Program.cs"],
+                    [Path.Combine(_bitPlatformProjectFolder, "src", "Server", $"{_projectName}.Server.AppHost")], ["Program.cs"],
                     expectedReplacements: expectedReplacements[i][2]);
                 await ReplaceTextAsync(_bitPlatformForwardPorts[i].ToString(), _sourceForwardPorts[i].ToString(), false, true,
-                    [Path.Combine(_bitPlatformProjectFolder, $@"src\Client\{_projectName}.Client.Core")], ["appsettings.json"],
+                    [Path.Combine(_bitPlatformProjectFolder, "src", "Client", $"{_projectName}.Client.Core")], ["appsettings.json"],
                     expectedReplacements: expectedReplacements[i][3]);
 
                 await ReplaceTextAsync(_bitPlatformForwardPorts[i].ToString(), _sourceForwardPorts[i].ToString(), false, true,
-                    [Path.Combine(_bitPlatformProjectFolder, $@"src")], [launchSettingsFilename],
+                    [Path.Combine(_bitPlatformProjectFolder, "src")], [launchSettingsFilename],
                     expectedReplacements: expectedReplacements[i][4]);
             }
         }
@@ -241,7 +569,7 @@ internal class Program
     private static string ReadUserSecrets(string projectPath)
     {
         string? userSecretValue = null;
-        string userSecretsFilename = $@"src\Server\{_projectName}.Server.AppHost\{_projectName}.Server.AppHost.csproj";
+        string userSecretsFilename = Path.Combine("src", "Server", $"{_projectName}.Server.AppHost", $"{_projectName}.Server.AppHost.csproj");
         try
         {
             var xdoc = XDocument.Load(Path.Combine(projectPath, userSecretsFilename));
@@ -261,7 +589,7 @@ internal class Program
     private static int[]? ReadForwardPorts(string projectPath)
     {
         int[]? forwardPorts = null;
-        string devContainerFilename = @".devcontainer\devcontainer.json";
+        string devContainerFilename = Path.Combine(".devcontainer", "devcontainer.json");
         try
         {
             string devContainerJson = File.ReadAllText(Path.Combine(projectPath, devContainerFilename));
@@ -281,8 +609,10 @@ internal class Program
 
     private static async Task RenameServerSharedProjectAsync(bool matchCase = false)
     {
-        if (!MoveOrRenameDirectory($@"src\Server\{_projectName}.Server.Shared", $@"src\Server\{_projectName}.Server.Core") ||
-            !MoveOrRenameFile($@"src\Server\{_projectName}.Server.Core\{_projectName}.Server.Shared.csproj", $@"src\Server\{_projectName}.Server.Core\{_projectName}.Server.Core.csproj")
+        if (!MoveOrRenameDirectory(Path.Combine("src", "Server", $"{_projectName}.Server.Shared"),
+                Path.Combine("src", "Server", $"{_projectName}.Server.Core")) ||
+            !MoveOrRenameFile(Path.Combine("src", "Server", $"{_projectName}.Server.Core", $"{_projectName}.Server.Shared.csproj"),
+                Path.Combine("src", "Server", $"{_projectName}.Server.Core", $"{_projectName}.Server.Core.csproj"))
             )
         {
             _errors.Add($@"Aborted: the project ""{_projectName}.Server.Shared"" must exist.");
@@ -294,8 +624,9 @@ internal class Program
     private static async Task RenameSharedProjectAsync(bool matchCase = false)
     {
 
-        if (!MoveOrRenameDirectory($@"src\Shared", $@"src\{_projectName}.Core") ||
-            !MoveOrRenameFile($@"src\{_projectName}.Core\{_projectName}.Shared.csproj", $@"src\{_projectName}.Core\{_projectName}.Core.csproj")
+        if (!MoveOrRenameDirectory(Path.Combine("src", "Shared"), Path.Combine("src", $"{_projectName}.Core")) ||
+            !MoveOrRenameFile(Path.Combine("src", $"{_projectName}.Core", $"{_projectName}.Shared.csproj"),
+                Path.Combine("src", $"{_projectName}.Core", $"{_projectName}.Core.csproj"))
             )
         {
             _errors.Add($@"Aborted: the project ""{_projectName}.Shared"" must exist.");
