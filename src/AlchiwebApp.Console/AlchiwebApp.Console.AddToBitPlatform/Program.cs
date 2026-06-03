@@ -69,6 +69,7 @@ internal class Program
         string sourceCorePath = Path.Combine(_bitPlatformProjectFolder, "src", $"{_projectName}.Core");
         string sourceServerCorePath = Path.Combine(_bitPlatformProjectFolder, "src", "Server", $"{_projectName}.Server.Core");
         string sourceServerApiPath = Path.Combine(_bitPlatformProjectFolder, "src", "Server", $"{_projectName}.Server.Api");
+        string sourceTestsPath = Path.Combine(_bitPlatformProjectFolder, "src", "Tests");
 
         MoveOrRenameFile(
             Path.Combine(sourceCorePath, "Infrastructure", "Extensions", "ActivitySourceExtensions.cs"),
@@ -132,7 +133,7 @@ internal class Program
         ChangeCsprojFiles(sourceServerCorePath, sourceServerApiPath);
 
         await ReplaceTextAsync($@"{_projectName}.Server.Api", $@"{_projectName}.Server.Core", true, true,
-            [ sourceServerCorePath ]);
+            [ sourceServerCorePath, sourceTestsPath ]);
 
         await ReplaceTextAsync($@"using {_projectName}.Server.Api.Infrastructure", $@"using {_projectName}.Server.Core.Infrastructure", true, true,
             [sourceServerApiPath]);
@@ -153,6 +154,12 @@ internal class Program
         await ReplaceTextAsync(" Features.Identity.Models.", " ", true, false,
             [sourceServerApiPath],
             ["Program*.*"]);
+        try
+        {
+            Directory.Delete(Path.Combine(sourceTestsPath, "bin"), true);
+            Directory.Delete(Path.Combine(sourceTestsPath, "obj"), true);
+        }
+        catch (Exception) { }
     }
 
     private static void ChangeCsprojFiles(string sourceServerCorePath, string sourceServerApiPath)
@@ -189,9 +196,8 @@ internal class Program
             var includeValueAttribute = us.Attribute("Include")?.Value;
             if (includeValueAttribute == null || usingsTextListForCore.Contains(includeValueAttribute))
                 return false;
-            var moveToCore =
-                !includeValueAttribute.Equals("Asp.Versioning")
-            ;
+            var moveToCore = MustMoveToServerCore(includeValueAttribute);
+            
             if (moveToCore && !includeValueAttribute.StartsWith($"{_projectName}.Server.Core"))
             {
                 us.Remove();
@@ -210,9 +216,7 @@ internal class Program
             var includeValueAttribute = pr.Attribute("Include")?.Value;
             if (includeValueAttribute == null || packageReferencesTextListForCore.Contains(includeValueAttribute))
                 return false;
-            var moveToCore =
-                !includeValueAttribute.StartsWith("Asp.Versioning")
-            ;
+            var moveToCore = MustMoveToServerCore(includeValueAttribute);
             if (moveToCore)
             {
                 pr.Remove();
@@ -224,152 +228,181 @@ internal class Program
         var serverCoreProject = serverCoreXDoc.Element("Project");
         if (serverCoreProject != null)
         {
-            serverCoreProject.Attribute("Sdk")?.SetValue("Microsoft.NET.Sdk.Razor");
-            var newItemGroup = new XElement("ItemGroup");
-
-            var newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", "Microsoft.AspNetCore.Http");
-            newItemGroup.Add(newElement);
-            newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", "Microsoft.Extensions.Hosting");
-            newItemGroup.Add(newElement);
-            newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", "Microsoft.Extensions.Logging");
-            newItemGroup.Add(newElement);
-            newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", "System.Net.Http.Json");
-            newItemGroup.Add(newElement);
-
-            newUsingsListForCore.ForEach(us => newItemGroup.Add(us));
-            serverCoreProject.Add(newItemGroup);
-
-            newItemGroup = new XElement("ItemGroup");
-            newPackageReferencesCore.ForEach(pr => newItemGroup.Add(pr));
-            serverCoreProject.Add(newItemGroup);
-
-            newItemGroup = new XElement("ItemGroup");
-
-            foreach (var item in serverApiXDoc.Descendants("EmbeddedResource"))
+            var firstPackageReferenceItemGroup = serverCoreProject.Elements("ItemGroup")?.Where(ig => ig.Element("PackageReference") != null)?.FirstOrDefault();
+            if (firstPackageReferenceItemGroup != null)
             {
-                newItemGroup.Add(item);
+                var firstUsingItemGroup = serverCoreProject.Elements("ItemGroup")?.Where(ig => ig.Element("Using") != null)?.FirstOrDefault();
+                var firstEmbeddedResourceItemGroup = serverCoreProject.Elements("ItemGroup")?.Where(ig => ig.Element("EmbeddedResource") != null)?.FirstOrDefault();
+
+                if (firstUsingItemGroup == null)
+                {
+                    firstUsingItemGroup = new XElement("ItemGroup");
+                    firstPackageReferenceItemGroup.AddBeforeSelf(firstUsingItemGroup);
+                }
+                if (firstEmbeddedResourceItemGroup == null)
+                {
+                    firstEmbeddedResourceItemGroup = new XElement("ItemGroup");
+                    firstPackageReferenceItemGroup.AddAfterSelf(firstEmbeddedResourceItemGroup);
+                }
+                serverCoreProject.Attribute("Sdk")?.SetValue("Microsoft.NET.Sdk.Razor");
+
+                var newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", "Microsoft.AspNetCore.Http");
+                firstUsingItemGroup.Add(newElement);
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", "Microsoft.Extensions.Hosting");
+                firstUsingItemGroup.Add(newElement);
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", "Microsoft.Extensions.Logging");
+                firstUsingItemGroup.Add(newElement);
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", "System.Net.Http.Json");
+                firstUsingItemGroup.Add(newElement);
+
+                newUsingsListForCore.ForEach(us => firstUsingItemGroup.Add(us));
+
+                newPackageReferencesCore.ForEach(pr => firstPackageReferenceItemGroup.Add(pr));
+
+                foreach (var item in serverApiXDoc.Descendants("EmbeddedResource"))
+                {
+                    firstEmbeddedResourceItemGroup.Add(item);
+                }
+                serverApiXDoc.Descendants("ItemGroup").Where(ig => ig.Elements("EmbeddedResource").Count() == ig.Elements().Count()).Remove();
             }
-            if (newItemGroup.HasElements)
-            {
-                serverCoreProject.Add(newItemGroup);
-            }
-            serverApiXDoc.Descendants("ItemGroup").Where(ig => ig.Elements("EmbeddedResource").Count() == ig.Elements().Count()).Remove();
         }
 
 
         var serverApiProject = serverApiXDoc.Element("Project");
         if (serverApiProject != null)
         {
-            var newItemGroup = new XElement("ItemGroup");
-
-            var newElement = new XElement("PackageReference");
-            newElement.SetAttributeValue("Include", $"Microsoft.EntityFrameworkCore");
-            newItemGroup.Add(newElement);
-            newElement = new XElement("PackageReference");
-            newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.OpenApi");
-            newItemGroup.Add(newElement);
-            serverApiProject.Add(newItemGroup);
-
-
-            newItemGroup = new XElement("ItemGroup");
-
-            newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", $"Microsoft.Extensions.Options");
-            newItemGroup.Add(newElement);
-            newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.Authorization");
-            newItemGroup.Add(newElement);
-            newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.Identity");
-            newItemGroup.Add(newElement);
-            newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", $"Microsoft.EntityFrameworkCore");
-            newItemGroup.Add(newElement);
-            newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.OData.Query");
-            newItemGroup.Add(newElement);
-            newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.Mvc");
-            newItemGroup.Add(newElement);
-            newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", $"Microsoft.Extensions.AI");
-            newItemGroup.Add(newElement);
-            newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", $"Hangfire");
-            newItemGroup.Add(newElement);
-            newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", $"ZiggyCreatures.Caching.Fusion");
-            newItemGroup.Add(newElement);
+            var firstPackageReferenceItemGroup = serverApiProject.Elements("ItemGroup")?.Where(ig => ig.Element("PackageReference") != null)?.FirstOrDefault();
+            if (firstPackageReferenceItemGroup != null)
+            {
+                var firstUsingItemGroup = serverApiProject.Elements("ItemGroup")?.Where(ig => ig.Element("Using") != null)?.FirstOrDefault();
+                if (firstUsingItemGroup == null)
+                {
+                    firstUsingItemGroup = new XElement("ItemGroup");
+                    firstPackageReferenceItemGroup.AddBeforeSelf(firstUsingItemGroup);
+                }
 
 
 
-            newElement = new XElement("Using");
-            newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core");
-            newItemGroup.Add(newElement);
-            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Infrastructure", "SignalR")))
-            {
+                var newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"Microsoft.Extensions.Options");
+                firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Infrastructure.SignalR");
-                newItemGroup.Add(newElement);
-            }
-            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Attachments")))
-            {
+                newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.Authorization");
+                firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Attachments");
-                newItemGroup.Add(newElement);
-            }
-            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Categories")))
-            {
+                newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.Identity");
+                firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Categories");
-                newItemGroup.Add(newElement);
-            }
-            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Chatbot")))
-            {
+                newElement.SetAttributeValue("Include", $"Microsoft.EntityFrameworkCore");
+                firstUsingItemGroup.Add(newElement);
+                //newElement = new XElement("Using");
+                //newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.OData.Query");
+                //firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Chatbot");
-                newItemGroup.Add(newElement);
-            }
-            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Identity")))
-            {
+                newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.Mvc");
+                firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Identity");
-                newItemGroup.Add(newElement);
-            }
-            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Products")))
-            {
+                newElement.SetAttributeValue("Include", $"Microsoft.Extensions.AI");
+                firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Products");
-                newItemGroup.Add(newElement);
-            }
-            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "PushNotification")))
-            {
+                newElement.SetAttributeValue("Include", $"Hangfire");
+                firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.PushNotification");
-                newItemGroup.Add(newElement);
-            }
-            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Statistics")))
-            {
+                newElement.SetAttributeValue("Include", $"ZiggyCreatures.Caching.Fusion");
+                firstUsingItemGroup.Add(newElement);
+
+
+
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Statistics");
-                newItemGroup.Add(newElement);
+                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core");
+                firstUsingItemGroup.Add(newElement);
+                if (Directory.Exists(Path.Combine(sourceServerCorePath, "Infrastructure", "SignalR")))
+                {
+                    newElement = new XElement("Using");
+                    newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Infrastructure.SignalR");
+                    firstUsingItemGroup.Add(newElement);
+                }
+                if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Attachments")))
+                {
+                    newElement = new XElement("Using");
+                    newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Attachments");
+                    firstUsingItemGroup.Add(newElement);
+                }
+                if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Categories")))
+                {
+                    newElement = new XElement("Using");
+                    newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Categories");
+                    firstUsingItemGroup.Add(newElement);
+                }
+                if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Chatbot")))
+                {
+                    newElement = new XElement("Using");
+                    newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Chatbot");
+                    firstUsingItemGroup.Add(newElement);
+                }
+                if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Identity")))
+                {
+                    newElement = new XElement("Using");
+                    newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Identity");
+                    firstUsingItemGroup.Add(newElement);
+                }
+                if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Products")))
+                {
+                    newElement = new XElement("Using");
+                    newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Products");
+                    firstUsingItemGroup.Add(newElement);
+                }
+                if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "PushNotification")))
+                {
+                    newElement = new XElement("Using");
+                    newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.PushNotification");
+                    firstUsingItemGroup.Add(newElement);
+                }
+                if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Statistics")))
+                {
+                    newElement = new XElement("Using");
+                    newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Statistics");
+                    firstUsingItemGroup.Add(newElement);
+                }
+                if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Todo")))
+                {
+                    newElement = new XElement("Using");
+                    newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Todo");
+                    firstUsingItemGroup.Add(newElement);
+                }
+
+                //newElement = new XElement("PackageReference");
+                //newElement.SetAttributeValue("Include", $"Microsoft.EntityFrameworkCore");
+                //firstPackageReferenceItemGroup.Add(newElement);
+                //newElement = new XElement("PackageReference");
+                //newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.OpenApi");
+                //firstPackageReferenceItemGroup.Add(newElement);
             }
-            if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Todo")))
-            {
-                newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"{_projectName}.Server.Core.Features.Todo");
-                newItemGroup.Add(newElement);
-            }
-            serverApiProject.Add(newItemGroup);
         }
 
 
         serverApiXDoc.SaveCsproj(serverApiCsprojPath);
         serverCoreXDoc.SaveCsproj(serverCoreCsprojPath);
+    }
+
+    private static bool MustMoveToServerCore(string includeValueAttribute)
+    {
+        return !includeValueAttribute.Contains(".HealthChecks.") &&
+            !includeValueAttribute.Contains(".SignalR") &&
+            !includeValueAttribute.StartsWith("Asp.Versioning") &&
+            !includeValueAttribute.StartsWith("QRCoder") &&
+            !includeValueAttribute.StartsWith("HtmlSanitizer") &&
+            !includeValueAttribute.StartsWith("Humanizer") &&
+            !includeValueAttribute.StartsWith("Magick.") &&
+            !includeValueAttribute.StartsWith("Microsoft.AspNetCore.OData") &&
+            !includeValueAttribute.StartsWith("Microsoft.AspNetCore.OpenApi") &&
+            !includeValueAttribute.StartsWith("Microsoft.Extensions.AI.") &&
+            !includeValueAttribute.StartsWith("Microsoft.SemanticKernel") &&
+            !includeValueAttribute.StartsWith("Scalar.");
     }
 
     private static void MoveResources()
@@ -534,32 +567,33 @@ internal class Program
             return;
         }
 
-        int[][] expectedReplacements = [
-            [1, 1, 0, 0, 1 ],
-            [1, 0, 0, 0, 1 ],
-            [1, 0, 0, 0, 1 ],
-            [1, 0, 0, 0, 1 ],
-            [0, 0, 0, 0, 0 ],
-            [1, 0, 1, 1, 6 ]
+        int?[][] expectedReplacements = [
+            [1, null, 0, 0, 1 ],
+            [1, null, 0, 0, 1 ],
+            [1, null, 0, 0, 1 ],
+            [1, null, 0, 0, 1 ],
+            [0, null, 0, 0, 0 ],
+            [1, null, 1, 1, 6 ]
             ];
         for (int i = 0; i < 6; i++)
         {
             if (_sourceForwardPorts[i] != _bitPlatformForwardPorts[i])
             {
-                await ReplaceTextAsync(_bitPlatformForwardPorts[i].ToString(), _sourceForwardPorts[i].ToString(), false, true,
+                await ReplaceTextAsync($"{_bitPlatformForwardPorts[i]}", _sourceForwardPorts[i].ToString(), false, true,
                     [Path.Combine(_bitPlatformProjectFolder, ".devcontainer")], ["devcontainer.json"],
                     expectedReplacements: expectedReplacements[i][0]);
-                await ReplaceTextAsync(_bitPlatformForwardPorts[i].ToString(), _sourceForwardPorts[i].ToString(), false, true,
-                    [Path.Combine(_bitPlatformProjectFolder, ".docs")], ["*.md"],
+                await ReplaceTextAsync($"{_bitPlatformForwardPorts[i]}", _sourceForwardPorts[i].ToString(), false, true,
+                //await ReplaceTextAsync($":{_bitPlatformForwardPorts[i]}", _sourceForwardPorts[i].ToString(), false, false,
+                [Path.Combine(_bitPlatformProjectFolder, ".docs")], ["*.md"],
                     expectedReplacements: expectedReplacements[i][1]);
-                await ReplaceTextAsync(_bitPlatformForwardPorts[i].ToString(), _sourceForwardPorts[i].ToString(), false, true,
+                await ReplaceTextAsync($"{_bitPlatformForwardPorts[i]}", _sourceForwardPorts[i].ToString(), false, true,
                     [Path.Combine(_bitPlatformProjectFolder, "src", "Server", $"{_projectName}.Server.AppHost")], ["Program.cs"],
                     expectedReplacements: expectedReplacements[i][2]);
-                await ReplaceTextAsync(_bitPlatformForwardPorts[i].ToString(), _sourceForwardPorts[i].ToString(), false, true,
+                await ReplaceTextAsync($"{_bitPlatformForwardPorts[i]}", _sourceForwardPorts[i].ToString(), false, true,
                     [Path.Combine(_bitPlatformProjectFolder, "src", "Client", $"{_projectName}.Client.Core")], ["appsettings.json"],
                     expectedReplacements: expectedReplacements[i][3]);
 
-                await ReplaceTextAsync(_bitPlatformForwardPorts[i].ToString(), _sourceForwardPorts[i].ToString(), false, true,
+                await ReplaceTextAsync($"{_bitPlatformForwardPorts[i]}", _sourceForwardPorts[i].ToString(), false, true,
                     [Path.Combine(_bitPlatformProjectFolder, "src")], [launchSettingsFilename],
                     expectedReplacements: expectedReplacements[i][4]);
             }
