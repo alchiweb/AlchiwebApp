@@ -16,13 +16,14 @@ internal class Program
     static int[]? _sourceForwardPorts;
     static string _bitPlatformUserSecrets = "";
     static string _sourceUserSecrets = "";
-
+    static bool _useExpectedReplacements = false;
     private static async Task Main(string[] args)
     {
         _bitPlatformProjectFolder = Directory.GetCurrentDirectory();
         _projectName = Path.GetFileName(_bitPlatformProjectFolder);
         _sourceProjectFolder = Path.Combine(_bitPlatformProjectFolder, "..", "..");
-        Console.WriteLine($"AlchiwebApp / Add To BitPlatform");
+        Console.WriteLine($"AlchiwebApp / Add To BitPlatform v0.1");
+        Console.WriteLine($"Tested with BitPlatform v10.4.4 / v14.4.5");
         Console.WriteLine($"Project name: {_projectName} / Project directory: {_bitPlatformProjectFolder}");
 
         _sourceForwardPorts = ReadForwardPorts(_sourceProjectFolder);
@@ -69,6 +70,7 @@ internal class Program
         string sourceCorePath = Path.Combine(_bitPlatformProjectFolder, "src", $"{_projectName}.Core");
         string sourceServerCorePath = Path.Combine(_bitPlatformProjectFolder, "src", "Server", $"{_projectName}.Server.Core");
         string sourceServerApiPath = Path.Combine(_bitPlatformProjectFolder, "src", "Server", $"{_projectName}.Server.Api");
+        string sourceServerWebPath = Path.Combine(_bitPlatformProjectFolder, "src", "Server", $"{_projectName}.Server.Web");
         string sourceTestsPath = Path.Combine(_bitPlatformProjectFolder, "src", "Tests");
 
         MoveOrRenameFile(
@@ -136,9 +138,9 @@ internal class Program
             [ sourceServerCorePath, sourceTestsPath ]);
 
         await ReplaceTextAsync($@"using {_projectName}.Server.Api.Infrastructure", $@"using {_projectName}.Server.Core.Infrastructure", true, true,
-            [sourceServerApiPath]);
+            [sourceServerApiPath, sourceServerWebPath]);
         await ReplaceTextAsync($@"using {_projectName}.Server.Api.Features", $@"using {_projectName}.Server.Core.Features", true, true,
-            [sourceServerApiPath]);
+            [sourceServerApiPath, sourceServerWebPath]);
         //await _searchService.ReplaceInFilesAsync($"(\\n\\n^namespace ({_projectName}\\.Server\\.)Api(\\.Features\\..*);$)", "\\nusing $2Core$3;$1",
         //    [new SearchResult() { FilePath = Path.Combine(sourceServerApiPath, "Features", "*.*")}],
         //    useRegex: true);
@@ -148,11 +150,17 @@ internal class Program
         //await _searchService.ReplaceInFilesAsync($"(\\n\\n^namespace ({_projectName}\\.Server\\.)Api;$)", "\\nusing $2Core;$1",
         //    [new SearchResult() { FilePath = Path.Combine(sourceServerApiPath, "Program.*") }],
         //    useRegex:true);
-        await ReplaceTextAsync("<Infrastructure.SignalR.", "<", true, false,
-            [sourceServerApiPath],
+        await ReplaceTextAsync("<Infrastructure.SignalR.", "<Core.Infrastructure.SignalR.", true, false,
+            [sourceServerApiPath, sourceServerWebPath],
             ["Program*.*"]);
-        await ReplaceTextAsync(" Features.Identity.Models.", " ", true, false,
-            [sourceServerApiPath],
+        await ReplaceTextAsync("<Api.Infrastructure.SignalR.", "<Core.Infrastructure.SignalR.", true, false,
+            [sourceServerApiPath, sourceServerWebPath],
+            ["Program*.*"]);
+        await ReplaceTextAsync(" Features.Identity.Models.", " Core.Features.Identity.Models.", true, false,
+            [sourceServerApiPath, sourceServerWebPath],
+            ["Program*.*"]);
+        await ReplaceTextAsync(" Api.Features.Identity.Models.", " Core.Features.Identity.Models.", true, false,
+            [sourceServerApiPath, sourceServerWebPath],
             ["Program*.*"]);
         try
         {
@@ -603,7 +611,7 @@ internal class Program
     private static string ReadUserSecrets(string projectPath)
     {
         string? userSecretValue = null;
-        string userSecretsFilename = Path.Combine("src", "Server", $"{_projectName}.Server.AppHost", $"{_projectName}.Server.AppHost.csproj");
+        string userSecretsFilename = Path.Combine("src", "Server", $"{_projectName}.Server.Api", $"{_projectName}.Server.Api.csproj");
         try
         {
             var xdoc = XDocument.Load(Path.Combine(projectPath, userSecretsFilename));
@@ -615,7 +623,7 @@ internal class Program
         }
         if (string.IsNullOrWhiteSpace(userSecretValue))
         {
-            _errors.Add($@"The UserSecretsId value is missing in the ""{_projectName}.Server.AppHost"" project file.");
+            _errors.Add($@"The UserSecretsId value is missing in the ""{_projectName}.Server.Api"" project file.");
             userSecretValue = "";
         }
         return userSecretValue;
@@ -698,7 +706,7 @@ internal class Program
         {
             await _searchService.ReplaceInFilesAsync(searchText, replaceText, listFiles, matchCase);
         }
-        if (expectedReplacements != null && (expectedReplacements >= 0 ? listFiles.Count != expectedReplacements : listFiles.Count < -expectedReplacements))
+        if (_useExpectedReplacements && expectedReplacements != null && (expectedReplacements >= 0 ? listFiles.Count != expectedReplacements : listFiles.Count < -expectedReplacements))
         {
             _errors.Add($@"Replacements for ""{searchText}"" ({string.Join('|', filters)}): {listFiles.Count} / Expected: {(expectedReplacements >= 0 ? expectedReplacements : $">= {-expectedReplacements}")}");
         }
