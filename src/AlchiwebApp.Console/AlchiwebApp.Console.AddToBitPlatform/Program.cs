@@ -1,9 +1,11 @@
 ﻿using System.CommandLine;
+using System.CommandLine.Help;
 using System.CommandLine.Parsing;
 using System.Reflection;
 using System.Transactions;
 using System.Xml;
 using System.Xml.Linq;
+using AlchiwebApp.Console.AddToBitPlatform;
 using AlchiwebApp.Console.AddToBitPlatform.Extensions;
 using AlchiwebApp.Console.Core.Services;
 using Rejigs;
@@ -58,18 +60,22 @@ internal class Program
         RootCommand rootCommand = new($"AlchiwebApp / Add To BitPlatform v{assemblyVersion} (tested with BitPlatform v10.4.4 / v14.4.5)");
         rootCommand.Options.Add(directoryOption);
         rootCommand.SetAction(async (parseResult) =>
-        {            
-
+        {
             if (parseResult.GetRequiredValue(directoryOption) is DirectoryInfo parsedDirectory)
             {
                 await ModifyBitPlatformProject(parsedDirectory.FullName);
             }
         });
-        //var versionOption = new VersionOption("--version", "-v")
-        //{
-        //    Description = "Show version information",
-        //};
-        //rootCommand.Options.Add(versionOption);
+
+        for (int i = 0; i < rootCommand.Options.Count; i++)
+        {
+            // RootCommand has a default VersionOption; update its Action.
+            if (rootCommand.Options[i] is VersionOption defaultVersionOption)
+            {
+                defaultVersionOption.Action = new CustomVersionAction();
+                break;
+            }
+        }
 
         ParseResult parseResult = rootCommand.Parse(args);
         parseResult.Invoke();
