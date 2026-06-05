@@ -1,9 +1,13 @@
-﻿using System.Transactions;
+﻿using System.CommandLine;
+using System.CommandLine.Parsing;
+using System.Reflection;
+using System.Transactions;
 using System.Xml;
 using System.Xml.Linq;
 using AlchiwebApp.Console.AddToBitPlatform.Extensions;
 using AlchiwebApp.Console.Core.Services;
 using Rejigs;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 internal class Program
 {
@@ -17,13 +21,66 @@ internal class Program
     static string _bitPlatformUserSecrets = "";
     static string _sourceUserSecrets = "";
     static bool _useExpectedReplacements = false;
-    private static async Task Main(string[] args)
+    private static async Task<int> Main(string[] args)
     {
-        _bitPlatformProjectFolder = Directory.GetCurrentDirectory();
-        _projectName = Path.GetFileName(_bitPlatformProjectFolder);
+        var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        Option<DirectoryInfo> directoryOption = new("--folder")
+        {
+            Description = "The folder of the BitPlatform application",
+            Required = true,
+            //DefaultValueFactory = parseResult => new DirectoryInfo("."),
+            HelpName = "BitPlatform folder",
+            Arity = ArgumentArity.ExactlyOne,
+            Validators =
+            {
+                optionResult => 
+                {
+                    DirectoryInfo? optionValue = null;
+                    try {
+                        optionValue = optionResult.GetValueOrDefault<DirectoryInfo>();
+                        if (Directory.Exists(optionValue.FullName) == false)
+                        {
+                            optionResult.AddError("Folder does not exist.");
+                            return;
+                        }
+                    }
+                    catch(Exception)
+                    {
+                        optionResult.AddError("Invalid folder path.");
+                        return;
+                    }
+
+                    return;
+                }
+            }
+        };
+        Console.WriteLine($"AddToBitPlatform v{assemblyVersion}");
+        RootCommand rootCommand = new($"AlchiwebApp / Add To BitPlatform v{assemblyVersion} (tested with BitPlatform v10.4.4 / v14.4.5)");
+        rootCommand.Options.Add(directoryOption);
+        rootCommand.SetAction(async (parseResult) =>
+        {            
+
+            if (parseResult.GetRequiredValue(directoryOption) is DirectoryInfo parsedDirectory)
+            {
+                await ModifyBitPlatformProject(parsedDirectory.FullName);
+            }
+        });
+        //var versionOption = new VersionOption("--version", "-v")
+        //{
+        //    Description = "Show version information",
+        //};
+        //rootCommand.Options.Add(versionOption);
+
+        ParseResult parseResult = rootCommand.Parse(args);
+        parseResult.Invoke();
+
+        return parseResult.Errors.Count == 0 ? 0 : 1;
+    }
+    private static async Task ModifyBitPlatformProject(string bitPlatformProjectFolderPath)
+    {
+        _bitPlatformProjectFolder = bitPlatformProjectFolderPath;
+        _projectName = Path.GetFileName(Path.TrimEndingDirectorySeparator(_bitPlatformProjectFolder));
         _sourceProjectFolder = Path.Combine(_bitPlatformProjectFolder, "..", "..");
-        Console.WriteLine($"AlchiwebApp / Add To BitPlatform v0.1");
-        Console.WriteLine($"Tested with BitPlatform v10.4.4 / v14.4.5");
         Console.WriteLine($"Project name: {_projectName} / Project directory: {_bitPlatformProjectFolder}");
 
         _sourceForwardPorts = ReadForwardPorts(_sourceProjectFolder);
@@ -63,8 +120,8 @@ internal class Program
         {
             Console.WriteLine($"Done without error.");
         }
-    }
 
+    }
     private static async Task MoveFilesToServerCoreProjectAsync()
     {
         string sourceCorePath = Path.Combine(_bitPlatformProjectFolder, "src", $"{_projectName}.Core");
@@ -476,7 +533,7 @@ internal class Program
                 var elementWithNamespace = item.Element("StronglyTypedNamespace");
                 if (elementWithNamespace != null)
                 {
-                    elementWithNamespace.Value = $"{targetProject}.{targetResourcesDirectory.Replace('\\', '.')}";
+                    elementWithNamespace.Value = $"{targetProject}.{targetResourcesDirectory.Replace(Path.DirectorySeparatorChar, '.')}";
                 }
             }
 
@@ -518,8 +575,8 @@ internal class Program
 
     private static List<string> MoveFilesRecursively(string sourcePath, string targetPath, bool deleteEmptyDirectory, string? excludeFilesPattern = null, string? excludeDirectory = null)
     {
-        var sourceDirectories = Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories).Where(filename => excludeDirectory == null || !filename.Split(['\\']).Contains(excludeDirectory));
-        var sourceFiles = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories).Where(filename => (string.IsNullOrEmpty(excludeFilesPattern) || !filename.Contains(excludeFilesPattern)) && (excludeDirectory == null || !filename.Split(['\\']).Contains(excludeDirectory)));
+        var sourceDirectories = Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories).Where(filename => excludeDirectory == null || !filename.Split([Path.DirectorySeparatorChar]).Contains(excludeDirectory));
+        var sourceFiles = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories).Where(filename => (string.IsNullOrEmpty(excludeFilesPattern) || !filename.Contains(excludeFilesPattern)) && (excludeDirectory == null || !filename.Split([Path.DirectorySeparatorChar]).Contains(excludeDirectory)));
         //Now Create all of the directories
         foreach (string dirPath in sourceDirectories)
         {
