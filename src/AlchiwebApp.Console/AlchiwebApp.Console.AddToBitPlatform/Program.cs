@@ -18,52 +18,45 @@ internal class Program
     static string _projectName = "";
     static readonly FileSearchService _searchService = new();
     static List<string> _errors = [];
-    static int[]? _bitPlatformForwardPorts;
-    static int[]? _sourceForwardPorts;
-    static string _bitPlatformUserSecrets = "";
-    static string _sourceUserSecrets = "";
     static bool _useExpectedReplacements = false;
     private static async Task<int> Main(string[] args)
     {
         var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
-        Option<DirectoryInfo> directoryOption = new("--folder")
+        Option<DirectoryInfo> targetDirectoryOption = new("--target", "-t")
         {
-            Description = "The folder of the BitPlatform application",
+            Description = "The folder of the newly created BitPlatform application (to modify)",
             Required = true,
             //DefaultValueFactory = parseResult => new DirectoryInfo("."),
             HelpName = "BitPlatform folder",
             Arity = ArgumentArity.ExactlyOne,
             Validators =
             {
-                optionResult => 
-                {
-                    DirectoryInfo? optionValue = null;
-                    try {
-                        optionValue = optionResult.GetValueOrDefault<DirectoryInfo>();
-                        if (Directory.Exists(optionValue.FullName) == false)
-                        {
-                            optionResult.AddError("Folder does not exist.");
-                            return;
-                        }
-                    }
-                    catch(Exception)
-                    {
-                        optionResult.AddError("Invalid folder path.");
-                        return;
-                    }
-
-                    return;
-                }
+                optionResult => DirectoryValidation(optionResult)
+            }
+        };
+        Option<DirectoryInfo> sourceDirectoryOption = new("--source", "-s")
+        {
+            Description = "The folder of the source BitPlatform application (to read parameters)",
+            Required = true,
+            //DefaultValueFactory = parseResult => new DirectoryInfo(Path.Combine("..", "..")),
+            HelpName = "BitPlatform folder",
+            Arity = ArgumentArity.ExactlyOne,
+            Validators =
+            {
+                optionResult => DirectoryValidation(optionResult)
             }
         };
         Console.WriteLine($"AddToBitPlatform v{assemblyVersion}");
         RootCommand rootCommand = new($"AlchiwebApp / Add To BitPlatform v{assemblyVersion} (tested with BitPlatform v10.4.4 / v14.4.5)");
-        rootCommand.Options.Add(directoryOption);
+        rootCommand.Options.Add(targetDirectoryOption);
+        rootCommand.Options.Add(sourceDirectoryOption);
         rootCommand.SetAction(async (parseResult) =>
         {
-            if (parseResult.GetRequiredValue(directoryOption) is DirectoryInfo parsedDirectory)
+            if (parseResult.GetRequiredValue(targetDirectoryOption) is DirectoryInfo targetParsedDirectory
+                && parseResult.GetRequiredValue(sourceDirectoryOption) is DirectoryInfo sourceParsedDirectory
+            )
             {
-                await ModifyBitPlatformProject(parsedDirectory.FullName);
+                await ModifyBitPlatformProject(targetParsedDirectory.FullName, sourceParsedDirectory.FullName);
             }
         });
 
@@ -82,18 +75,49 @@ internal class Program
 
         return parseResult.Errors.Count == 0 ? 0 : 1;
     }
-    private static async Task ModifyBitPlatformProject(string bitPlatformProjectFolderPath)
+
+    private static bool DirectoryValidation(OptionResult optionResult)
     {
-        _bitPlatformProjectFolder = bitPlatformProjectFolderPath;
-        _projectName = Path.GetFileName(Path.TrimEndingDirectorySeparator(_bitPlatformProjectFolder));
-        _sourceProjectFolder = Path.Combine(_bitPlatformProjectFolder, "..", "..");
+        DirectoryInfo? optionValue = null;
+        try
+        {
+            optionValue = optionResult.GetValueOrDefault<DirectoryInfo>();
+            if (Directory.Exists(optionValue.FullName) == false)
+            {
+                optionResult.AddError("Folder does not exist.");
+                return false;
+            }
+        }
+        catch (Exception)
+        {
+            optionResult.AddError("Invalid folder path.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private static async Task ModifyBitPlatformProject(string bitPlatformProjectFolderPath, string sourceProjectFolder)
+    {
+        _bitPlatformProjectFolder = Path.TrimEndingDirectorySeparator(bitPlatformProjectFolderPath);
+        _projectName = Path.GetFileName(_bitPlatformProjectFolder);
+        _sourceProjectFolder = Path.TrimEndingDirectorySeparator(sourceProjectFolder);
         Console.WriteLine($"Project name: {_projectName} / Project directory: {_bitPlatformProjectFolder}");
 
-        _sourceForwardPorts = ReadForwardPorts(_sourceProjectFolder);
-        _bitPlatformForwardPorts = ReadForwardPorts(_bitPlatformProjectFolder);
-        _sourceUserSecrets = ReadUserSecrets(_sourceProjectFolder);
-        _bitPlatformUserSecrets = ReadUserSecrets(_bitPlatformProjectFolder);
+        int[]? bitPlatformForwardPorts = null;
+        int[]? sourceForwardPorts = null;
+        string bitPlatformUserSecrets = "";
+        string sourceUserSecrets = "";
 
+        bool hasSourceBitPlatformProject = !string.Equals(_bitPlatformProjectFolder, _sourceProjectFolder);
+
+        if (hasSourceBitPlatformProject)
+        {
+            sourceForwardPorts = ReadForwardPorts(_sourceProjectFolder);
+            bitPlatformForwardPorts = ReadForwardPorts(_bitPlatformProjectFolder);
+            sourceUserSecrets = ReadUserSecrets(_sourceProjectFolder);
+            bitPlatformUserSecrets = ReadUserSecrets(_bitPlatformProjectFolder);
+        }
         if (_errors.Count > 0)
         {
             _errors.Add($@"Aborted: critical error.");
@@ -105,7 +129,10 @@ internal class Program
                 await RenameServerSharedProjectAsync(true);
                 await RenameSharedProjectAsync(true);
 
-                await ReplaceForwardedPortsAndUserSecretsAsync();
+                if (hasSourceBitPlatformProject)
+                {
+                    await ReplaceForwardedPortsAndUserSecretsAsync(bitPlatformForwardPorts, bitPlatformUserSecrets, sourceForwardPorts, sourceUserSecrets);
+                }
 
                 await MoveFilesToServerCoreProjectAsync();
             }
@@ -623,16 +650,16 @@ internal class Program
         }
     }
     
-    private static async Task ReplaceForwardedPortsAndUserSecretsAsync()
+    private static async Task ReplaceForwardedPortsAndUserSecretsAsync(int[]? bitPlatformForwardPorts, string bitPlatformUserSecrets, int[]? sourceForwardPorts, string sourceUserSecrets)
     {
         string launchSettingsFilename = "launchSettings.json";
         string csprojFilename = $"{_projectName}.Server.*.csproj";
 
-        if (!string.Equals(_sourceUserSecrets, _bitPlatformUserSecrets, StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(sourceUserSecrets, bitPlatformUserSecrets, StringComparison.OrdinalIgnoreCase))
         {
-            await ReplaceTextAsync(_bitPlatformUserSecrets, _sourceUserSecrets, false, true, [Path.Combine(_bitPlatformProjectFolder, "src")], [launchSettingsFilename, csprojFilename], expectedReplacements: 5);
+            await ReplaceTextAsync(bitPlatformUserSecrets, sourceUserSecrets, false, true, [Path.Combine(_bitPlatformProjectFolder, "src")], [launchSettingsFilename, csprojFilename], expectedReplacements: 5);
         }
-        if (_sourceForwardPorts?.Length != 6 || _bitPlatformForwardPorts?.Length != 6)
+        if (sourceForwardPorts?.Length != 6 || bitPlatformForwardPorts?.Length != 6)
         {
             _errors.Add($@"Forward ports error.");
             return;
@@ -648,23 +675,23 @@ internal class Program
             ];
         for (int i = 0; i < 6; i++)
         {
-            if (_sourceForwardPorts[i] != _bitPlatformForwardPorts[i])
+            if (sourceForwardPorts[i] != bitPlatformForwardPorts[i])
             {
-                await ReplaceTextAsync($"{_bitPlatformForwardPorts[i]}", _sourceForwardPorts[i].ToString(), false, true,
+                await ReplaceTextAsync($"{bitPlatformForwardPorts[i]}", sourceForwardPorts[i].ToString(), false, true,
                     [Path.Combine(_bitPlatformProjectFolder, ".devcontainer")], ["devcontainer.json"],
                     expectedReplacements: expectedReplacements[i][0]);
-                await ReplaceTextAsync($"{_bitPlatformForwardPorts[i]}", _sourceForwardPorts[i].ToString(), false, true,
-                //await ReplaceTextAsync($":{_bitPlatformForwardPorts[i]}", _sourceForwardPorts[i].ToString(), false, false,
+                await ReplaceTextAsync($"{bitPlatformForwardPorts[i]}", sourceForwardPorts[i].ToString(), false, true,
+                //await ReplaceTextAsync($":{bitPlatformForwardPorts[i]}", sourceForwardPorts[i].ToString(), false, false,
                 [Path.Combine(_bitPlatformProjectFolder, ".docs")], ["*.md"],
                     expectedReplacements: expectedReplacements[i][1]);
-                await ReplaceTextAsync($"{_bitPlatformForwardPorts[i]}", _sourceForwardPorts[i].ToString(), false, true,
+                await ReplaceTextAsync($"{bitPlatformForwardPorts[i]}", sourceForwardPorts[i].ToString(), false, true,
                     [Path.Combine(_bitPlatformProjectFolder, "src", "Server", $"{_projectName}.Server.AppHost")], ["Program.cs"],
                     expectedReplacements: expectedReplacements[i][2]);
-                await ReplaceTextAsync($"{_bitPlatformForwardPorts[i]}", _sourceForwardPorts[i].ToString(), false, true,
+                await ReplaceTextAsync($"{bitPlatformForwardPorts[i]}", sourceForwardPorts[i].ToString(), false, true,
                     [Path.Combine(_bitPlatformProjectFolder, "src", "Client", $"{_projectName}.Client.Core")], ["appsettings.json"],
                     expectedReplacements: expectedReplacements[i][3]);
 
-                await ReplaceTextAsync($"{_bitPlatformForwardPorts[i]}", _sourceForwardPorts[i].ToString(), false, true,
+                await ReplaceTextAsync($"{bitPlatformForwardPorts[i]}", sourceForwardPorts[i].ToString(), false, true,
                     [Path.Combine(_bitPlatformProjectFolder, "src")], [launchSettingsFilename],
                     expectedReplacements: expectedReplacements[i][4]);
             }
