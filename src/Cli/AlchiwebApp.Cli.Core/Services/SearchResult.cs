@@ -1,4 +1,4 @@
-﻿namespace AlchiwebApp.Console.Core.Services;
+﻿namespace AlchiwebApp.Cli.Core.Services;
 
 // From https://github.com/valginer0/WinFindGrep
 public class SearchResult

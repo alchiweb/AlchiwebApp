@@ -1,7 +1,4 @@
-﻿using System.Xml;
-using System.Xml.Linq;
-
-namespace AlchiwebApp.Console.AddToBitPlatform.Extensions;
+﻿namespace System.Xml.Linq;
 
 public static class XDocumentExtensions
 {

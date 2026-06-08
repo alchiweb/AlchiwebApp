@@ -9,12 +9,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Rejigs" />
-      <PackageReference Include="System.CommandLine" />
+        <PackageReference Include="Rejigs" />
+        <PackageReference Include="System.CommandLine" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AlchiwebApp.Console.Core\AlchiwebApp.Console.Core.csproj" />
+      <ProjectReference Include="..\AlchiwebApp.Cli.Core\AlchiwebApp.Cli.Core.csproj" />
     </ItemGroup>
 
 </Project>
