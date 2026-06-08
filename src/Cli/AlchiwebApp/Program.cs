@@ -55,8 +55,8 @@ internal class Program
                 && parseResult.GetValue(showExpectedReplacementsOption) is bool showExpectedReplacements
             )
             {
-                var bitPlatformApp = new BitPlatformApp(targetParsedDirectory.FullName, sourceParsedDirectory.FullName, showExpectedReplacements, new FileSearchService());
-                await bitPlatformApp.ModifyBitPlatformProject();
+                var bitPlatformAppMod = new BitPlatformAppMod(targetParsedDirectory.FullName, sourceParsedDirectory.FullName, showExpectedReplacements, new FileSearchService());
+                await bitPlatformAppMod.ModifyBitPlatformProject();
             }
         });
 
