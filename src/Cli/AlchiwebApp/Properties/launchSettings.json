@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "AlchiwebApp": {
+      "commandName": "Project",
+      "commandLineArgs": "upgrade -t .",
+      "workingDirectory": "D:\\dev\\Source\\Repos\\Syllabus\\BitPlatform\\Syllabus"
+    }
+  }
+}

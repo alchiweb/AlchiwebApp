@@ -241,14 +241,14 @@ public partial class BitPlatformAppMod : BitPlatformApp
             ).Select(filename => new SearchResult() { FilePath = filename }).ToList();
         sourcePath = Path.Combine(sourceServerApiPath, "Infrastructure");
 
-        // TODO: merge to two files (with regex)
+        // TODO: merge to two files (with regex)... or not?
         var extensionsCsFile1 = Path.Combine("Infrastructure", "Extensions", "HttpContextExtensions");
         var extensionsCsFile2 = Path.Combine(sourceServerApiPath, "Infrastructure", "Extensions", "HttpRequestExtensions");
         MoveOrRenameFile(
             Path.Combine(sourceServerApiPath, $"{extensionsCsFile1}.cs"),
             Path.Combine(sourceServerApiPath, $"{extensionsCsFile1}.FromApi.cs")
             );
-        // TODO: merge to two files (with regex)
+        // TODO: merge to two files (with regex)... or not?
         MoveOrRenameFile(
             Path.Combine(sourceServerApiPath, $"{extensionsCsFile2}.cs"),
             Path.Combine(sourceServerApiPath, $"{extensionsCsFile2}.FromApi.cs")
@@ -260,8 +260,8 @@ public partial class BitPlatformAppMod : BitPlatformApp
             Path.Combine(sourceServerApiPath, $"{extensionsCsFile2}.FromApi.cs")
             ];
         var listExtensionsFiles = arrayExtensionsFiles.Select(text => new SearchResult() { FilePath = text }).ToList();
-        await _searchService.ReplaceInFilesAsync("public class", "public partial class", listExtensionsFiles, true, true);
-        await _searchService.ReplaceInFilesAsync("internal class", "public partial class", listExtensionsFiles, true, true);
+        await _searchService.ReplaceInFilesAsync("static class", "static partial class", listExtensionsFiles, true, true);
+        await _searchService.ReplaceInFilesAsync("internal static", "public static", listExtensionsFiles, true, true);
 
         MoveFilesRecursively(
             sourcePath,
@@ -531,8 +531,8 @@ public partial class BitPlatformAppMod : BitPlatformApp
         }
 
 
-        serverApiXDoc.SaveCsproj(serverApiCsprojPath);
-        serverCoreXDoc.SaveCsproj(serverCoreCsprojPath);
+        serverApiXDoc.SaveXmlFile(serverApiCsprojPath);
+        serverCoreXDoc.SaveXmlFile(serverCoreCsprojPath);
     }
 
     private bool MustMoveToServerCore(string includeValueAttribute)
@@ -619,11 +619,11 @@ public partial class BitPlatformAppMod : BitPlatformApp
             }
 
             targetItemsBefore.FirstOrDefault()?.AddBeforeSelf(sourceItems);
-            targetXDoc.SaveCsproj(targetResourcesProjectFile);
+            targetXDoc.SaveXmlFile(targetResourcesProjectFile);
 
             sourceItems.Remove();
             sourceXDoc.Descendants("ItemGroup").Where(ig => ig.IsEmpty).Remove();
-            sourceXDoc.SaveCsproj(sourceResourcesProjectFile);
+            sourceXDoc.SaveXmlFile(sourceResourcesProjectFile);
         }
         catch (Exception)
         {

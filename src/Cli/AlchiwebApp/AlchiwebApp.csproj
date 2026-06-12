@@ -5,7 +5,8 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>0.1.0</Version>
+        <Version>0.2.0</Version>
+        <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,5 +17,19 @@
     <ItemGroup>
       <ProjectReference Include="..\AlchiwebApp.Cli.Core\AlchiwebApp.Cli.Core.csproj" />
     </ItemGroup>
+
+     <ItemGroup>
+       <Compile Remove="Content\**\*.*" />
+     </ItemGroup>
+
+     <ItemGroup>
+      <EmbeddedResource Include="Content\**\*.*">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </EmbeddedResource>
+     </ItemGroup>
+
+     <ItemGroup>
+       <Folder Include="Content\src\Alchiweb-App1.Core\Features\" />
+     </ItemGroup>
 
 </Project>

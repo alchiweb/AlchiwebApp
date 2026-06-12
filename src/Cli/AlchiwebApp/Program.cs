@@ -45,10 +45,15 @@ internal class Program
         };
         Console.WriteLine($"AddToBitPlatform v{assemblyVersion}");
         RootCommand rootCommand = new($"AlchiwebApp / Add To BitPlatform v{assemblyVersion} (tested with BitPlatform v10.4.4 / v14.4.5)");
-        rootCommand.Options.Add(targetDirectoryOption);
-        rootCommand.Options.Add(sourceDirectoryOption);
-        rootCommand.Options.Add(showExpectedReplacementsOption);
-        rootCommand.SetAction(async (parseResult) =>
+        rootCommand.Options.Where(opt => opt as VersionOption != null)?.FirstOrDefault()?.Action = new CustomVersionAction();
+
+        // Mod command
+        Command modCommand = new("mod-bp", "Modify generated BitPlatform app.") {
+            targetDirectoryOption,
+            sourceDirectoryOption,
+            showExpectedReplacementsOption
+        };
+        modCommand.SetAction(async (parseResult) =>
         {
             if (parseResult.GetRequiredValue(targetDirectoryOption) is DirectoryInfo targetParsedDirectory
                 && parseResult.GetRequiredValue(sourceDirectoryOption) is DirectoryInfo sourceParsedDirectory
@@ -59,16 +64,24 @@ internal class Program
                 await bitPlatformAppMod.ModifyBitPlatformProject();
             }
         });
+        rootCommand.Subcommands.Add(modCommand);
 
-        for (int i = 0; i < rootCommand.Options.Count; i++)
+        // Add AlchiwebApp command
+        Command upgradeCommand = new("upgrade", "Upgrade a modified BitPlatform app to AlchiwebApp.") {
+            targetDirectoryOption,
+            showExpectedReplacementsOption
+        };
+        upgradeCommand.SetAction(async (parseResult) =>
         {
-            // RootCommand has a default VersionOption; update its Action.
-            if (rootCommand.Options[i] is VersionOption defaultVersionOption)
+            if (parseResult.GetRequiredValue(targetDirectoryOption) is DirectoryInfo targetParsedDirectory
+                && parseResult.GetValue(showExpectedReplacementsOption) is bool showExpectedReplacements
+            )
             {
-                defaultVersionOption.Action = new CustomVersionAction();
-                break;
+                var bitPlatformAppModUpgrade = new BitPlatformAppModUpgrade(targetParsedDirectory.FullName, showExpectedReplacements, new FileSearchService());
+                await bitPlatformAppModUpgrade.AddAlchiwebApp();
             }
-        }
+        });
+        rootCommand.Subcommands.Add(upgradeCommand);
 
         ParseResult parseResult = rootCommand.Parse(args);
         parseResult.Invoke();

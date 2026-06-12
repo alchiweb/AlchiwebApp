@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Address" xml:space="preserve">
+    <value>Adresse</value>
+  </data>
+  <data name="AutoLogin" xml:space="preserve">
+    <value>Auto-login</value>
+  </data>
+  <data name="BirthDate" xml:space="preserve">
+    <value>Date de naissance</value>
+  </data>
+  <data name="Captcha" xml:space="preserve">
+    <value>Captcha</value>
+  </data>
+  <data name="City" xml:space="preserve">
+    <value>Ville</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Mot de passe de confirmation</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>Contenu</value>
+  </data>
+  <data name="Country" xml:space="preserve">
+    <value>Pays</value>
+  </data>
+  <data name="CreatedAt" xml:space="preserve">
+    <value>Créé le</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>Prénom</value>
+  </data>
+  <data name="Gender" xml:space="preserve">
+    <value>Sexe</value>
+  </data>
+  <data name="Gender_Female" xml:space="preserve">
+    <value>Féminin</value>
+  </data>
+  <data name="Gender_Male" xml:space="preserve">
+    <value>Masculin</value>
+  </data>
+  <data name="Gender_Other" xml:space="preserve">
+    <value>Non défini</value>
+  </data>
+  <data name="Id" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="JoinDate" xml:space="preserve">
+    <value>Date d'entrée</value>
+  </data>
+  <data name="LastConnection" xml:space="preserve">
+    <value>Dernière connexion</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Nom de famille</value>
+  </data>
+  <data name="LeaveDate" xml:space="preserve">
+    <value>Date de sortie</value>
+  </data>
+  <data name="LoginType" xml:space="preserve">
+    <value>Type de login</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Mot de passe</value>
+  </data>
+  <data name="Phone" xml:space="preserve">
+    <value>Téléphone</value>
+  </data>
+  <data name="Roles" xml:space="preserve">
+    <value>Rôle(s)</value>
+  </data>
+  <data name="Role" xml:space="preserve">
+    <value>Rôle</value>
+  </data>
+  <data name="Role_None" xml:space="preserve">
+    <value>Aucun</value>
+  </data>
+  <data name="Role_AppAdministrator" xml:space="preserve">
+    <value>Administrateur</value>
+  </data>
+  <data name="Subtitle" xml:space="preserve">
+    <value>Sous-titre</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Intitulé</value>
+  </data>
+  <data name="UserName" xml:space="preserve">
+    <value>Nom d'utilisateur</value>
+  </data>
+  <data name="Website" xml:space="preserve">
+    <value>Site web</value>
+  </data>
+  <data name="Website_RegExValidation" xml:space="preserve">
+    <value>Veuillez saisir une URL de site Web valide.</value>
+  </data>
+  <data name="ZipCode" xml:space="preserve">
+    <value>Code postal</value>
+  </data>
+  <data name="ZipCode_LengthValidation" xml:space="preserve">
+    <value>Le code postal doit contenir 5 chiffres.</value>
+  </data>
+  <data name="ZipCode_RegExValidation" xml:space="preserve">
+    <value>Veuillez entrer un code postal valide.</value>
+  </data>
+  <data name="FullName" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Year" xml:space="preserve">
+    <value>Année</value>
+  </data>
+  <data name="Year_Title_RegExValidation" xml:space="preserve">
+    <value>Format d'année non valide (XXXX/XXXX)</value>
+  </data>
+  <data name="Year_Title_TwoYearsMustBeConsecutiveValidation" xml:space="preserve">
+    <value>Les deux années du titre doivent être consécutives.</value>
+  </data>
+  <data name="ShortYear" xml:space="preserve">
+    <value>Année</value>
+  </data>
+  <data name="ShortName" xml:space="preserve">
+    <value>Nom court</value>
+  </data>
+  <data name="NumberOfHours" xml:space="preserve">
+    <value>Nombre d'heures</value>
+  </data>
+  <data name="Email_RegExValidation" xml:space="preserve">
+    <value>Veuillez entrer une adresse email correcte.</value>
+  </data>
+  <data name="Email_RequiredValidation" xml:space="preserve">
+    <value>L'email est requis.</value>
+  </data>
+  <data name="Password_CompareValidation" xml:space="preserve">
+    <value>Le mot de passe et le mot de passe de confirmation ne correspondent pas.</value>
+  </data>
+  <data name="Password_MinLengthValidation" xml:space="preserve">
+    <value>Le mot de passe doit comporter au moins 8 caractères.</value>
+  </data>
+  <data name="Password_RegExValidation" xml:space="preserve">
+    <value>Le mot de passe doit comporter au moins un chiffre, une lettre majuscule et un caractère non Le mot de passe doit contenir au moins un chiffre, une lettre majuscule et un caractère non alphanumérique.</value>
+  </data>
+  <data name="Password_RequiredValidation" xml:space="preserve">
+    <value>Le mot de passe est requis.</value>
+  </data>
+  <data name="ConfirmPassword_RequiredValidation" xml:space="preserve">
+    <value>Le mot de passe de confirmation est requis.</value>
+  </data>
+  <data name="Phone_RegExValidation" xml:space="preserve">
+    <value>Veuillez entrer un numéro de téléphone valide.</value>
+  </data>
+  <data name="User_CreatedAt" xml:space="preserve">
+    <value>Utilisateur créé le</value>
+  </data>
+  <data name="Mobile" xml:space="preserve">
+    <value>Mobile</value>
+  </data>
+  <data name="UserName_MinLengthValidation" xml:space="preserve">
+    <value>Le nom d'utilisateur doit comporter au moins 2 caractères.</value>
+  </data>
+  <data name="UserName_RegExValidation" xml:space="preserve">
+    <value>Le nom d'utilisateur ne doit comporter que des lettres et des chiffres.</value>
+  </data>
+  <data name="UserName_RequiredValidation" xml:space="preserve">
+    <value>Le nom d'utilisateur est requis.</value>
+  </data>
+  <data name="Content_RequiredValidation" xml:space="preserve">
+    <value>Le contenu est requis.</value>
+  </data>
+  <data name="Content_MinLengthValidation" xml:space="preserve">
+    <value>Le contenu doit comporter au moins 2 caractères.</value>
+  </data>
+  <data name="Years" xml:space="preserve">
+    <value>Années</value>
+  </data>
+  <data name="Year_StartDate" xml:space="preserve">
+    <value>Débute le </value>
+  </data>
+  <data name="Year_EndADate" xml:space="preserve">
+    <value>Se termine le </value>
+  </data>
+  <data name="Year_Title_RequiredValidation" xml:space="preserve">
+    <value>Le nom de l'année est requis.</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Utilisateur</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>Utilisateurs</value>
+  </data>
+  <data name="FirstName_LengthValidation" xml:space="preserve">
+    <value>Le prénom doit avoir entre 2 et 50 caractères.</value>
+  </data>
+  <data name="FirstName_RequiredValidation" xml:space="preserve">
+    <value>Le prénom est requis</value>
+  </data>
+  <data name="LastName_RequiredValidation" xml:space="preserve">
+    <value>Le nom de famille est requis</value>
+  </data>
+  <data name="LastName_LengthValidation" xml:space="preserve">
+    <value>Le nom doit avoir entre  2 et 50 caractères.</value>
+  </data>
+  <data name="Roles_AtLeastOneRoleSelectedValidation" xml:space="preserve">
+    <value>Veuillez sélectionner au moins un rôle.</value>
+  </data>
+  <data name="Comment" xml:space="preserve">
+    <value>Commentaire</value>
+  </data>
+  <data name="LastUpdatedBy" xml:space="preserve">
+    <value>Mis à jour par </value>
+  </data>
+</root>

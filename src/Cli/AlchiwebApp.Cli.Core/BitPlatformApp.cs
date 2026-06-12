@@ -8,6 +8,7 @@ namespace AlchiwebApp.Cli.Core;
 
 public abstract partial class BitPlatformApp
 {
+    static readonly string TEMPLATE_PROJECT_NAME = "Alchiweb-App1";
     protected string BitPlatformProjectFolder { get; } = "";
     protected string SourceProjectFolder { get; } = "";
     protected string ProjectName { get; } = "";
@@ -22,6 +23,19 @@ public abstract partial class BitPlatformApp
         SourceProjectFolder = Path.TrimEndingDirectorySeparator(sourceProjectFolder);
         UseExpectedReplacements = useExpectedReplacements;
         _searchService = searchService;
+    }
+
+    protected XElement? AddItemGroup(XDocument sourceXDoc)
+    {
+        var projectElement = sourceXDoc?.Element("Project");
+        if (projectElement == null)
+        {
+            Errors.Add("ItemGroup cannot be created.");
+            return null;
+        }
+        XElement itemGroupToAdd = new("ItemGroup");
+        projectElement.Add(itemGroupToAdd);
+        return itemGroupToAdd;
     }
 
     protected List<XElement> GetRessourcesItemsFromCsproj(XDocument sourceXDoc, string updateValue)
@@ -47,22 +61,58 @@ public abstract partial class BitPlatformApp
         return items;
     }
 
+    protected async Task<List<string>> CopyFilesRecursivelyAsync(string sourcePath, string targetPath, bool isTemplateDirectory, string? excludeFilesPattern = null, string? excludeDirectory = null)
+    {
+        var sourceDirectories = Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories)
+            .Where(filename => excludeDirectory == null || !filename.Split([Path.DirectorySeparatorChar]).Contains(excludeDirectory))
+            ;
+        var sourceFiles = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories)
+            .Where(filename => (string.IsNullOrEmpty(excludeFilesPattern) || !filename.Contains(excludeFilesPattern)) && (excludeDirectory == null || !filename.Split([Path.DirectorySeparatorChar]).Contains(excludeDirectory)))
+            ;
+        // Create all of the directories
+        foreach (string dirPath in sourceDirectories)
+        {
+            var destPath = dirPath.Replace(sourcePath, targetPath);
+            if (isTemplateDirectory)
+                destPath = destPath.Replace(TEMPLATE_PROJECT_NAME, ProjectName);
+            Directory.CreateDirectory(destPath);
+        }
+
+        List<string> copiedFiles = new();
+        // Copy all the files & Replaces any files with the same name
+        foreach (string newPath in sourceFiles)
+        {
+            var destPath = newPath.Replace(sourcePath, targetPath);
+            if (isTemplateDirectory)
+                destPath = destPath.Replace(TEMPLATE_PROJECT_NAME, ProjectName);
+            File.Copy(newPath, destPath, false);
+            copiedFiles.Add(destPath);
+        }
+
+        if (isTemplateDirectory)
+        {
+            await ReplaceTextAsync(TEMPLATE_PROJECT_NAME, ProjectName, directories: [targetPath]);
+        }
+
+        return copiedFiles;
+    }
+
     protected List<string> MoveFilesRecursively(string sourcePath, string targetPath, bool deleteEmptyDirectory, string? excludeFilesPattern = null, string? excludeDirectory = null)
     {
         var sourceDirectories = Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories).Where(filename => excludeDirectory == null || !filename.Split([Path.DirectorySeparatorChar]).Contains(excludeDirectory));
         var sourceFiles = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories).Where(filename => (string.IsNullOrEmpty(excludeFilesPattern) || !filename.Contains(excludeFilesPattern)) && (excludeDirectory == null || !filename.Split([Path.DirectorySeparatorChar]).Contains(excludeDirectory)));
-        //Now Create all of the directories
+        // Create all of the directories
         foreach (string dirPath in sourceDirectories)
         {
             Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
         }
 
         List<string> movedFiles = new();
-        //Copy all the files & Replaces any files with the same name
+        // Copy all the files & Replaces any files with the same name
         foreach (string newPath in sourceFiles)
         {
             var destPath = newPath.Replace(sourcePath, targetPath);
-            File.Move(newPath, destPath, true);
+            File.Move(newPath, destPath, false);
             movedFiles.Add(destPath);
         }
         if (deleteEmptyDirectory)

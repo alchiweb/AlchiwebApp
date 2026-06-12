@@ -2,7 +2,7 @@
 
 public static class XDocumentExtensions
 {
-    public static void SaveCsproj(this XDocument doc, string filename)
+    public static void SaveXmlFile(this XDocument doc, string filename)
     {
         if (doc != null)
         {
