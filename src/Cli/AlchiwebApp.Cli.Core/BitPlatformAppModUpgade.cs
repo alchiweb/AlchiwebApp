@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Windows.Input;
 using System.Xml.Linq;
 using AlchiwebApp.Cli.Core.Services;
 
@@ -47,13 +46,14 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
     }
     private void ModifyCsProjFiles()
     {
+        #region Core project CsProj file modification
         string sourceProject = $"{ProjectName}.Core";
         string sourceResourcesProjectFile = Path.Combine(
             BitPlatformProjectFolder, "src", $"{sourceProject}", $"{sourceProject}.csproj"
             );
         var sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
 
-        var listSourceResources = CopyRessources("AppStrings",
+        var listSourceResources = CopyResources("AppStrings",
             "I18n",
             sourceProject,
             sourceXDoc
@@ -70,14 +70,16 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
         }
         
         sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
+        #endregion
 
+        #region Client.Core project CsProj file modification
         sourceProject = $"{ProjectName}.Client.Core";
         sourceResourcesProjectFile = Path.Combine(
             BitPlatformProjectFolder, "src", "Client", $"{sourceProject}", $"{sourceProject}.csproj"
             );
         sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
 
-        CopyRessources("AppStrings",
+        CopyResources("AppStrings",
             "ClientI18n",
             sourceProject,
             sourceXDoc,
@@ -120,7 +122,9 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
             itemGroupToAdd.Add(usingToAdd);
         }
         sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
+        #endregion
 
+        #region Directory.Packages.props file modification
         sourceResourcesProjectFile = Path.Combine(
             BitPlatformProjectFolder, "src", "Directory.Packages.props"
             );
@@ -135,7 +139,7 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
             itemGroupToAdd.Add(packageVersion);
         }
         sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
-
+        #endregion
     }
 
     private void ModifySolutionFile()
@@ -215,77 +219,5 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
         Process.Start(gitCommand)?.WaitForExit();
         gitCommand.Arguments = @"commit -m ""AlchiwebApp generated version""";
         Process.Start(gitCommand)?.WaitForExit();
-    }
-    private List<XElement>? CopyRessources(string resourcesToGet,
-        string resourcesToAdd,
-        string sourceProject,
-        XDocument sourceXDoc,
-        List<XElement>? sourceItems = null)
-    {
-        bool hasListItems = sourceItems != null;
-        if (!hasListItems && string.IsNullOrEmpty(resourcesToGet))
-        {
-            Errors.Add("Resource source must be provided.");
-            return null;
-        }
-        string resourcesToGetWithDot = $"{resourcesToGet}.";
-        string resourcesToAddWithDot = $"{resourcesToAdd}.";
-        string sourceResourcesDirectory = "Resources";
-
-        if (sourceItems == null)
-        {
-            sourceItems = GetRessourcesItemsFromCsproj(sourceXDoc, Path.Combine(sourceResourcesDirectory, resourcesToGetWithDot));
-        }
-        if (sourceItems == null || sourceItems.Count == 0)
-        {
-            Errors.Add("ItemGroup section not found in source csproj file (for moving resources files).");
-            return null;
-        }
-        List<XElement> itemsToAdd = new();
-        foreach (var item in sourceItems)
-        {
-            var newItem = new XElement(item);
-            var attributeWithResourcesPath = newItem.Attribute("Update");
-            if (attributeWithResourcesPath != null)
-            {
-                attributeWithResourcesPath.Value = attributeWithResourcesPath.Value.Replace(resourcesToGetWithDot, resourcesToAddWithDot);
-            }
-            var elementWithResourcesPath = newItem.Element("LastGenOutput");
-            if (elementWithResourcesPath != null)
-            {
-                elementWithResourcesPath.Value = elementWithResourcesPath.Value.Replace(resourcesToGetWithDot, resourcesToAddWithDot);
-            }
-            elementWithResourcesPath = newItem.Element("DependentUpon");
-            if (elementWithResourcesPath != null)
-            {
-                elementWithResourcesPath.Value = elementWithResourcesPath.Value.Replace(resourcesToGetWithDot, resourcesToAddWithDot);
-            }
-            elementWithResourcesPath = newItem.Element("StronglyTypedFileName");
-            if (elementWithResourcesPath != null)
-            {
-                elementWithResourcesPath.Value = elementWithResourcesPath.Value.Replace(resourcesToGetWithDot, resourcesToAddWithDot);
-            }
-            elementWithResourcesPath = newItem.Element("StronglyTypedClassName");
-            if (elementWithResourcesPath != null)
-            {
-                elementWithResourcesPath.Value = elementWithResourcesPath.Value.Replace(resourcesToGet, resourcesToAdd);
-            }
-            itemsToAdd.Add(newItem);
-        }
-        if (hasListItems)
-        {
-            var  itemGroupToAdd = AddItemGroup(sourceXDoc);
-            if (itemGroupToAdd == null)
-            {
-                return sourceItems;
-            }
-            itemGroupToAdd.Add(itemsToAdd);
-        }
-        else
-        {
-            sourceItems.First().AddBeforeSelf(itemsToAdd);
-        }
-
-        return sourceItems;
     }
 }

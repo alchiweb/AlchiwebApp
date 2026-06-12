@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using AlchiwebApp.Cli.Core.Services;
 
 namespace AlchiwebApp.Cli.Core;
@@ -25,6 +22,7 @@ public abstract partial class BitPlatformApp
         _searchService = searchService;
     }
 
+    #region XML Project file management (*.csproj + Directory.Build.props)
     protected XElement? AddItemGroup(XDocument sourceXDoc)
     {
         var projectElement = sourceXDoc?.Element("Project");
@@ -37,8 +35,10 @@ public abstract partial class BitPlatformApp
         projectElement.Add(itemGroupToAdd);
         return itemGroupToAdd;
     }
+    #endregion
 
-    protected List<XElement> GetRessourcesItemsFromCsproj(XDocument sourceXDoc, string updateValue)
+    #region Resources management
+    protected List<XElement> GetResourcesItemsFromCsproj(XDocument sourceXDoc, string updateValue)
     {
         //var items = sourceXDoc.Document?.Element("Project")?.Elements("ItemGroup")?.SelectMany(
         //    el => el?.Elements("EmbeddedResource") ?? new List<XElement>(), (el, c) => c)
@@ -61,6 +61,81 @@ public abstract partial class BitPlatformApp
         return items;
     }
 
+    protected List<XElement>? CopyResources(string resourcesToGet,
+    string resourcesToAdd,
+    string sourceProject,
+    XDocument sourceXDoc,
+    List<XElement>? sourceItems = null)
+    {
+        bool hasListItems = sourceItems != null;
+        if (!hasListItems && string.IsNullOrEmpty(resourcesToGet))
+        {
+            Errors.Add("Resource source must be provided.");
+            return null;
+        }
+        string resourcesToGetWithDot = $"{resourcesToGet}.";
+        string resourcesToAddWithDot = $"{resourcesToAdd}.";
+        string sourceResourcesDirectory = "Resources";
+
+        if (sourceItems == null)
+        {
+            sourceItems = GetResourcesItemsFromCsproj(sourceXDoc, Path.Combine(sourceResourcesDirectory, resourcesToGetWithDot));
+        }
+        if (sourceItems == null || sourceItems.Count == 0)
+        {
+            Errors.Add("ItemGroup section not found in source csproj file (for moving resources files).");
+            return null;
+        }
+        List<XElement> itemsToAdd = new();
+        foreach (var item in sourceItems)
+        {
+            var newItem = new XElement(item);
+            var attributeWithResourcesPath = newItem.Attribute("Update");
+            if (attributeWithResourcesPath != null)
+            {
+                attributeWithResourcesPath.Value = attributeWithResourcesPath.Value.Replace(resourcesToGetWithDot, resourcesToAddWithDot);
+            }
+            var elementWithResourcesPath = newItem.Element("LastGenOutput");
+            if (elementWithResourcesPath != null)
+            {
+                elementWithResourcesPath.Value = elementWithResourcesPath.Value.Replace(resourcesToGetWithDot, resourcesToAddWithDot);
+            }
+            elementWithResourcesPath = newItem.Element("DependentUpon");
+            if (elementWithResourcesPath != null)
+            {
+                elementWithResourcesPath.Value = elementWithResourcesPath.Value.Replace(resourcesToGetWithDot, resourcesToAddWithDot);
+            }
+            elementWithResourcesPath = newItem.Element("StronglyTypedFileName");
+            if (elementWithResourcesPath != null)
+            {
+                elementWithResourcesPath.Value = elementWithResourcesPath.Value.Replace(resourcesToGetWithDot, resourcesToAddWithDot);
+            }
+            elementWithResourcesPath = newItem.Element("StronglyTypedClassName");
+            if (elementWithResourcesPath != null)
+            {
+                elementWithResourcesPath.Value = elementWithResourcesPath.Value.Replace(resourcesToGet, resourcesToAdd);
+            }
+            itemsToAdd.Add(newItem);
+        }
+        if (hasListItems)
+        {
+            var itemGroupToAdd = AddItemGroup(sourceXDoc);
+            if (itemGroupToAdd == null)
+            {
+                return sourceItems;
+            }
+            itemGroupToAdd.Add(itemsToAdd);
+        }
+        else
+        {
+            sourceItems.First().AddBeforeSelf(itemsToAdd);
+        }
+
+        return sourceItems;
+    }
+    #endregion
+
+    #region Files and directories management
     protected async Task<List<string>> CopyFilesRecursivelyAsync(string sourcePath, string targetPath, bool isTemplateDirectory, string? excludeFilesPattern = null, string? excludeDirectory = null)
     {
         var sourceDirectories = Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories)
@@ -208,4 +283,6 @@ public abstract partial class BitPlatformApp
         }
         return true;
     }
+    #endregion
+
 }

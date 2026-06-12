@@ -571,7 +571,7 @@ public partial class BitPlatformAppMod : BitPlatformApp
         {
             string sourceResourcesProjectFile = Path.Combine(sourceProjectDirectory, $"{sourceProject}.csproj");
             var sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
-            var sourceItems = GetRessourcesItemsFromCsproj(sourceXDoc, Path.Combine(sourceResourcesDirectory, resourcesToMove));
+            var sourceItems = GetResourcesItemsFromCsproj(sourceXDoc, Path.Combine(sourceResourcesDirectory, resourcesToMove));
             if (sourceItems.Count == 0)
             {
                 Errors.Add($@"ItemGroup section not found in source csproj file (for moving resources files).");
@@ -580,13 +580,13 @@ public partial class BitPlatformAppMod : BitPlatformApp
 
             string targetResourcesProjectFile = Path.Combine(targetProjectDirectory, $"{targetProject}.csproj");
             var targetXDoc = XDocument.Load(targetResourcesProjectFile);
-            var targetItems = GetRessourcesItemsFromCsproj(targetXDoc, Path.Combine(targetResourcesDirectory, resourcesToMove));
+            var targetItems = GetResourcesItemsFromCsproj(targetXDoc, Path.Combine(targetResourcesDirectory, resourcesToMove));
             if (targetItems.Count > 0)
             {
                 Errors.Add($@"ItemGroup section found in target csproj file (for moving resources files).");
                 return;
             }
-            var targetItemsBefore = GetRessourcesItemsFromCsproj(targetXDoc, Path.Combine(targetResourcesDirectory, resourcesTargetBefore));
+            var targetItemsBefore = GetResourcesItemsFromCsproj(targetXDoc, Path.Combine(targetResourcesDirectory, resourcesTargetBefore));
             if (targetItemsBefore.Count == 0)
             {
                 Errors.Add($@"ItemGroup section (for Email resources) not found in target csproj file (for moving resources files).");
