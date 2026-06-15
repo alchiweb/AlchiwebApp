@@ -211,6 +211,29 @@ public partial class BitPlatformAppMod : BitPlatformApp
         string sourceServerWebPath = Path.Combine(BitPlatformProjectFolder, "src", "Server", $"{ProjectName}.Server.Web");
         string sourceTestsPath = Path.Combine(BitPlatformProjectFolder, "src", "Tests");
 
+        // Move some resources from Core project to Server.Api project (before moving to Server.Core)
+        MoveResources();
+
+        // Move ServerApiSettings.cs (in Server.Api project) to ServerCoreSettings.cs (in Server.Core project)
+        MoveOrRenameFile(
+            Path.Combine(sourceServerApiPath, "ServerApiSettings.cs"),
+            Path.Combine(sourceServerCorePath, "ServerCoreSettings.cs")
+            );
+        // Replace "ServerApiSettings" with "ServerCoreSettings" in all files in Server.Api and Server.Core projects
+        await ReplaceTextAsync("ServerApiSettings", "ServerCoreSettings", true, true, [
+            sourceServerApiPath,
+            sourceServerCorePath
+            ]);
+
+        // Move all files in Features from Server.Api project to Server.Core project
+        MoveFilesRecursively(
+            Path.Combine(sourceServerApiPath, "Features"),
+            Path.Combine(sourceServerCorePath, "Features"),
+            true,
+            "Controller."
+            );
+
+        // Move some extensions files (in /Instrastructure/Extension) from Core project to Server.Core project
         MoveOrRenameFile(
             Path.Combine(sourceCorePath, "Infrastructure", "Extensions", "ActivitySourceExtensions.cs"),
             Path.Combine(sourceServerCorePath, "Infrastructure", "Extensions", "ActivitySourceExtensions.cs")
@@ -220,61 +243,43 @@ public partial class BitPlatformAppMod : BitPlatformApp
             Path.Combine(sourceServerCorePath, "Infrastructure", "Extensions", "MeterExtensions.cs")
         );
 
-        MoveResources();
-
-        string sourcePath = Path.Combine(sourceServerApiPath, "Features");
-
-        MoveOrRenameFile(
-            Path.Combine(sourceServerApiPath, "ServerApiSettings.cs"),
-            Path.Combine(sourceServerCorePath, "ServerCoreSettings.cs")
-            );
-        await ReplaceTextAsync("ServerApiSettings", "ServerCoreSettings", true, true, [
-            sourceServerApiPath,
-            sourceServerCorePath
-            ]);
-
-        MoveFilesRecursively(
-            sourcePath,
-            Path.Combine(sourceServerCorePath, "Features"),
-            true,
-            "Controller."
-            ).Select(filename => new SearchResult() { FilePath = filename }).ToList();
-        sourcePath = Path.Combine(sourceServerApiPath, "Infrastructure");
-
-        // TODO: merge to two files (with regex)... or not?
+        // Rename some extensions files that are duplicated in Server.Api and Server.Core: *.cs -> *.FromApi.cs
         var extensionsCsFile1 = Path.Combine("Infrastructure", "Extensions", "HttpContextExtensions");
-        var extensionsCsFile2 = Path.Combine(sourceServerApiPath, "Infrastructure", "Extensions", "HttpRequestExtensions");
+        var extensionsCsFile2 = Path.Combine("Infrastructure", "Extensions", "HttpRequestExtensions");
         MoveOrRenameFile(
             Path.Combine(sourceServerApiPath, $"{extensionsCsFile1}.cs"),
             Path.Combine(sourceServerApiPath, $"{extensionsCsFile1}.FromApi.cs")
             );
-        // TODO: merge to two files (with regex)... or not?
         MoveOrRenameFile(
             Path.Combine(sourceServerApiPath, $"{extensionsCsFile2}.cs"),
             Path.Combine(sourceServerApiPath, $"{extensionsCsFile2}.FromApi.cs")
             );
+
+        // Move all files in Infrastructure from Server.Api project to Server.Core project
+        MoveFilesRecursively(
+            Path.Combine(sourceServerApiPath, "Infrastructure"),
+            Path.Combine(sourceServerCorePath, "Infrastructure"),
+            true,
+            excludeDirectory: "Controllers"
+            );
+
+        // Change "static class" to "static partial class" for the duplicated extensions files (that were in Server.Api and Server.Core projects)
         string[] arrayExtensionsFiles = [
             Path.Combine(sourceServerCorePath, $"{extensionsCsFile1}.cs"),
-            Path.Combine(sourceServerApiPath, $"{extensionsCsFile1}.FromApi.cs"),
+            Path.Combine(sourceServerCorePath, $"{extensionsCsFile1}.FromApi.cs"),
             Path.Combine(sourceServerCorePath, $"{extensionsCsFile2}.cs"),
-            Path.Combine(sourceServerApiPath, $"{extensionsCsFile2}.FromApi.cs")
+            Path.Combine(sourceServerCorePath, $"{extensionsCsFile2}.FromApi.cs")
             ];
         var listExtensionsFiles = arrayExtensionsFiles.Select(text => new SearchResult() { FilePath = text }).ToList();
         await _searchService.ReplaceInFilesAsync("static class", "static partial class", listExtensionsFiles, true, true);
         await _searchService.ReplaceInFilesAsync("internal static", "public static", listExtensionsFiles, true, true);
 
-        MoveFilesRecursively(
-            sourcePath,
-            Path.Combine(sourceServerCorePath, "Infrastructure"),
-            true,
-            excludeDirectory: "Controllers"
-            ).Select(filename => new SearchResult() { FilePath = filename }).ToList();
-
+        // Modify csproj files (usings, package references, embedded resources)
         ChangeCsprojFiles(sourceServerCorePath, sourceServerApiPath);
 
+        // Replace references to Server.Api with Server.Core
         await ReplaceTextAsync($@"{ProjectName}.Server.Api", $@"{ProjectName}.Server.Core", true, true,
             [sourceServerCorePath, sourceTestsPath]);
-
         await ReplaceTextAsync($@"using {ProjectName}.Server.Api.Infrastructure", $@"using {ProjectName}.Server.Core.Infrastructure", true, true,
             [sourceServerApiPath, sourceServerWebPath]);
         await ReplaceTextAsync($@"using {ProjectName}.Server.Api.Features", $@"using {ProjectName}.Server.Core.Features", true, true,
@@ -300,12 +305,14 @@ public partial class BitPlatformAppMod : BitPlatformApp
         await ReplaceTextAsync(" Api.Features.Identity.Models.", " Core.Features.Identity.Models.", true, false,
             [sourceServerApiPath, sourceServerWebPath],
             ["Program*.*"]);
-        try
-        {
-            Directory.Delete(Path.Combine(sourceTestsPath, "bin"), true);
-            Directory.Delete(Path.Combine(sourceTestsPath, "obj"), true);
-        }
-        catch (Exception) { }
+
+        //// Clean Test project
+        //try
+        //{
+        //    Directory.Delete(Path.Combine(sourceTestsPath, "bin"), true);
+        //    Directory.Delete(Path.Combine(sourceTestsPath, "obj"), true);
+        //}
+        //catch (Exception) { }
     }
 
     private void ChangeCsprojFiles(string sourceServerCorePath, string sourceServerApiPath)
@@ -409,11 +416,7 @@ public partial class BitPlatformAppMod : BitPlatformApp
 
                 newPackageReferencesCore.ForEach(pr => firstPackageReferenceItemGroup.Add(pr));
 
-                foreach (var item in serverApiXDoc.Descendants("EmbeddedResource"))
-                {
-                    firstEmbeddedResourceItemGroup.Add(item);
-                }
-                serverApiXDoc.Descendants("ItemGroup").Where(ig => ig.Elements("EmbeddedResource").Count() == ig.Elements().Count()).Remove();
+                MoveEmbeddedResources(serverApiXDoc, firstEmbeddedResourceItemGroup);
             }
         }
 
@@ -462,7 +465,7 @@ public partial class BitPlatformAppMod : BitPlatformApp
                 firstUsingItemGroup.Add(newElement);
 
 
-
+                // TODO: specific -> generic
                 newElement = new XElement("Using");
                 newElement.SetAttributeValue("Include", $"{ProjectName}.Server.Core");
                 firstUsingItemGroup.Add(newElement);
@@ -533,6 +536,41 @@ public partial class BitPlatformAppMod : BitPlatformApp
 
         serverApiXDoc.SaveXmlFile(serverApiCsprojPath);
         serverCoreXDoc.SaveXmlFile(serverCoreCsprojPath);
+    }
+
+    /// <summary>
+    /// Move EmbeddedRerource elements from serverApiXDoc to firstEmbeddedResourceItemGroup
+    /// </summary>
+    /// <param name="serverApiXDoc"></param>
+    /// <param name="firstEmbeddedResourceItemGroup"></param>
+    private void MoveEmbeddedResources(XDocument serverApiXDoc, XElement firstEmbeddedResourceItemGroup)
+    {
+        XElement[]? sourceElements = serverApiXDoc.Descendants("EmbeddedResource")?.ToArray();
+        if (sourceElements == null || sourceElements.Count() == 0)
+        {
+            return;
+        }
+        foreach (var item in sourceElements)
+        {
+            firstEmbeddedResourceItemGroup.Add(item);
+        }
+        sourceElements.Remove();
+
+        sourceElements = serverApiXDoc.Descendants("Content").Where(elt => string.Equals(elt.Attribute("Include")?.Value, @"..\..\..\Bit.ResxTranslator.json"))?.ToArray();
+        if (sourceElements == null || sourceElements.Count() == 0 || firstEmbeddedResourceItemGroup?.Document == null)
+        {
+            return;
+        }
+        var itemGroup = AddItemGroup(firstEmbeddedResourceItemGroup.Document);
+        if (itemGroup == null)
+        {
+            return;
+        }
+        foreach (var item in sourceElements)
+        {
+            itemGroup.Add(item);
+        }
+        sourceElements.Remove();
     }
 
     private bool MustMoveToServerCore(string includeValueAttribute)
