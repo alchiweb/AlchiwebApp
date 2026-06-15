@@ -268,11 +268,14 @@ public partial class BitPlatformAppMod : BitPlatformApp
             Path.Combine(sourceServerCorePath, $"{extensionsCsFile1}.cs"),
             Path.Combine(sourceServerCorePath, $"{extensionsCsFile1}.FromApi.cs"),
             Path.Combine(sourceServerCorePath, $"{extensionsCsFile2}.cs"),
-            Path.Combine(sourceServerCorePath, $"{extensionsCsFile2}.FromApi.cs")
+            Path.Combine(sourceServerCorePath, $"{extensionsCsFile2}.FromApi.cs"),
+            Path.Combine(sourceServerCorePath, "Infrastructure", "Extensions", "WebApplicationBuilderExtensions.cs"),
             ];
-        var listExtensionsFiles = arrayExtensionsFiles.Select(text => new SearchResult() { FilePath = text }).ToList();
-        await _searchService.ReplaceInFilesAsync("static class", "static partial class", listExtensionsFiles, true, true);
-        await _searchService.ReplaceInFilesAsync("internal static", "public static", listExtensionsFiles, true, true);
+
+        await ReplacePartialClassAsync(arrayExtensionsFiles);
+
+        // For Core project
+        RemoveUnusedPackages(sourceCorePath);
 
         // Modify csproj files (usings, package references, embedded resources)
         ChangeCsprojFiles(sourceServerCorePath, sourceServerApiPath);
@@ -315,12 +318,14 @@ public partial class BitPlatformAppMod : BitPlatformApp
         //catch (Exception) { }
     }
 
+
     private void ChangeCsprojFiles(string sourceServerCorePath, string sourceServerApiPath)
     {
         var serverApiCsprojPath = Path.Combine(sourceServerApiPath, $"{ProjectName}.Server.Api.csproj");
         var serverCoreCsprojPath = Path.Combine(sourceServerCorePath, $"{ProjectName}.Server.Core.csproj");
         var serverApiXDoc = XDocument.Load(serverApiCsprojPath);
         var serverCoreXDoc = XDocument.Load(serverCoreCsprojPath);
+
         List<XElement> usingsListForApi = serverApiXDoc.Descendants("Using").ToList();
         //List<XElement> newUsingsListForCore = serverCoreXDoc.Descendants("Using").ToList();
         List<string> usingsTextListForCore = serverCoreXDoc.Descendants("Using")
@@ -536,6 +541,21 @@ public partial class BitPlatformAppMod : BitPlatformApp
 
         serverApiXDoc.SaveXmlFile(serverApiCsprojPath);
         serverCoreXDoc.SaveXmlFile(serverCoreCsprojPath);
+    }
+
+    private void RemoveUnusedPackages(string sourceCorePath)
+    {
+        var coreCsprojPath = Path.Combine(sourceCorePath, $"{ProjectName}.Core.csproj");
+        var coreXDoc = XDocument.Load(coreCsprojPath);
+        string[] packageReferenceItemsToRemove = {
+            "Microsoft.AspNetCore.Authorization",
+            "Microsoft.Extensions.DependencyInjection.Abstractions",
+            "Microsoft.Extensions.Options.ConfigurationExtensions"
+        };
+        coreXDoc.Descendants("PackageReference")
+            .Where(elt => packageReferenceItemsToRemove.Contains(elt.Attribute("Include")?.Value))
+            .Remove();
+        coreXDoc.SaveXmlFile(coreCsprojPath);
     }
 
     /// <summary>

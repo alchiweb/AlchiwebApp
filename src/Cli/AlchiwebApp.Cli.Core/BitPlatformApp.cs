@@ -35,6 +35,12 @@ public abstract partial class BitPlatformApp
         projectElement.Add(itemGroupToAdd);
         return itemGroupToAdd;
     }
+    protected async Task ReplacePartialClassAsync(string[] arrayExtensionsFiles)
+    {
+        var listExtensionsFiles = arrayExtensionsFiles.Select(text => new SearchResult() { FilePath = text }).ToList();
+        await _searchService.ReplaceInFilesAsync("static class", "static partial class", listExtensionsFiles, true, true);
+        await _searchService.ReplaceInFilesAsync("internal static", "public static", listExtensionsFiles, true, true);
+    }
     #endregion
 
     #region Resources management
