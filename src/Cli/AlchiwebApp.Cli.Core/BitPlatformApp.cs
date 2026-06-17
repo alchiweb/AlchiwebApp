@@ -35,11 +35,15 @@ public abstract partial class BitPlatformApp
         projectElement.Add(itemGroupToAdd);
         return itemGroupToAdd;
     }
-    protected async Task ReplacePartialClassAsync(string[] arrayExtensionsFiles)
+    protected async Task ReplacePartialClassAsync(string[] arrayExtensionsFiles, bool forceToPublic = false, string beforeClass = "")
     {
         var listExtensionsFiles = arrayExtensionsFiles.Select(text => new SearchResult() { FilePath = text }).ToList();
-        await _searchService.ReplaceInFilesAsync("static class", "static partial class", listExtensionsFiles, true, true);
-        await _searchService.ReplaceInFilesAsync("internal static", "public static", listExtensionsFiles, true, true);
+        beforeClass = string.IsNullOrWhiteSpace(beforeClass) ? "" : $" {beforeClass.Trim()}";
+        await _searchService.ReplaceInFilesAsync($"{beforeClass} class ", $"{beforeClass} partial class ", listExtensionsFiles, true, true);
+        if (forceToPublic)
+        {
+            await _searchService.ReplaceInFilesAsync($"internal{beforeClass} partial class ", $"public{beforeClass} partial class ", listExtensionsFiles, true, true);
+        }
     }
     #endregion
 
