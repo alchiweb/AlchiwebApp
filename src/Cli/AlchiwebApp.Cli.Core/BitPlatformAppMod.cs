@@ -109,6 +109,23 @@ public partial class BitPlatformAppMod : BitPlatformApp
         await ReplaceTextAsync($@"Shared""", $@"{ProjectName}.Core""", matchCase, expectedReplacements: 1);
 
         await ReplaceTextAsync($@"Shared project to", $@"shared project (`{ProjectName}.Core`) to", matchCase, expectedReplacements: 1);
+
+        await RenameCSharpCodeFile(
+            Path.Combine("src", $"{ProjectName}.Core", "Infrastructure", "Extensions"),
+            "ISharedServiceCollectionExtensions", "ICoreServiceCollectionExtensions", matchCase, 7);
+        await RenameCSharpCodeFile(
+            Path.Combine("src", "Server", $"{ProjectName}.Server.Core"),
+            "ServerSharedSettings", "ServerCoreSettings", matchCase, 7);
+        await RenameCSharpCodeFile(
+            Path.Combine("src", $"{ProjectName}.Core"),
+            "SharedSettings", "CoreSettings", matchCase, 6);
+        await RenameCSharpCodeFile(
+            Path.Combine("src", $"{ProjectName}.Core", "Infrastructure", "Services"),
+            "SharedExceptionHandler", "CoreExceptionHandler", matchCase, 9);
+        await ReplaceTextAsync("AddSharedConfigurations", "AddCoreConfigurations", matchCase, matchWholeWord: true, expectedReplacements: 2);
+        await ReplaceTextAsync("AddSharedProjectServices", "AddCoreProjectServices", matchCase, matchWholeWord: true, expectedReplacements: 5);
+        await ReplaceTextAsync("AddServerSharedServices", "AddServerCoreServices", matchCase, matchWholeWord: true, expectedReplacements: 3);
+
     }
     #endregion
 
@@ -214,13 +231,13 @@ public partial class BitPlatformAppMod : BitPlatformApp
         // Move some resources from Core project to Server.Api project (before moving to Server.Core)
         MoveResources();
 
-        // Move ServerApiSettings.cs (in Server.Api project) to ServerCoreSettings.cs (in Server.Core project)
+        // Move ServerApiSettings.cs (in Server.Api project) to ServerAppSettings.cs (in Server.Core project)
         MoveOrRenameFile(
             Path.Combine(sourceServerApiPath, "ServerApiSettings.cs"),
-            Path.Combine(sourceServerCorePath, "ServerCoreSettings.cs")
+            Path.Combine(sourceServerCorePath, "ServerAppSettings.cs")
             );
-        // Replace "ServerApiSettings" with "ServerCoreSettings" in all files in Server.Api and Server.Core projects
-        await ReplaceTextAsync("ServerApiSettings", "ServerCoreSettings", true, true, [
+        // Replace "ServerApiSettings" with "ServerAppSettings" in all files in Server.Api and Server.Core projects
+        await ReplaceTextAsync("ServerApiSettings", "ServerAppSettings", true, true, [
             sourceServerApiPath,
             sourceServerCorePath
             ]);

@@ -8,7 +8,7 @@ public static partial class WebApplicationBuilderExtensions
         where TBuilder : IHostApplicationBuilder
     {
         // if withMinimalServices is false -> standard BitPlatform behavior
-        builder.AddServerSharedServices(withMinimalServices);
+        builder.AddServerCoreServices(withMinimalServices);
         // and 
         if (!withMinimalServices)
         {
@@ -23,13 +23,13 @@ public static partial class WebApplicationBuilderExtensions
     }
 
 
-    public static TBuilder AddServerSharedServices<TBuilder>(this TBuilder builder, bool withMinimalServices)
+    public static TBuilder AddServerCoreServices<TBuilder>(this TBuilder builder, bool withMinimalServices)
         where TBuilder : IHostApplicationBuilder
     {
         // if withMinimalServices is false -> standard BitPlatform behavior
         if (!withMinimalServices)
         {
-            return builder.AddServerSharedServices();
+            return builder.AddServerCoreServices();
         }
         // else just add Aspire default services
         builder.AddServiceDefaults();

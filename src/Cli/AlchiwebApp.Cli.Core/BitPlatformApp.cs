@@ -295,6 +295,17 @@ public abstract partial class BitPlatformApp
         }
         return true;
     }
+    protected async Task RenameCSharpCodeFile(string directory, string stringOld, string stringNew, bool matchCase, int? expectedReplacements = null, bool matchWholeWord = true)
+    {
+        if (!MoveOrRenameFile(Path.Combine(directory, $"{stringOld}.cs"),
+                Path.Combine(directory, $"{stringNew}.cs"))
+            )
+        {
+            Errors.Add($@"Aborted: the file ""{Path.Combine(directory, $"{stringOld}.cs")}"" must exist.");
+            return;
+        }
+        await ReplaceTextAsync(stringOld, stringNew, matchCase, matchWholeWord:true, expectedReplacements: expectedReplacements);
+    }
     #endregion
 
 }

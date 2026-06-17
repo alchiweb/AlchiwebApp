@@ -1,8 +1,4 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Caching.Memory;
-using Alchiweb-App1.Core;
-using Alchiweb-App1.Core.Features.Attachments;
+﻿using Alchiweb-App1.Core.Features.Attachments;
 using Alchiweb-App1.Core.Features.Categories;
 using Alchiweb-App1.Core.Features.Chatbot;
 using Alchiweb-App1.Core.Features.Dashboard;
@@ -18,7 +14,6 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static partial class ICoreServiceCollectionExtensions
 {
-    #region Added for [Alchiweb-App1]
     public static void AddBitPlatformTypedHttpClients(this IServiceCollection services)
     {
         services.TryAddTransient<IChatbotController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Chatbot_IChatbotController>();
@@ -36,5 +31,4 @@ public static partial class ICoreServiceCollectionExtensions
         services.TryAddTransient<IDashboardController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Dashboard_IDashboardController>();
         services.TryAddTransient<ITodoItemController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Todo_ITodoItemController>();
     }
-    #endregion
 }
