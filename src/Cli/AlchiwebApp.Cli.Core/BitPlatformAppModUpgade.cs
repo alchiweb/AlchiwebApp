@@ -179,13 +179,7 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
 
     private async Task CopyAlchiwebAppFilesAsync()
     {
-        var sourceFolder = Assembly.GetEntryAssembly()?.Location;
-        if (string.IsNullOrEmpty(sourceFolder))
-            return;
-        sourceFolder = Path.GetDirectoryName(sourceFolder);
-        if (string.IsNullOrEmpty(sourceFolder))
-            return;
-        sourceFolder = Path.Combine(sourceFolder, "Content");
+        string? sourceFolder = GetConsoleAppContentPath("Content", true);
         if (string.IsNullOrEmpty(sourceFolder))
             return;
         await CopyFilesRecursivelyAsync(sourceFolder, BitPlatformProjectFolder, true);

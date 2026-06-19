@@ -20,10 +20,14 @@
 
      <ItemGroup>
        <Compile Remove="Content\**\*.*" />
+       <Compile Remove="ModBitPlatformFiles.json" />
      </ItemGroup>
 
      <ItemGroup>
       <EmbeddedResource Include="Content\**\*.*">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </EmbeddedResource>
+      <EmbeddedResource Include="ModBitPlatformFiles.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </EmbeddedResource>
      </ItemGroup>

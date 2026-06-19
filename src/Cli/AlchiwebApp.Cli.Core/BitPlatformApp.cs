@@ -1,4 +1,6 @@
-﻿using System.Xml.Linq;
+﻿using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using AlchiwebApp.Cli.Core.Services;
 
 namespace AlchiwebApp.Cli.Core;
@@ -21,6 +23,16 @@ public abstract partial class BitPlatformApp
         UseExpectedReplacements = useExpectedReplacements;
         _searchService = searchService;
     }
+
+    #region Json modifying BitPlatform files
+    protected async Task ModifyBitPlatformFilesFromJson()
+    {        
+        var contentDirPath = GetConsoleAppContentPath("ModBitPlatformFiles.json", false);
+        if (string.IsNullOrEmpty(contentDirPath))
+            return;
+        //TODO: read json file
+    }
+    #endregion
 
     #region XML Project file management (*.csproj + Directory.Build.props)
     protected XElement? AddItemGroup(XDocument sourceXDoc)
@@ -146,6 +158,22 @@ public abstract partial class BitPlatformApp
     #endregion
 
     #region Files and directories management
+    protected static string? GetConsoleAppContentPath(string filenameOrDirectory, bool isDirectory)
+    {
+        string? sourceFolder = Assembly.GetEntryAssembly()?.Location;
+        if (string.IsNullOrEmpty(sourceFolder))
+            return null;
+        sourceFolder = Path.GetDirectoryName(sourceFolder);
+        if (string.IsNullOrEmpty(sourceFolder))
+            return null;
+        sourceFolder = Path.Combine(sourceFolder, filenameOrDirectory);
+        if (string.IsNullOrEmpty(sourceFolder) ||
+            (isDirectory ? !Directory.Exists(sourceFolder) : !File.Exists(sourceFolder))
+            )
+            return null;
+        return sourceFolder;
+    }
+
     protected async Task<List<string>> CopyFilesRecursivelyAsync(string sourcePath, string targetPath, bool isTemplateDirectory, string? excludeFilesPattern = null, string? excludeDirectory = null)
     {
         var sourceDirectories = Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories)

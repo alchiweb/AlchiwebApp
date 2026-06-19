@@ -1,0 +1,11 @@
+{
+    "modifs":
+    [
+        {
+            "filename": "test/test1.cs",
+            "searchText": "ceci est un text",
+            "replaceText": "    ligne de code1\n    ligne de code2",
+            "action": "modify"
+        }
+    ]
+}
