@@ -50,6 +50,7 @@ public partial class BitPlatformAppMod : BitPlatformApp
                 }
                 // Moving files to Server.Core project
                 await MoveFilesToServerCoreProjectAsync();
+                await ModifyBitPlatformFilesFromJsonAsync();
             }
             catch (Exception ex)
             {
@@ -137,7 +138,10 @@ public partial class BitPlatformAppMod : BitPlatformApp
 
         if (!string.Equals(sourceUserSecrets, bitPlatformUserSecrets, StringComparison.OrdinalIgnoreCase))
         {
-            await ReplaceTextAsync(bitPlatformUserSecrets, sourceUserSecrets, false, true, [Path.Combine(BitPlatformProjectFolder, "src")], [launchSettingsFilename, csprojFilename], expectedReplacements: 5);
+            await ReplaceTextAsync(bitPlatformUserSecrets, sourceUserSecrets, false, true,
+                [Path.Combine(BitPlatformProjectFolder, "src")],
+                [launchSettingsFilename, csprojFilename],
+                expectedReplacements: 5);
         }
         if (sourceForwardPorts?.Length != 6 || bitPlatformForwardPorts?.Length != 6)
         {

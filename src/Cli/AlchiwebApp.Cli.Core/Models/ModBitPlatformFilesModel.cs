@@ -2,5 +2,5 @@
 
 public class ModBitPlatformFilesModel
 {
-    public ModBitPlatformFileModel[] Modifs { get; set; }
+    public ModBitPlatformFileModel[]? Modifs { get; set; }
 }

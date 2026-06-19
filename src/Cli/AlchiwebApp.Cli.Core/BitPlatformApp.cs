@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using AlchiwebApp.Cli.Core.Models;
 using AlchiwebApp.Cli.Core.Services;
 
 namespace AlchiwebApp.Cli.Core;
@@ -25,12 +26,66 @@ public abstract partial class BitPlatformApp
     }
 
     #region Json modifying BitPlatform files
-    protected async Task ModifyBitPlatformFilesFromJson()
+    protected async Task ModifyBitPlatformFilesFromJsonAsync()
     {        
         var contentDirPath = GetConsoleAppContentPath("ModBitPlatformFiles.json", false);
         if (string.IsNullOrEmpty(contentDirPath))
             return;
-        //TODO: read json file
+        var test = File.ReadAllText(contentDirPath);
+
+        using FileStream fileOpenStream = File.OpenRead(contentDirPath);
+        JsonSerializerOptions jsonOptions = new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+        var modBitPlatformFiles = await JsonSerializer.DeserializeAsync<ModBitPlatformFilesModel>(fileOpenStream, jsonOptions);
+        if (modBitPlatformFiles?.Modifs == null)
+            return;
+        foreach(var mod in modBitPlatformFiles.Modifs)
+        {
+            if (mod == null
+                || mod.Action == ActionEnum.None
+                || string.IsNullOrEmpty(mod.SearchText)
+                || string.IsNullOrEmpty(mod.ReplaceText)
+                || string.IsNullOrEmpty(mod.Filename)
+                )
+                continue;
+
+            mod.Filename = mod.Filename.Replace("Alchiweb-App1", ProjectName);
+            mod.SearchText = mod.SearchText.Replace("Alchiweb-App1", ProjectName);
+            mod.ReplaceText = mod.ReplaceText.Replace("Alchiweb-App1", ProjectName);
+            string fullPathFile = Path.Combine(BitPlatformProjectFolder, mod.Filename);
+            string? fullPathDirectory = Path.GetDirectoryName(fullPathFile);
+            if (fullPathDirectory == null || !File.Exists(fullPathFile))
+                continue;
+            var replaceText = "";
+            switch(mod.Action)
+            {
+                case ActionEnum.Modify:
+                    replaceText = $"#region [AlchiwebApp] Modified\n{mod.ReplaceText}\n#endregion";
+                break;
+                case ActionEnum.AddBefore:
+                    replaceText = $"#region [AlchiwebApp] Added\n{mod.ReplaceText}\n#endregion\n$0";
+                    break;
+                case ActionEnum.AddAfter:
+                    replaceText = $"$0\n#region [AlchiwebApp] Added\n{mod.ReplaceText}\n#endregion";
+                    break;
+            }
+            var searchText = Regex.Escape(mod.SearchText).Replace("\\\\s\\*", "\\s*");
+            if (!mod.SearchText.StartsWith("\n"))
+                searchText = $"(.*){searchText}";
+            if (!mod.SearchText.EndsWith("\n"))
+                searchText = $"{searchText}(.*)";
+            var listExtensionsFiles = new List<SearchResult>
+            {
+                new() { FilePath = fullPathFile }
+            };
+
+            await _searchService.ReplaceInFilesAsync(searchText, replaceText, listExtensionsFiles, true,
+                useRegex: true,
+                useExtendedSearch: false
+                );
+        }
     }
     #endregion
 
@@ -256,7 +311,7 @@ public abstract partial class BitPlatformApp
         }
     }
 
-    protected async Task<int> ReplaceTextAsync(string searchText, string replaceText, bool matchCase = false, bool matchWholeWord = false, string[]? directories = null, string[]? filters = null, int? expectedReplacements = null, string[]? excludeDirectories = null)
+    protected async Task<int> ReplaceTextAsync(string searchText, string replaceText, bool matchCase = false, bool matchWholeWord = false, string[]? directories = null, string[]? filters = null, int? expectedReplacements = null, string[]? excludeDirectories = null, bool useRegex = false, bool useExtendedSearch = false)
     {
         if (directories == null || directories.Length == 0)
         {
@@ -270,10 +325,10 @@ public abstract partial class BitPlatformApp
         {
             filters = ["*.*"];
         }
-        var listFiles = await _searchService.SearchFilesAsync(directories, filters, true, searchText, matchCase, matchWholeWord, excludeDirectories: excludeDirectories);
+        var listFiles = await _searchService.SearchFilesAsync(directories, filters, true, searchText, matchCase, matchWholeWord, useRegex, useExtendedSearch, excludeDirectories: excludeDirectories);
         if (listFiles.Count != 0)
         {
-            await _searchService.ReplaceInFilesAsync(searchText, replaceText, listFiles, matchCase);
+            await _searchService.ReplaceInFilesAsync(searchText, replaceText, listFiles, matchCase, matchWholeWord, useRegex, useExtendedSearch);
         }
         if (UseExpectedReplacements && expectedReplacements != null && (expectedReplacements >= 0 ? listFiles.Count != expectedReplacements : listFiles.Count < -expectedReplacements))
         {

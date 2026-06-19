@@ -1,11 +1,76 @@
 {
-    "modifs":
-    [
+    "modifs": [
         {
-            "filename": "test/test1.cs",
-            "searchText": "ceci est un text",
-            "replaceText": "    ligne de code1\n    ligne de code2",
+            "filename": "src\\Alchiweb-App1.Core\\Infrastructure\\Dtos\\AppJsonContext.cs",
+            "searchText": "\nnamespace Alchiweb-App1.Core.Infrastructure.Dtos;",
+            "replaceText": "#if ALCHIWEBAPP\nusing AlchiwebApp.Core;\nusing AlchiwebApp.PagingFiltering.Paging;\nusing Alchiweb-App1.Core.Features.Identity.Dtos;\nusing Alchiweb-App1.Core.Features.PdfFile;\nusing Alchiweb-App1.Core.Features.PushNotification;\nusing Alchiweb-App1.Core.Infrastructure.Exceptions;\n#endif",
+            "action": "add.before"
+        },
+        {
+            "filename": "src\\Alchiweb-App1.Core\\Infrastructure\\Dtos\\AppJsonContext.cs",
+            "searchText": "public partial class AppJsonContext",
+            "replaceText": "#if ALCHIWEBAPP\n[JsonSerializable(typeof(ApiResponse))]\n[JsonSerializable(typeof(ApiResponse<Int32>))]\n[JsonSerializable(typeof(ApiResponse<bool>))]\n[JsonSerializable(typeof(ApiResponse<UserDto>))]\n[JsonSerializable(typeof(ApiResponse<PagedList<UserDto>>))]\n// Add here your custom classes for Json (de)serialization (like for Dtos)\n#endif",
+            "action": "add.before"
+        },
+        {
+            "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\Gender.cs",
+            "searchText": "Other,\\s*Male,\\s*Female,",
+            "replaceText": "#if ALCHIWEBAPP\n$1[Display(Name = \"Gender_Other\", ResourceType = typeof(I18n))]\n$1Other,\n$1[Display(Name = \"Gender_Male\", ResourceType = typeof(I18n))]\n$1Male,\n$1[Display(Name = \"Gender_Female\", ResourceType = typeof(I18n))]\n$1Female,\n#else\n$0\n#endif",
             "action": "modify"
+        },
+        {
+            "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\UserDto.cs",
+            "searchText": "[Required(ErrorMessage = nameof(AppStrings.RequiredAttribute_ValidationError))]\\s*[Display(Name = nameof(AppStrings.Password))]\\s*public string? Password { get; set; }",
+            "replaceText": "#if !ALCHIWEBAPP_SECURITY\n$0\n#endif",
+            "action": "modify"
+        },
+        {
+            "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\ChangePasswordRequestDto.cs",
+            "searchText": "public string? OldPassword { get; set; }",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1//[JsonConverter(typeof(SecureDataJsonConverter))]\n#endif",
+            "action": "add.before"
+        },
+        {
+            "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\ChangePasswordRequestDto.cs",
+            "searchText": "public string? NewPassword { get; set; }",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1//[JsonConverter(typeof(SecureDataJsonConverter))]\n#endif",
+            "action": "add.before"
+        },
+        {
+            "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\ChangePasswordRequestDto.cs",
+            "searchText": "public string? ConfirmPassword { get; set; }",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1//[JsonConverter(typeof(SecureDataJsonConverter))]\n#endif",
+            "action": "add.before"
+        },
+        {
+            "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\ResetPasswordRequestDto.cs",
+            "searchText": "public string? Password { get; set; }",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1[JsonConverter(typeof(SecureDataJsonConverter))]\n#endif",
+            "action": "add.before"
+        },
+        {
+            "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\ResetPasswordRequestDto.cs",
+            "searchText": "public string? ConfirmPassword { get; set; }",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1[JsonConverter(typeof(SecureDataJsonConverter))]\n#endif",
+            "action": "add.before"
+        },
+        {
+            "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\SignInRequestDto.cs",
+            "searchText": "public string? Password { get; set; }",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1[JsonConverter(typeof(SecureDataJsonConverter))]\n#endif",
+            "action": "add.before"
+        },
+        {
+            "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\SignUpRequestDto.cs",
+            "searchText": "public string? Password { get; set; }",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1[JsonConverter(typeof(SecureDataJsonConverter))]\n#endif",
+            "action": "add.before"
+        },
+        {
+            "filename": "src\\Server\\Syllabus.Server.Core\\Infrastructure\\Extensions\\JsonSerializerOptionsExtensions.cs",
+            "searchText": "options.AllowTrailingCommas = true;",
+            "replaceText": "#if ALCHIWEBAPP\n$1options.ReferenceHandler = ReferenceHandler.IgnoreCycles;\n#endif",
+            "action": "add.before"
         }
     ]
 }
