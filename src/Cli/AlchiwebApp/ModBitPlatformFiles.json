@@ -29,19 +29,19 @@
         {
             "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Components\\Pages\\Identity\\ResetPasswordPage.razor.cs",
             "searchText": "await identityController.ResetPassword(model, CurrentCancellationToken);",
-            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1ResetPasswordRequestDto requestToSend = new();\n$1model.Patch(requestToSend);\n$1requestToSend.Password = await cryptoService.EncryptAsync(model.Password);\n$1requestToSend.ConfirmPassword = await cryptoService.EncryptAsync(requestToSend.ConfirmPassword);\n$1await identityController.ResetPassword(requestToSend, CurrentCancellationToken);\n#else$0\n#endif",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1ResetPasswordRequestDto requestToSend = new();\n$1model.Patch(requestToSend);\n$1requestToSend.Password = await cryptoService.EncryptAsync(model.Password);\n$1requestToSend.ConfirmPassword = await cryptoService.EncryptAsync(requestToSend.ConfirmPassword);\n$1await identityController.ResetPassword(requestToSend, CurrentCancellationToken);\n#else\n$0\n#endif",
             "action": "modify"
         },
         {
-            "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Components\\Pages\\Identity\\SignUpPage.razor.cs",
+            "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Components\\Pages\\Identity\\SignUp\\SignUpPage.razor.cs",
             "searchText": "IIdentityController identityController = default",
             "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1[AutoInject] ICryptoService cryptoService = default!;\n#endif",
             "action": "add.before"
         },
         {
-            "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Components\\Pages\\Identity\\SignUpPage.razor.cs",
+            "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Components\\Pages\\Identity\\SignUp\\SignUpPage.razor.cs",
             "searchText": "await identityController.SignUp(signUpModel, CurrentCancellationToken);",
-            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1SignUpRequestDto requestToSend = new();\n$1signUpModel.Patch(requestToSend);\n$1requestToSend.Password = await cryptoService.EncryptAsync(signUpModel.Password);\n$1await identityController.SignUp(requestToSend, CurrentCancellationToken);$0\n#endif",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1SignUpRequestDto requestToSend = new();\n$1signUpModel.Patch(requestToSend);\n$1requestToSend.Password = await cryptoService.EncryptAsync(signUpModel.Password);\n$1await identityController.SignUp(requestToSend, CurrentCancellationToken);\n#else\n$0\n#endif",
             "action": "modify"
         },
 
@@ -54,7 +54,7 @@
         {
             "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Infrastructure\\Services\\AuthManager.cs",
             "searchText": "var response = await identityController.SignIn(request, cancellationToken);",
-            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1SignInRequestDto requestToSend = new();\n$1request.Patch(requestToSend);\n$1requestToSend.Password = await cryptoService.EncryptAsync(request.Password);\n$1var response = await identityController.SignIn(requestToSend, cancellationToken);$0\n#endif",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1SignInRequestDto requestToSend = new();\n$1request.Patch(requestToSend);\n$1requestToSend.Password = await cryptoService.EncryptAsync(request.Password);\n$1var response = await identityController.SignIn(requestToSend, cancellationToken);\n#else\n$0\n#endif",
             "action": "modify"
         },
 
@@ -111,18 +111,6 @@
             "searchText": "options.AllowTrailingCommas = true;",
             "replaceText": "#if ALCHIWEBAPP\n$1options.ReferenceHandler = ReferenceHandler.IgnoreCycles;\n#endif",
             "action": "add.before"
-        },
-        {
-            "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Features\\Identity\\Configurations\\UserConfiguration.cs",
-            "searchText": "void Configure(EntityTypeBuilder<User> builder)\\s*{",
-            "replaceText": "#if ALCHIWEBAPP_USER_ROLE\n$1builder.Navigation(u => u.Roles)\n$1    .AutoInclude();\n#endif",
-            "action": "add.after"
-        }
-        {
-            "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Features\\Identity\\Configurations\\UserRoleConfiguration.cs",
-            "searchText": "void Configure(EntityTypeBuilder<UserRole> builder)\\s*{",
-            "replaceText": "#if ALCHIWEBAPP_USER_ROLE\n$1builder.Navigation(ur => ur.Role)\n$1    .AutoInclude();\n#endif",
-            "action": "add.after"
         }
     ]
 }
