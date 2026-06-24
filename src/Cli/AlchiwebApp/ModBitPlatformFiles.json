@@ -107,10 +107,22 @@
             "action": "add.before"
         },
         {
-            "filename": "src\\Server\\Syllabus.Server.Core\\Infrastructure\\Extensions\\JsonSerializerOptionsExtensions.cs",
+            "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Infrastructure\\Extensions\\JsonSerializerOptionsExtensions.cs",
             "searchText": "options.AllowTrailingCommas = true;",
             "replaceText": "#if ALCHIWEBAPP\n$1options.ReferenceHandler = ReferenceHandler.IgnoreCycles;\n#endif",
             "action": "add.before"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Features\\Identity\\Configurations\\UserConfiguration.cs",
+            "searchText": "void Configure(EntityTypeBuilder<User> builder)\\s*{",
+            "replaceText": "#if ALCHIWEBAPP_USER_ROLE\n$1builder.Navigation(u => u.Roles)\n$1    .AutoInclude();\n#endif",
+            "action": "add.after"
+        }
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Features\\Identity\\Configurations\\UserRoleConfiguration.cs",
+            "searchText": "void Configure(EntityTypeBuilder<UserRole> builder)\\s*{",
+            "replaceText": "#if ALCHIWEBAPP_USER_ROLE\n$1builder.Navigation(ur => ur.Role)\n$1    .AutoInclude();\n#endif",
+            "action": "add.after"
         }
     ]
 }
