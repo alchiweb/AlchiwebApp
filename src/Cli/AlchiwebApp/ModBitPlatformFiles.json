@@ -111,6 +111,12 @@
             "searchText": "options.AllowTrailingCommas = true;",
             "replaceText": "#if ALCHIWEBAPP\n$1options.ReferenceHandler = ReferenceHandler.IgnoreCycles;\n#endif",
             "action": "add.before"
+        },
+        {
+            "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Infrastructure\\Extensions\\IClientCoreServiceCollectionExtensions.cs",
+            "searchText": "services.AddTypedHttpClients();",
+            "replaceText": "#if ALCHIWEBAPP\n$1services.AddTypedHttpClients(!AppPlatform.IsBlazorHybridOrBrowser);\n$1services.AddAlchiwebAppServices();\n#else\n$0\n#endif",
+            "action": "modify"
         }
     ]
 }
