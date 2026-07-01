@@ -117,6 +117,36 @@
             "searchText": "services.AddTypedHttpClients();",
             "replaceText": "#if ALCHIWEBAPP\n$1services.AddTypedHttpClients(!AppPlatform.IsBlazorHybridOrBrowser);\n$1services.AddAlchiwebAppServices();\n#else\n$0\n#endif",
             "action": "modify"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Api\\Program.Services.cs",
+            "searchText": "builder.AddServerCoreServices();",
+            "replaceText": "#if ALCHIWEBAPP\n$1builder.AddAlchiwebAppServerServices();\n#else\n$0\n#endif",
+            "action": "modify"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Web\\Program.Services.cs",
+            "searchText": "builder.AddServerCoreServices();",
+            "replaceText": "#if ALCHIWEBAPP\n$1builder.AddAlchiwebAppServerServices();\n#else\n$0\n#endif",
+            "action": "modify"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Api\\Program.Services.cs",
+            "searchText": "if (string.IsNullOrEmpty(appSettings.AI?.OpenAI?.ChatApiKey) is false)",
+            "replaceText": "#if ALCHIWEBAPP_AI_OLLAMA\n$1if (string.IsNullOrEmpty(appSettings.AI?.OpenAI?.ChatApiKey))\n$1{\n$1builder\n$1    .AddKeyedOllamaApiClient(\"mistral\")\n$1    .AddChatClient()\n$1    .UseLogging()\n$1    .UseFunctionInvocation()\n$1    .UseOpenTelemetry(configure: t => t.EnableSensitiveData = env.IsDevelopment());\n$1}\n$1else\n#else\n$0\n#endif",
+            "action": "modify"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.AppHost\\Program.cs",
+            "searchText": "if (builder.ExecutionContext.IsRunMode)",
+            "replaceText": "#if ALCHIWEBAPP_AI_OLLAMA\n$1var ollama = builder.AddOllama(\"ollama\")\n$1    .WithDataVolume()\n$1    //.WithGPUSupport()\n$1    .WithLifetime(ContainerLifetime.Persistent); // Keep the container running when the app exits\n$1var mistral = ollama.AddModel(\"mistral\", \"mistral:7b\");\n$1serverApiProject.WithReference(mistral).WaitFor(mistral);\n#endif",
+            "action": "add.before"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Api\\Program.cs",
+            "searchText": "app.ConfigureMiddlewares();",
+            "replaceText": "#if ALCHIWEBAPP\n$1app.ConfigureBusinessMiddlewares();\n#endif",
+            "action": "add.after"
         }
     ]
 }

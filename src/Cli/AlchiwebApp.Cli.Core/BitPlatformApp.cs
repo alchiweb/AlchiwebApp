@@ -89,7 +89,7 @@ public abstract partial class BitPlatformApp
     }
     #endregion
 
-    #region XML Project file management (*.csproj + Directory.Build.props)
+    #region XML Project file management (*.csproj + Directory.*.props)
     protected XElement? AddItemGroup(XDocument sourceXDoc)
     {
         var projectElement = sourceXDoc?.Element("Project");

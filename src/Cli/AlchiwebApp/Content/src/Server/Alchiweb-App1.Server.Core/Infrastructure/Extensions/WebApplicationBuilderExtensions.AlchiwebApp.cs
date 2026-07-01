@@ -4,7 +4,7 @@ namespace Microsoft.Extensions.Hosting;
 
 public static partial class WebApplicationBuilderExtensions
 {
-    public static TBuilder AddServerInfraServices<TBuilder>(this TBuilder builder, bool withMinimalServices = false)
+    public static TBuilder AddAlchiwebAppServerServices<TBuilder>(this TBuilder builder, bool withMinimalServices = false)
         where TBuilder : IHostApplicationBuilder
     {
         // if withMinimalServices is false -> standard BitPlatform behavior

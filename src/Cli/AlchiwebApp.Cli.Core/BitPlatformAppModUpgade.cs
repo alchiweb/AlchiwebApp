@@ -95,13 +95,13 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
                 ));
             itemGroupToAdd.Add(projectReferenceToAdd);
         }
-        itemGroupToAdd = AddItemGroup(sourceXDoc);
-        if (itemGroupToAdd != null)
-        {
-            var packageReferenceToAdd = new XElement("PackageReference");
-            packageReferenceToAdd.SetAttributeValue("Include", "Blazored.LocalStorage");
-            itemGroupToAdd.Add(packageReferenceToAdd);
-        }
+        //itemGroupToAdd = AddItemGroup(sourceXDoc);
+        //if (itemGroupToAdd != null)
+        //{
+        //    var packageReferenceToAdd = new XElement("PackageReference");
+        //    packageReferenceToAdd.SetAttributeValue("Include", "Blazored.LocalStorage");
+        //    itemGroupToAdd.Add(packageReferenceToAdd);
+        //}
         itemGroupToAdd = AddItemGroup(sourceXDoc);
         if (itemGroupToAdd != null)
         {
@@ -125,18 +125,34 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
         #endregion
 
         #region Directory.Packages.props file modification
+        //sourceResourcesProjectFile = Path.Combine(
+        //    BitPlatformProjectFolder, "src", "Directory.Packages.props"
+        //    );
+        //sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
+
+        //itemGroupToAdd = AddItemGroup(sourceXDoc);
+        //if (itemGroupToAdd != null)
+        //{
+        //    var packageVersion = new XElement("PackageVersion");
+        //    packageVersion.SetAttributeValue("Include", "Blazored.LocalStorage");
+        //    packageVersion.SetAttributeValue("Version", "4.5.0");
+        //    itemGroupToAdd.Add(packageVersion);
+        //}
+        //sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
+        #endregion
+
+        #region Directory.Build.props file modification
         sourceResourcesProjectFile = Path.Combine(
-            BitPlatformProjectFolder, "src", "Directory.Packages.props"
+            BitPlatformProjectFolder, "src", "Directory.Build.props"
             );
         sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
 
-        itemGroupToAdd = AddItemGroup(sourceXDoc);
-        if (itemGroupToAdd != null)
+        var firstPropertyGroup = sourceXDoc.Document?.Element("Project")?.Element("PropertyGroup");
+        if (firstPropertyGroup != null)
         {
-            var packageVersion = new XElement("PackageVersion");
-            packageVersion.SetAttributeValue("Include", "Blazored.LocalStorage");
-            packageVersion.SetAttributeValue("Version", "4.5.0");
-            itemGroupToAdd.Add(packageVersion);
+            var defineConstants = new XElement("DefineConstants");
+            defineConstants.SetValue("$(DefineConstants);ALCHIWEBAPP;ALCHIWEBAPP_SECURITY;ALCHIWEBAPP_USER_ROLE;ALCHIWEBAPP_AI_OLLAMA");
+            firstPropertyGroup.Add(defineConstants);
         }
         sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
         #endregion
