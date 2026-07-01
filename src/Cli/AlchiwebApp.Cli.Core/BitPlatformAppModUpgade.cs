@@ -154,21 +154,59 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
         sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
         #endregion
 
-        #region Directory.Packages.props file modification
-        //sourceResourcesProjectFile = Path.Combine(
-        //    BitPlatformProjectFolder, "src", "Directory.Packages.props"
-        //    );
-        //sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
+        #region Server.Api project CsProj file modification
+        sourceProject = $"{ProjectName}.Server.Api";
+        sourceResourcesProjectFile = Path.Combine(
+            BitPlatformProjectFolder, "src", "Server", $"{sourceProject}", $"{sourceProject}.csproj"
+            );
+        sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
 
-        //itemGroupToAdd = AddItemGroup(sourceXDoc);
-        //if (itemGroupToAdd != null)
-        //{
-        //    var packageVersion = new XElement("PackageVersion");
-        //    packageVersion.SetAttributeValue("Include", "Blazored.LocalStorage");
-        //    packageVersion.SetAttributeValue("Version", "4.5.0");
-        //    itemGroupToAdd.Add(packageVersion);
-        //}
-        //sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
+        itemGroupToAdd = AddItemGroup(sourceXDoc);
+        if (itemGroupToAdd != null)
+        {
+            var projectReferenceToAdd = new XElement("PackageReference");
+            projectReferenceToAdd.SetAttributeValue("Include", "CommunityToolkit.Aspire.OllamaSharp");
+            itemGroupToAdd.Add(projectReferenceToAdd);
+        }
+        sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
+        #endregion
+
+        #region Server.AppHost project CsProj file modification
+        sourceProject = $"{ProjectName}.Server.AppHost";
+        sourceResourcesProjectFile = Path.Combine(
+            BitPlatformProjectFolder, "src", "Server", $"{sourceProject}", $"{sourceProject}.csproj"
+            );
+        sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
+
+        itemGroupToAdd = AddItemGroup(sourceXDoc);
+        if (itemGroupToAdd != null)
+        {
+            var projectReferenceToAdd = new XElement("PackageReference");
+            projectReferenceToAdd.SetAttributeValue("Include", "CommunityToolkit.Aspire.Hosting.Ollama");
+            itemGroupToAdd.Add(projectReferenceToAdd);
+        }
+        sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
+        #endregion
+
+        #region Directory.Packages.props file modification
+        sourceResourcesProjectFile = Path.Combine(
+            BitPlatformProjectFolder, "src", "Directory.Packages.props"
+            );
+        sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
+
+        itemGroupToAdd = AddItemGroup(sourceXDoc);
+        if (itemGroupToAdd != null)
+        {
+            var packageVersion = new XElement("PackageVersion");
+            packageVersion.SetAttributeValue("Include", "CommunityToolkit.Aspire.Hosting.Ollama");
+            packageVersion.SetAttributeValue("Version", "13.3.0");
+            itemGroupToAdd.Add(packageVersion);
+            packageVersion = new XElement("PackageVersion");
+            packageVersion.SetAttributeValue("Include", "CommunityToolkit.Aspire.OllamaSharp");
+            packageVersion.SetAttributeValue("Version", "13.3.0");
+            itemGroupToAdd.Add(packageVersion);
+        }
+        sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
         #endregion
 
         #region Directory.Build.props file modification

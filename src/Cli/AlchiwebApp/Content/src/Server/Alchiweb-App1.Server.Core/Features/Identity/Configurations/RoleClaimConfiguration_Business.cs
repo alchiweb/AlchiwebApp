@@ -7,11 +7,14 @@ public partial class RoleClaimConfiguration_Business : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<RoleClaim> builder)
     {
+        var id = 1000;
+
         // Assign non admin features to demo role
-        foreach (var roleId in new[] {
-            "D16FB616-0B66-4E3A-B8EF-9B5F42F33D59",
-            "14A74BE8-EC5D-4669-955D-7E907C0FFFB2",
-            "7B2F6C87-1190-4905-9544-A1392D001BBC"
+        foreach (var roleId in new[]
+            {
+            // [BusinessCustomCode]
+            //  Add custom roles like the SpecialRole with the GUID defined in RoleConfiguration_Business:
+            "3F921DF3-9177-4342-B0BC-543B865E371A",
         }.Select(s => Guid.Parse(s)))
         {
             foreach (var feature in AppFeatures.GetAll()
