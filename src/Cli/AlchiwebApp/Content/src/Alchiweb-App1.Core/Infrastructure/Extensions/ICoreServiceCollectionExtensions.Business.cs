@@ -18,20 +18,20 @@ public static partial class ICoreServiceCollectionExtensions
     {
         if (manualAdding)
         {
-            services.TryAddTransient < IChatbotController, IHttpClientServiceCollectionExtensions.Alchiweb - App1_Core_Features_Chatbot_IChatbotController > ();
-            services.TryAddTransient < IPushNotificationController, IHttpClientServiceCollectionExtensions.Alchiweb - App1_Core_Features_PushNotification_IPushNotificationController > ();
-            services.TryAddTransient < IRoleManagementController, IHttpClientServiceCollectionExtensions.Alchiweb - App1_Core_Features_Identity_IRoleManagementController > ();
-            services.TryAddTransient < IAttachmentController, IHttpClientServiceCollectionExtensions.Alchiweb - App1_Core_Features_Attachments_IAttachmentController > ();
-            services.TryAddTransient < IStatisticsController, IHttpClientServiceCollectionExtensions.Alchiweb - App1_Core_Features_Statistics_IStatisticsController > ();
+            services.TryAddTransient<IChatbotController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Chatbot_IChatbotController>();
+            services.TryAddTransient<IPushNotificationController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_PushNotification_IPushNotificationController>();
+            services.TryAddTransient<IRoleManagementController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Identity_IRoleManagementController>();
+            services.TryAddTransient<IAttachmentController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Attachments_IAttachmentController>();
+            services.TryAddTransient<IStatisticsController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Statistics_IStatisticsController>();
             //services.TryAddTransient<IMinimalApiController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_MinimalApiSample_IMinimalApiController>();
-            services.TryAddTransient < IDiagnosticController, IHttpClientServiceCollectionExtensions.Alchiweb - App1_Core_Features_Diagnostic_IDiagnosticController > ();
-            services.TryAddTransient < IUserManagementController, IHttpClientServiceCollectionExtensions.Alchiweb - App1_Core_Features_Identity_IUserManagementController > ();
-            services.TryAddTransient < IUserController, IHttpClientServiceCollectionExtensions.Alchiweb - App1_Core_Features_Identity_IUserController > ();
-            services.TryAddTransient < IIdentityController, IHttpClientServiceCollectionExtensions.Alchiweb - App1_Core_Features_Identity_IIdentityController > ();
-            services.TryAddTransient < ICategoryController, IHttpClientServiceCollectionExtensions.Alchiweb - App1_Core_Features_Categories_ICategoryController > ();
-            services.TryAddTransient < IProductController, IHttpClientServiceCollectionExtensions.Alchiweb - App1_Core_Features_Products_IProductController > ();
-            services.TryAddTransient < IDashboardController, IHttpClientServiceCollectionExtensions.Alchiweb - App1_Core_Features_Dashboard_IDashboardController > ();
-            services.TryAddTransient < ITodoItemController, IHttpClientServiceCollectionExtensions.Alchiweb - App1_Core_Features_Todo_ITodoItemController > ();
+            services.TryAddTransient<IDiagnosticController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Diagnostic_IDiagnosticController>();
+            services.TryAddTransient<IUserManagementController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Identity_IUserManagementController>();
+            services.TryAddTransient<IUserController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Identity_IUserController>();
+            services.TryAddTransient<IIdentityController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Identity_IIdentityController>();
+            services.TryAddTransient<ICategoryController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Categories_ICategoryController>();
+            services.TryAddTransient<IProductController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Products_IProductController>();
+            services.TryAddTransient<IDashboardController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Dashboard_IDashboardController>();
+            services.TryAddTransient<ITodoItemController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Todo_ITodoItemController>();
         }
         else
         {
