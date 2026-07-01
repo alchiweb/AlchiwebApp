@@ -23,7 +23,7 @@
         {
             "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Components\\Pages\\Identity\\ResetPasswordPage.razor.cs",
             "searchText": "IIdentityController identityController = default",
-            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1[AutoInject] ICryptoService cryptoService = default!;\n#endif",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1ICryptoService cryptoService = default!;\n#endif",
             "action": "add.before"
         },
         {
@@ -35,7 +35,7 @@
         {
             "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Components\\Pages\\Identity\\SignUp\\SignUpPage.razor.cs",
             "searchText": "IIdentityController identityController = default",
-            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1[AutoInject] ICryptoService cryptoService = default!;\n#endif",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1ICryptoService cryptoService = default!;\n#endif",
             "action": "add.before"
         },
         {
@@ -48,7 +48,7 @@
         {
             "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Infrastructure\\Services\\AuthManager.cs",
             "searchText": "IIdentityController identityController = default",
-            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1[AutoInject] private ICryptoService cryptoService = default!;\n#endif",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1ICryptoService cryptoService = default!;\n#endif",
             "action": "add.before"
         },
         {

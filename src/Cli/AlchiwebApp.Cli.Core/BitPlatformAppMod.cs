@@ -290,13 +290,14 @@ public partial class BitPlatformAppMod : BitPlatformApp
             Path.Combine(sourceServerCorePath, $"{extensionsCsFile1}.FromApi.cs"),
             Path.Combine(sourceServerCorePath, $"{extensionsCsFile2}.cs"),
             Path.Combine(sourceServerCorePath, $"{extensionsCsFile2}.FromApi.cs"),
-            Path.Combine(sourceServerCorePath, "Infrastructure", "Extensions", "WebApplicationBuilderExtensions.cs"),
+            Path.Combine(sourceServerCorePath, "Infrastructure", "Extensions", "WebApplicationBuilderExtensions.cs")
             ];
 
         await ReplacePartialClassAsync(arrayExtensionsFiles, true, "static");
         arrayExtensionsFiles = [
             Path.Combine(sourceCorePath, "Infrastructure", "Services", $"AppFeatures.cs"),
-            Path.Combine(sourceCorePath, "Infrastructure", "Services", $"AppRoles.cs")
+            Path.Combine(sourceCorePath, "Infrastructure", "Services", $"AppRoles.cs"),
+            Path.Combine(sourceCorePath, "Infrastructure", "Services", $"AuthPolicies.cs")
             ];
         await ReplacePartialClassAsync(arrayExtensionsFiles);
 

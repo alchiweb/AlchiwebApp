@@ -68,7 +68,15 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
                 ));
             itemGroupToAdd.Add(projectReferenceToAdd);
         }
-        
+        itemGroupToAdd = AddItemGroup(sourceXDoc);
+        if (itemGroupToAdd != null)
+        {
+            var usingToAdd = new XElement("Using");
+            usingToAdd.SetAttributeValue("Include", $"{ProjectName}.Core.Features.Security");
+            itemGroupToAdd.Add(usingToAdd);
+        }
+
+
         sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
         #endregion
 
@@ -120,6 +128,28 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
             usingToAdd = new XElement("Using");
             usingToAdd.SetAttributeValue("Include", "AlchiwebApp.PagingFiltering.Paging");
             itemGroupToAdd.Add(usingToAdd);
+            usingToAdd = new XElement("Using");
+            usingToAdd.SetAttributeValue("Include", $"{ProjectName}.Core.Features.Security");
+            itemGroupToAdd.Add(usingToAdd);
+        }
+        sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
+        #endregion
+
+        #region Server.Core project CsProj file modification
+        sourceProject = $"{ProjectName}.Server.Core";
+        sourceResourcesProjectFile = Path.Combine(
+            BitPlatformProjectFolder, "src", "Server", $"{sourceProject}", $"{sourceProject}.csproj"
+            );
+        sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
+
+        itemGroupToAdd = AddItemGroup(sourceXDoc);
+        if (itemGroupToAdd != null)
+        {
+            var projectReferenceToAdd = new XElement("ProjectReference");
+            projectReferenceToAdd.SetAttributeValue("Include", Path.Combine(
+                "..", "..", "..", "AlchiwebApp", "src", "AlchiwebApp.Server.Core", "AlchiwebApp.Server.Core.csproj"
+                ));
+            itemGroupToAdd.Add(projectReferenceToAdd);
         }
         sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
         #endregion
