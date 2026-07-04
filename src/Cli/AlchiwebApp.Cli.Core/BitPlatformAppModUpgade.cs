@@ -237,25 +237,39 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
             Errors.Add("Solution file cannot be read.");
             return;
         }
+
         XElement folderToAdd = new("Folder");
-        folderToAdd.SetAttributeValue("Name", "/AlchiwebApp/");
+        folderToAdd.SetAttributeValue("Name", "/AlchiwebApp/Cli/");
         solutionElement.AddFirst(folderToAdd);
 
         XElement projectToAdd = new("Project");
-        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/AlchiwebApp.Core/AlchiwebApp.Core.csproj");
-        folderToAdd.AddFirst(projectToAdd);
+        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/Cli/AlchiwebApp.Cli.Core/AlchiwebApp.Cli.Core.csproj");
+        folderToAdd.Add(projectToAdd);
         projectToAdd = new("Project");
-        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/AlchiwebApp.PagingFiltering/AlchiwebApp.PagingFiltering.csproj");
-        folderToAdd.AddFirst(projectToAdd);
-        projectToAdd = new("Project");
-        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/Ardalis.Specification.EntityFrameworkCore/Ardalis.Specification.EntityFrameworkCore.csproj");
-        folderToAdd.AddFirst(projectToAdd);
+        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/Cli/AlchiwebApp/AlchiwebApp.csproj");
+        folderToAdd.Add(projectToAdd);
+
+
+        folderToAdd = new("Folder");
+        folderToAdd.SetAttributeValue("Name", "/AlchiwebApp/");
+        solutionElement.AddFirst(folderToAdd);
+
         projectToAdd = new("Project");
         projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/AlchiwebApp.Client.Core/AlchiwebApp.Client.Core.csproj");
-        folderToAdd.AddFirst(projectToAdd);
+        folderToAdd.Add(projectToAdd);
+        projectToAdd = new("Project");
+        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/AlchiwebApp.Core/AlchiwebApp.Core.csproj");
+        folderToAdd.Add(projectToAdd);
+        projectToAdd = new("Project");
+        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/AlchiwebApp.PagingFiltering/AlchiwebApp.PagingFiltering.csproj");
+        folderToAdd.Add(projectToAdd);
         projectToAdd = new("Project");
         projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/AlchiwebApp.Server.Core/AlchiwebApp.Server.Core.csproj");
-        folderToAdd.AddFirst(projectToAdd);
+        folderToAdd.Add(projectToAdd);
+        projectToAdd = new("Project");
+        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/Ardalis.Specification.EntityFrameworkCore/Ardalis.Specification.EntityFrameworkCore.csproj");
+        folderToAdd.Add(projectToAdd);
+
 
         sourceXDoc?.SaveXmlFile(solutionFile);
     }

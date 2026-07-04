@@ -192,6 +192,11 @@ public abstract partial class BitPlatformApp
             {
                 elementWithResourcesPath.Value = elementWithResourcesPath.Value.Replace(resourcesToGet, resourcesToAdd);
             }
+            elementWithResourcesPath = newItem.Element("StronglyTypedNamespace");
+            if (elementWithResourcesPath != null)
+            {
+                elementWithResourcesPath.Value = $"{sourceProject}.Resources";
+            }
             itemsToAdd.Add(newItem);
         }
         if (hasListItems)

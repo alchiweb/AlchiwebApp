@@ -147,6 +147,12 @@
             "searchText": "app.ConfigureMiddlewares();",
             "replaceText": "#if ALCHIWEBAPP\n$1app.ConfigureBusinessMiddlewares();\n#endif",
             "action": "add.after"
+        },
+        {
+            "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Components\\Layout\\MainLayout.razor.items.cs",
+            "searchText": "if (authUser.IsAuthenticated())",
+            "replaceText": "#if ALCHIWEBAPP\n$1await SetNavPanelItemsBusiness(authUser, navPanelItems);\n#endif",
+            "action": "add.before"
         }
     ]
 }
