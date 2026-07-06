@@ -241,7 +241,7 @@ public abstract partial class BitPlatformApp
         foreach (var file in sourceFiles)
         {
 //            System.IO.File.SetAttributes(file, FileAttributes.Normal);
-            var content = File.ReadAllText(file);
+            var content = File.ReadAllText(file).Replace("\r\n","\n");
             File.WriteAllText(file, content, utf8WithoutBOM);
         }
     }

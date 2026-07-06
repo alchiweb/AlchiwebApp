@@ -1,2 +1,46 @@
+* text=auto
 # Ensure shell scripts remain executable on Linux by enforcing LF line endings
 *.sh text eol=lf
+
+# Ensure shell scripts remain executable on Linux by enforcing CRLF line endings
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Denote all files that are truly binary and should not be modified.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+
+# All text files
+*.csproj text eol=lf
+*.razor text eol=lf
+*.html text eol=lf
+*.js text eol=lf
+*.cjs text eol=lf
+*.mjs text eol=lf
+*.ts text eol=lf
+*.scss text eol=lf
+*.less text eol=lf
+*.css text eol=lf
+*.cs text eol=lf
+*.resx text eol=lf
+*.json text eol=lf
+*.xml text eol=lf
+*.pubxml text eol=lf
+*.manifest text eol=lf
+*.webmanifest text eol=lf
+*.props text eol=lf
+*.targets text eol=lf
+*.config text eol=lf
+*.dic text eol=lf
+*.sln text eol=lf
+*.slnx text eol=lf
+*.slnf text eol=lf
+
+*.md text eol=lf
+*.txt text eol=lf
+LICENSE text eol=lf
+
+.* text eol=lf
