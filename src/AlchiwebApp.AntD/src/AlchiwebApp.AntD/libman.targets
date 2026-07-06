@@ -1,4 +1,4 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
 	<!-- Concatenate scripts on Build and creates the 'wwwroot/lib/editorjs-bundle.js' file -->
 	<Target Name="BuildCombinedJS" BeforeTargets="Build">
