@@ -241,8 +241,8 @@ public abstract partial class BitPlatformApp
         foreach (var file in sourceFiles)
         {
 //            System.IO.File.SetAttributes(file, FileAttributes.Normal);
-            var content = File.ReadAllLines(file);
-            File.WriteAllLines(file, content, utf8WithoutBOM);
+            var content = File.ReadAllText(file);
+            File.WriteAllText(file, content, utf8WithoutBOM);
         }
     }
     protected async Task<List<string>> CopyFilesRecursivelyAsync(string sourcePath, string targetPath, bool isTemplateDirectory, string? excludeFilesPattern = null, string? excludeDirectory = null)
