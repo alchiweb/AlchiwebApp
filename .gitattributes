@@ -7,6 +7,7 @@
 *.ps1 text eol=crlf
 
 # Denote all files that are truly binary and should not be modified.
+*.ico binary
 *.png binary
 *.jpg binary
 *.jpeg binary
@@ -38,7 +39,14 @@
 *.sln text eol=lf
 *.slnx text eol=lf
 *.slnf text eol=lf
-
+*.yml
+*.xaml
+*.svg
+*.plist
+*.xcprivacy
+*.appxmanifest
+*.crt
+*.key
 *.md text eol=lf
 *.txt text eol=lf
 LICENSE text eol=lf

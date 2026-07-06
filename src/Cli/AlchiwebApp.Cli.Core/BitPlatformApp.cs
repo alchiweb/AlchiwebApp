@@ -62,13 +62,13 @@ public abstract partial class BitPlatformApp
             switch(mod.Action)
             {
                 case ActionEnum.Modify:
-                    replaceText = $"#region [AlchiwebApp] Modified\n{mod.ReplaceText}\n#endregion";
+                    replaceText = $"$1#region [AlchiwebApp] Modified\n{mod.ReplaceText}\n$1#endregion";
                 break;
                 case ActionEnum.AddBefore:
-                    replaceText = $"#region [AlchiwebApp] Added\n{mod.ReplaceText}\n#endregion\n$0";
+                    replaceText = $"$1#region [AlchiwebApp] Added\n{mod.ReplaceText}\n$1#endregion\n$0";
                     break;
                 case ActionEnum.AddAfter:
-                    replaceText = $"$0\n#region [AlchiwebApp] Added\n{mod.ReplaceText}\n#endregion";
+                    replaceText = $"$0\n$1#region [AlchiwebApp] Added\n{mod.ReplaceText}\n$1#endregion";
                     break;
             }
             var searchText = Regex.Escape(mod.SearchText).Replace("\\\\s\\*", "\\s*");

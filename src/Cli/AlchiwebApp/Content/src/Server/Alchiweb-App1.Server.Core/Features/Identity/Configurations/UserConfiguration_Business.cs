@@ -11,6 +11,6 @@ public partial class UserConfiguration_Business : IEntityTypeConfiguration<User>
         builder.Navigation(u => u.Roles)
             .AutoInclude();
 #endif
-#endregion
+        #endregion
     }
 }
