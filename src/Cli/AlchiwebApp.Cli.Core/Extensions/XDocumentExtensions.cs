@@ -10,6 +10,8 @@ public static class XDocumentExtensions
             {
                 OmitXmlDeclaration = true,
                 Indent = true,
+                Encoding = new System.Text.UTF8Encoding(false),
+                NewLineChars = "\n"
             };
             using (XmlWriter xw = XmlWriter.Create(filename, xws))
                 doc.Save(xw);
