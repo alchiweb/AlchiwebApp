@@ -23,9 +23,6 @@ public partial class BitPlatformAppMod : BitPlatformApp
 
         bool hasSourceBitPlatformProject = !string.Equals(BitPlatformProjectFolder, SourceProjectFolder);
 
-        await ReEncodingFilesToUtf8WithoutBom(SourceProjectFolder, "*.cs");
-        await ReEncodingFilesToUtf8WithoutBom(SourceProjectFolder, "*.csproj");
-        return;
         await _searchService.ReplaceInFilesAsync("utf-8-bom", "utf-8-nobom", [new() { FilePath = Path.Combine(BitPlatformProjectFolder, ".editorconfig")}], true, true);
         await ReEncodingFilesToUtf8WithoutBom(BitPlatformProjectFolder, "*.cs");
         await ReEncodingFilesToUtf8WithoutBom(BitPlatformProjectFolder, "*.csproj");
