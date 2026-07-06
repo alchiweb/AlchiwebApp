@@ -1,4 +1,4 @@
-﻿using Ardalis.Specification.EntityFrameworkCore.SharedKernel;
+using Ardalis.Specification.EntityFrameworkCore.SharedKernel;
 
 using Ardalis.Specification;
 using Microsoft.Extensions.Logging;

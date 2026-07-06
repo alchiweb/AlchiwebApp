@@ -1,4 +1,4 @@
-﻿
+
 namespace Alchiweb-App1.Server.Api;
 
 public static partial class Program

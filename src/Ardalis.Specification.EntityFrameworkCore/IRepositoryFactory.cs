@@ -1,4 +1,4 @@
-﻿namespace Ardalis.Specification.EntityFrameworkCore;
+namespace Ardalis.Specification.EntityFrameworkCore;
 
 /// <summary>
 /// Generates new instances of <typeparamref name="TRepository"/> to encapsulate the 'Unit of Work' pattern

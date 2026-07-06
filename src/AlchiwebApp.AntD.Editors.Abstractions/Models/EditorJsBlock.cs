@@ -1,4 +1,4 @@
-﻿using AlchiwebApp.AntD.Editors.Abstractions.JsonConverters;
+using AlchiwebApp.AntD.Editors.Abstractions.JsonConverters;
 using System.Text.Json.Serialization;
 
 namespace AlchiwebApp.AntD.Editors.Abstractions.Models

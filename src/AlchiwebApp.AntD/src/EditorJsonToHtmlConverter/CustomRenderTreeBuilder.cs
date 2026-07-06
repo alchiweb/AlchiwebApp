@@ -1,4 +1,4 @@
-﻿namespace EditorJsonToHtmlConverter;
+namespace EditorJsonToHtmlConverter;
 
 public class CustomRenderTreeBuilder
 {

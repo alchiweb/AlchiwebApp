@@ -1,4 +1,4 @@
-﻿namespace EditorJsonToHtmlConverter.Models;
+namespace EditorJsonToHtmlConverter.Models;
 
 public class SupportedRenderersConverter : JsonConverter<SupportedRenderers>
 {

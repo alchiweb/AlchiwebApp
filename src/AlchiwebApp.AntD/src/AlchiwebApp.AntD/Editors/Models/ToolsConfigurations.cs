@@ -1,4 +1,4 @@
-﻿using AlchiwebApp.AntD.Editors.Models.Options;
+using AlchiwebApp.AntD.Editors.Models.Options;
 
 namespace AlchiwebApp.AntD.Editors.Models
 {

@@ -1,4 +1,4 @@
-﻿namespace Microsoft.Extensions.Hosting;
+namespace Microsoft.Extensions.Hosting;
 
 public static partial class WebApplicationBuilderExtensions
 {

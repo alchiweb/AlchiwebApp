@@ -1,4 +1,4 @@
-﻿namespace EditorJsonToHtmlConverter.Models;
+namespace EditorJsonToHtmlConverter.Models;
 
 public interface IEditorJsEntity<T>
 {

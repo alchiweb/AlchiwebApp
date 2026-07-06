@@ -1,4 +1,4 @@
-﻿namespace Ardalis.Specification.EntityFrameworkCore.Custom;
+namespace Ardalis.Specification.EntityFrameworkCore.Custom;
 
 public class DbContextManager<TContext> : IDbContextManager<TContext>, IDisposable, IAsyncDisposable
       where TContext : DbContext

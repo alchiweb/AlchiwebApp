@@ -1,4 +1,4 @@
-﻿using Mediator;
+using Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace Ardalis.Specification.EntityFrameworkCore.SharedKernel;

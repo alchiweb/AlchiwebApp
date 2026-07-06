@@ -1,4 +1,4 @@
-﻿namespace AlchiwebApp.Cli.Core.Models;
+namespace AlchiwebApp.Cli.Core.Models;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ActionEnum

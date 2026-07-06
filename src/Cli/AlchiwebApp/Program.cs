@@ -1,4 +1,4 @@
-﻿using System.CommandLine;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Reflection;
 using AlchiwebApp.Cli.Core;

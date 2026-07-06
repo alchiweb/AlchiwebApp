@@ -1,4 +1,4 @@
-﻿namespace AlchiwebApp.Cli.Core.Models;
+namespace AlchiwebApp.Cli.Core.Models;
 
 public class ModBitPlatformFileModel
 {

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using AlchiwebApp.PagingFiltering.Filtering;
 using AlchiwebApp.PagingFiltering.Paging;
 

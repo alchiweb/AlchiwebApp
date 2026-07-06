@@ -1,4 +1,4 @@
-﻿namespace EditorJsonToHtmlConverter;
+namespace EditorJsonToHtmlConverter;
 
 public static class Extensions
 {

@@ -1,4 +1,4 @@
-﻿namespace Ardalis.Specification.EntityFrameworkCore.Custom.Exceptions;
+namespace Ardalis.Specification.EntityFrameworkCore.Custom.Exceptions;
 
 public class RepositoryException : Exception
 {

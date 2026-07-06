@@ -1,4 +1,4 @@
-﻿namespace Alchiweb-App1.Core.Features.Security;
+namespace Alchiweb-App1.Core.Features.Security;
 
 public interface ICryptoService
 {

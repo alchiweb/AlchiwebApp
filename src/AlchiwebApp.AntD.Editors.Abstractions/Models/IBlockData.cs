@@ -1,4 +1,4 @@
-﻿namespace AlchiwebApp.AntD.Editors.Abstractions.Models
+namespace AlchiwebApp.AntD.Editors.Abstractions.Models
 {
     /// <summary>
     /// Interface for block data models.

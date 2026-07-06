@@ -1,4 +1,4 @@
-﻿namespace AlchiwebApp.AntD.Editors.Converters;
+namespace AlchiwebApp.AntD.Editors.Converters;
 
 /// <summary>
 /// Render tree builder context for EditorJs HTML rendering.

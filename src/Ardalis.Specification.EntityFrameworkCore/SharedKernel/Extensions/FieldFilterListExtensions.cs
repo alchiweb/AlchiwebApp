@@ -1,4 +1,4 @@
-﻿using Ardalis.Specification.EntityFrameworkCore.SharedKernel.Utils;
+using Ardalis.Specification.EntityFrameworkCore.SharedKernel.Utils;
 using System.Text.RegularExpressions;
 using Ardalis.Specification;
 using System.Linq.Expressions;

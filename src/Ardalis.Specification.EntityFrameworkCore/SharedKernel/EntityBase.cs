@@ -1,4 +1,4 @@
-﻿namespace Ardalis.Specification.EntityFrameworkCore.SharedKernel;
+namespace Ardalis.Specification.EntityFrameworkCore.SharedKernel;
 
 /*
 /// <summary>

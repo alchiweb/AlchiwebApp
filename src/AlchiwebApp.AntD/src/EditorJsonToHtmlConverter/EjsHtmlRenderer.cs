@@ -1,4 +1,4 @@
-﻿namespace EditorJsonToHtmlConverter;
+namespace EditorJsonToHtmlConverter;
 
 /// <summary>
 /// Renders the EjsRenderFragment component as HTML using a provided HtmlRenderer.

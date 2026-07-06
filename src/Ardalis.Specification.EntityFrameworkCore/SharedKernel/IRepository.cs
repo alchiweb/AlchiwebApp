@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using Ardalis.Specification;
 
 namespace Ardalis.Specification.EntityFrameworkCore.SharedKernel;

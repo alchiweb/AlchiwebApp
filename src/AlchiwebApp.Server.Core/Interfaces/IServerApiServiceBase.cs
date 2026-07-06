@@ -1,4 +1,4 @@
-﻿using Ardalis.Specification.EntityFrameworkCore.SharedKernel;
+using Ardalis.Specification.EntityFrameworkCore.SharedKernel;
 using AlchiwebApp.Core.Interfaces;
 
 namespace AlchiwebApp.Server.Core.Interfaces;

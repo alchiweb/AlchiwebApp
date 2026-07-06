@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Alchiweb-App1.Client.Core;
 using AlchiwebApp.Client.Core.AntD;
 using Alchiweb-App1.Client.Core.Infrastructure.Services.HttpMessageHandlers;

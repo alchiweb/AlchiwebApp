@@ -1,4 +1,4 @@
-﻿using AlchiwebApp.PagingFiltering.Filtering;
+using AlchiwebApp.PagingFiltering.Filtering;
 
 namespace AlchiwebApp.PagingFiltering.Paging;
 

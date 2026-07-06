@@ -1,4 +1,4 @@
-﻿global using AlchiwebApp.AntD.Editors.Converters.Models;
+global using AlchiwebApp.AntD.Editors.Converters.Models;
 global using AlchiwebApp.AntD.Editors.Converters.Renderers;
 global using Microsoft.AspNetCore.Components;
 global using Microsoft.Extensions.DependencyInjection;

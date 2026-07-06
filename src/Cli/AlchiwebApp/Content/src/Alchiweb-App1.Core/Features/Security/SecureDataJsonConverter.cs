@@ -1,4 +1,4 @@
-﻿using AlchiwebApp.Core.Interfaces;
+using AlchiwebApp.Core.Interfaces;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;

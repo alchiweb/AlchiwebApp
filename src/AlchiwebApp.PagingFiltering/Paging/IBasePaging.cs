@@ -1,4 +1,4 @@
-﻿namespace AlchiwebApp.PagingFiltering.Paging;
+namespace AlchiwebApp.PagingFiltering.Paging;
 
 public interface IBasePaging
 {

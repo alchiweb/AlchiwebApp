@@ -1,4 +1,4 @@
-﻿using AlchiwebApp.Core.Interfaces;
+using AlchiwebApp.Core.Interfaces;
 using System.Text.Json.Serialization;
 
 namespace Alchiweb-App1.Core.Features.PdfFile;

@@ -1,4 +1,4 @@
-﻿namespace AlchiwebApp.PagingFiltering.Filtering.Enums;
+namespace AlchiwebApp.PagingFiltering.Filtering.Enums;
 
 public enum GuidFieldFilterEnum
 {

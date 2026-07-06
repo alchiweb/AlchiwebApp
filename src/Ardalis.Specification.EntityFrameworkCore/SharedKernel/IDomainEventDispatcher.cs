@@ -1,4 +1,4 @@
-﻿namespace Ardalis.Specification.EntityFrameworkCore.SharedKernel;
+namespace Ardalis.Specification.EntityFrameworkCore.SharedKernel;
 
 /// <summary>
 /// A simple interface for sending domain events. Can use Mediator or any other implementation.

@@ -1,4 +1,4 @@
-﻿using AntDesign;
+using AntDesign;
 using AntDesign.Filters;
 
 namespace AlchiwebApp.Client.Core.AntD;

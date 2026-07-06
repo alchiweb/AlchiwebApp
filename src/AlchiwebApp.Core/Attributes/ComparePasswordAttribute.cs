@@ -1,4 +1,4 @@
-﻿using AlchiwebApp.Core.Interfaces;
+using AlchiwebApp.Core.Interfaces;
 
 namespace System.ComponentModel.DataAnnotations;
 

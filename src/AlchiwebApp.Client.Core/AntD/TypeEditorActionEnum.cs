@@ -1,4 +1,4 @@
-﻿namespace AlchiwebApp.Client.Core.AntD;
+namespace AlchiwebApp.Client.Core.AntD;
 
 public enum TypeEditorActionEnum
 {

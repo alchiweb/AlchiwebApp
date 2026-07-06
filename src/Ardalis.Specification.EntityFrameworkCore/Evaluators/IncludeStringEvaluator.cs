@@ -1,4 +1,4 @@
-﻿namespace Ardalis.Specification.EntityFrameworkCore;
+namespace Ardalis.Specification.EntityFrameworkCore;
 
 public sealed class IncludeStringEvaluator : IEvaluator
 {

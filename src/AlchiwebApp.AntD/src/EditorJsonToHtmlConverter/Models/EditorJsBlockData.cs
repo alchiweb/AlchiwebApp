@@ -1,4 +1,4 @@
-﻿namespace EditorJsonToHtmlConverter.Models;
+namespace EditorJsonToHtmlConverter.Models;
 
 /// <summary>
 /// Represents the data associated with an Editor.js block.

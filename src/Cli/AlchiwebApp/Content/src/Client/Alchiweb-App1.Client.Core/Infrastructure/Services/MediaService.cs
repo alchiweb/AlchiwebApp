@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 
 namespace Alchiweb-App1.Client.Core.Infrastructure.Services;
 

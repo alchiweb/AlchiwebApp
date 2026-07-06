@@ -10,7 +10,7 @@ spelling_exclusion_path = vs-spell.dic
 # Code files
 [*.{cs,csx,vb,vbx}]
 insert_final_newline = true
-charset = utf-8-bom
+charset = utf-8-nobom
 ###############################
 # .NET Coding Conventions     #
 ###############################

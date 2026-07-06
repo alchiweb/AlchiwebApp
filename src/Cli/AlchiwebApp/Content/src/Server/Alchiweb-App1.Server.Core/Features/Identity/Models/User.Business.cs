@@ -1,4 +1,4 @@
-﻿#if ALCHIWEBAPP
+#if ALCHIWEBAPP
 using Ardalis.Specification.EntityFrameworkCore.SharedKernel;
 #endif
 

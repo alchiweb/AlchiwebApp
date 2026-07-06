@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using AlchiwebApp.PagingFiltering.Paging;
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;

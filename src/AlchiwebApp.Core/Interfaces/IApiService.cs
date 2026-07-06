@@ -1,4 +1,4 @@
-﻿namespace AlchiwebApp.Core.Interfaces;
+namespace AlchiwebApp.Core.Interfaces;
 
 public interface IApiService<TEntityDto, TId>
     where TId : struct, IEquatable<TId>

@@ -1,4 +1,4 @@
-﻿namespace Alchiweb-App1.Client.Core;
+namespace Alchiweb-App1.Client.Core;
 
 /// <summary>
 /// JsonSerializerContext for the client layer, statically compiled for better performance (AOT compatible).

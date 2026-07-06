@@ -1,4 +1,4 @@
-﻿internal static class EjsRenderFragmentTestsHelpers
+internal static class EjsRenderFragmentTestsHelpers
 {
 
     public static readonly string EditorJsonEmpty = """

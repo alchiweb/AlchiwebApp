@@ -1,4 +1,4 @@
-﻿using AlchiwebApp.Server.Core.Converters;
+using AlchiwebApp.Server.Core.Converters;
 
 namespace Microsoft.EntityFrameworkCore;
 

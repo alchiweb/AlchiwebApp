@@ -1,4 +1,4 @@
-﻿using AlchiwebApp.AntD.Editors.Models;
+using AlchiwebApp.AntD.Editors.Models;
 using AlchiwebApp.AntD.Utils;
 using System.Text.Json.Serialization;
 

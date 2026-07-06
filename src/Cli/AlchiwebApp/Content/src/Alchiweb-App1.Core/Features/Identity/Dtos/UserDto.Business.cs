@@ -1,4 +1,4 @@
-﻿namespace Alchiweb-App1.Core.Features.Identity.Dtos;
+namespace Alchiweb-App1.Core.Features.Identity.Dtos;
 
 public partial class UserDto : IValidatableObject
 {

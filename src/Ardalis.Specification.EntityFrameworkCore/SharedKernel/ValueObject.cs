@@ -1,4 +1,4 @@
-﻿namespace Ardalis.Specification.EntityFrameworkCore.SharedKernel;
+namespace Ardalis.Specification.EntityFrameworkCore.SharedKernel;
 
 /// <summary>
 /// NOTE: Use `readonly record struct` for most cases in C# 10+

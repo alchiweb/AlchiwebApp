@@ -1,4 +1,4 @@
-﻿namespace AlchiwebApp.Core.Interfaces;
+namespace AlchiwebApp.Core.Interfaces;
 
 public interface IApiServiceDelete<TEntityDto, TId>
     where TEntityDto : IEntityDto<TId>

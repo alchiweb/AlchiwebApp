@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using AlchiwebApp.Core.Interfaces;
 
 namespace AlchiwebApp.Server.Core.Interfaces;

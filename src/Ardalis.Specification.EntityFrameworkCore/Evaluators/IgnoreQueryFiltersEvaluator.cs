@@ -1,4 +1,4 @@
-﻿namespace Ardalis.Specification.EntityFrameworkCore;
+namespace Ardalis.Specification.EntityFrameworkCore;
 
 /// <summary>
 /// This evaluator applies EF Core's IgnoreQueryFilters feature to a given query

@@ -1,4 +1,4 @@
-﻿namespace EditorJsonToHtmlConverter.Renderers;
+namespace EditorJsonToHtmlConverter.Renderers;
 
 public sealed class RenderText : IBlockRenderer
 {

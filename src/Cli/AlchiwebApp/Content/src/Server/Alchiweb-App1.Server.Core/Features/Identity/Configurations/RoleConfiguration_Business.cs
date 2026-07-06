@@ -1,4 +1,4 @@
-﻿using Alchiweb-App1.Core.Infrastructure.Services;
+using Alchiweb-App1.Core.Infrastructure.Services;
 using Alchiweb-App1.Server.Core.Features.Identity.Models;
 
 namespace Alchiweb-App1.Server.Core.Features.Identity.Configurations;

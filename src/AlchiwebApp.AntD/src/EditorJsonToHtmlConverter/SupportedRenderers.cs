@@ -1,4 +1,4 @@
-﻿namespace EditorJsonToHtmlConverter;
+namespace EditorJsonToHtmlConverter;
 
 /// <summary>
 /// List of supported block types from Editor JS

@@ -1,4 +1,4 @@
-﻿namespace Alchiweb-App1.Client.Core.Infrastructure.Services.Contracts;
+namespace Alchiweb-App1.Client.Core.Infrastructure.Services.Contracts;
 
 public interface IMediaService
 {

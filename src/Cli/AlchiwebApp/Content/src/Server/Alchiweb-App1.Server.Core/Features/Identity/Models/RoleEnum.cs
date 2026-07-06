@@ -1,4 +1,4 @@
-﻿namespace Alchiweb-App1.Server.Core.Features.Identity.Models;
+namespace Alchiweb-App1.Server.Core.Features.Identity.Models;
 
 #if ALCHIWEBAPP_USER_ROLE
 [Flags]

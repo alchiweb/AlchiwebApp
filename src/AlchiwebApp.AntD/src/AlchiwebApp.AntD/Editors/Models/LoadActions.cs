@@ -1,4 +1,4 @@
-﻿namespace AlchiwebApp.AntD.Editors.Models
+namespace AlchiwebApp.AntD.Editors.Models
 {
     /// <summary>
     /// Load actions configuration.

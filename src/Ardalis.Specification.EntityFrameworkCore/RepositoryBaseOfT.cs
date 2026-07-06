@@ -1,4 +1,4 @@
-﻿namespace Ardalis.Specification.EntityFrameworkCore;
+namespace Ardalis.Specification.EntityFrameworkCore;
 
 /// <inheritdoc/>
 public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : class

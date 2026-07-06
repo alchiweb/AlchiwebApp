@@ -1,4 +1,4 @@
-﻿using Ardalis.Specification;
+using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore.SharedKernel.Utils;
 using AlchiwebApp.PagingFiltering.Filtering;
 

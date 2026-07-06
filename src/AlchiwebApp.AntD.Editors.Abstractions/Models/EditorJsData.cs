@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Nodes;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace AlchiwebApp.AntD.Editors.Abstractions.Models

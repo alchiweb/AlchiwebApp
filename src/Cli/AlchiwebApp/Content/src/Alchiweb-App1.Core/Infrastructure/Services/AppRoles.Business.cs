@@ -1,4 +1,4 @@
-﻿namespace Alchiweb-App1.Core.Infrastructure.Services;
+namespace Alchiweb-App1.Core.Infrastructure.Services;
 
 public partial class AppRoles
 {

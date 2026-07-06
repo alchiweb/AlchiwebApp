@@ -1,4 +1,4 @@
-﻿using AlchiwebApp.Core.Interfaces;
+using AlchiwebApp.Core.Interfaces;
 using System.Diagnostics.CodeAnalysis;
 
 namespace AlchiwebApp.Server.Core.Interfaces;

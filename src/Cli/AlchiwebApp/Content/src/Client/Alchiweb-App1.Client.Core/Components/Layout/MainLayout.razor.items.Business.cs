@@ -1,4 +1,4 @@
-﻿namespace Alchiweb-App1.Client.Core.Components.Layout;
+namespace Alchiweb-App1.Client.Core.Components.Layout;
 
 public partial class MainLayout
 {

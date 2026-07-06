@@ -1,4 +1,4 @@
-﻿using AntDesign;
+using AntDesign;
 
 namespace AlchiwebApp.Client.Core.AntD;
 public class FormItemLayout

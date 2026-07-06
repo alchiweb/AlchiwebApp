@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http.HttpResults;
 using AlchiwebApp.Core;
 using AlchiwebApp.Core.Interfaces;
 using AlchiwebApp.PagingFiltering.Paging;

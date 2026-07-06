@@ -1,4 +1,4 @@
-﻿using AlchiwebApp.AntD.Editors.Abstractions.Models;
+using AlchiwebApp.AntD.Editors.Abstractions.Models;
 
 namespace AlchiwebApp.AntD.Editors.Converters.Models;
 

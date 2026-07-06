@@ -1,4 +1,4 @@
-﻿global using EditorJsonToHtmlConverter.Models;
+global using EditorJsonToHtmlConverter.Models;
 global using EditorJsonToHtmlConverter.Renderers;
 global using Microsoft.AspNetCore.Components;
 global using Microsoft.AspNetCore.Components.Rendering;

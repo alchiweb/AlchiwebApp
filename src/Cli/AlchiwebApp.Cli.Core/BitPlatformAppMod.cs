@@ -1,4 +1,4 @@
-﻿using System.Xml.Linq;
+using System.Xml.Linq;
 using AlchiwebApp.Cli.Core.Services;
 
 namespace AlchiwebApp.Cli.Core;
@@ -22,6 +22,10 @@ public partial class BitPlatformAppMod : BitPlatformApp
         string sourceUserSecrets = "";
 
         bool hasSourceBitPlatformProject = !string.Equals(BitPlatformProjectFolder, SourceProjectFolder);
+
+        await _searchService.ReplaceInFilesAsync("utf-8-bom", "utf-8-nobom", [new() { FilePath = Path.Combine(BitPlatformProjectFolder, ".editorconfig")}], true, true);
+        await ReEncodingFilesToUtf8WithoutBom(BitPlatformProjectFolder, "*.cs");
+        await ReEncodingFilesToUtf8WithoutBom(BitPlatformProjectFolder, "*.csproj");
 
         if (hasSourceBitPlatformProject)
         {

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using AlchiwebApp.Cli.Core.Models;
@@ -233,7 +233,18 @@ public abstract partial class BitPlatformApp
             return null;
         return sourceFolder;
     }
+    protected async Task ReEncodingFilesToUtf8WithoutBom(string sourcePath, string extensions)
+    {
+        var sourceFiles = Directory.GetFiles(sourcePath, extensions, SearchOption.AllDirectories);
+        var utf8WithoutBOM = new System.Text.UTF8Encoding(false);
 
+        foreach (var file in sourceFiles)
+        {
+//            System.IO.File.SetAttributes(file, FileAttributes.Normal);
+            var content = File.ReadAllLines(file);
+            File.WriteAllLines(file, content, utf8WithoutBOM);
+        }
+    }
     protected async Task<List<string>> CopyFilesRecursivelyAsync(string sourcePath, string targetPath, bool isTemplateDirectory, string? excludeFilesPattern = null, string? excludeDirectory = null)
     {
         var sourceDirectories = Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories)
