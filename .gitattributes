@@ -2,10 +2,6 @@
 # Ensure shell scripts remain executable on Linux by enforcing LF line endings
 *.sh text eol=lf
 
-# Ensure shell scripts remain executable on Linux by enforcing CRLF line endings
-*.bat text eol=crlf
-*.ps1 text eol=crlf
-
 # Denote all files that are truly binary and should not be modified.
 *.ico binary
 *.png binary
