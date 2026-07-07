@@ -35,14 +35,14 @@
 *.sln text eol=lf
 *.slnx text eol=lf
 *.slnf text eol=lf
-*.yml
-*.xaml
-*.svg
-*.plist
-*.xcprivacy
-*.appxmanifest
-*.crt
-*.key
+*.yml text eol=lf
+*.xaml text eol=lf
+*.svg text eol=lf
+*.plist text eol=lf
+*.xcprivacy text eol=lf
+*.appxmanifest text eol=lf
+*.crt text eol=lf
+*.key text eol=lf
 *.md text eol=lf
 *.txt text eol=lf
 LICENSE text eol=lf

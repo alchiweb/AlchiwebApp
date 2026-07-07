@@ -23,6 +23,17 @@ public partial class BitPlatformAppMod : BitPlatformApp
 
         bool hasSourceBitPlatformProject = !string.Equals(BitPlatformProjectFolder, SourceProjectFolder);
 
+        // Clean projects
+        try
+        {
+            var directoriesToDelete = Directory.GetDirectories(BitPlatformProjectFolder, "obj", SearchOption.AllDirectories).Concat(Directory.GetDirectories(BitPlatformProjectFolder, "bin", SearchOption.AllDirectories));
+            foreach (var dir in directoriesToDelete)
+            {
+                Directory.Delete(dir, true);
+            }
+        }
+        catch (Exception) { }
+
         await _searchService.ReplaceInFilesAsync("utf-8-bom", "utf-8-nobom", [new() { FilePath = Path.Combine(BitPlatformProjectFolder, ".editorconfig")}], true, true);
         await ReEncodingFilesToUtf8WithoutBom(BitPlatformProjectFolder, "*.cs");
         await ReEncodingFilesToUtf8WithoutBom(BitPlatformProjectFolder, "*.resx");
@@ -92,7 +103,7 @@ public partial class BitPlatformAppMod : BitPlatformApp
             return;
         }
 
-        await ReplaceTextAsync($@"{ProjectName}.Server.Shared", $@"{ProjectName}.Server.Core", matchCase, expectedReplacements: 102);
+        await ReplaceTextAsync($@"{ProjectName}.Server.Shared", $@"{ProjectName}.Server.Core", matchCase, expectedReplacements: 23);
     }
     private async Task RenameSharedProjectAsync(bool matchCase = false)
     {
@@ -106,11 +117,11 @@ public partial class BitPlatformAppMod : BitPlatformApp
             return;
         }
 
-        await ReplaceTextAsync($@"Shared/{ProjectName}.Shared", $@"{ProjectName}.Core/{ProjectName}.Core", matchCase, expectedReplacements: 20);
+        await ReplaceTextAsync($@"Shared/{ProjectName}.Shared", $@"{ProjectName}.Core/{ProjectName}.Core", matchCase, expectedReplacements: 4);
         await ReplaceTextAsync($@"Shared\{ProjectName}.Shared", $@"{ProjectName}.Core\{ProjectName}.Core", matchCase, expectedReplacements: 3);
-        await ReplaceTextAsync($@"Shared\\{ProjectName}.Shared", $@"{ProjectName}.Core\\{ProjectName}.Core", matchCase, expectedReplacements: 56);
+        await ReplaceTextAsync($@"Shared\\{ProjectName}.Shared", $@"{ProjectName}.Core\\{ProjectName}.Core", matchCase, expectedReplacements: 1);
 
-        await ReplaceTextAsync($@"{ProjectName}.Shared", $@"{ProjectName}.Core", matchCase, expectedReplacements: 339);
+        await ReplaceTextAsync($@"{ProjectName}.Shared", $@"{ProjectName}.Core", matchCase, expectedReplacements: 283);
 
         await ReplaceTextAsync($@"Shared/", $@"{ProjectName}.Core/", matchCase, expectedReplacements: 54);
         await ReplaceTextAsync($@"Shared`", $@"{ProjectName}.Core`", matchCase, expectedReplacements: 3);
@@ -343,13 +354,6 @@ public partial class BitPlatformAppMod : BitPlatformApp
             [sourceServerApiPath, sourceServerWebPath],
             ["Program*.*"]);
 
-        //// Clean Test project
-        //try
-        //{
-        //    Directory.Delete(Path.Combine(sourceTestsPath, "bin"), true);
-        //    Directory.Delete(Path.Combine(sourceTestsPath, "obj"), true);
-        //}
-        //catch (Exception) { }
     }
 
 
