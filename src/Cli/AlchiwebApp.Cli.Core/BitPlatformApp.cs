@@ -126,7 +126,8 @@ public abstract partial class BitPlatformApp
         //    //    }
         //    //)
         //    .ToList();
-
+        updateValue = updateValue.Replace('/', '\\');
+        
         var items = sourceXDoc.Descendants("EmbeddedResource")
             .Where(e =>
             {
