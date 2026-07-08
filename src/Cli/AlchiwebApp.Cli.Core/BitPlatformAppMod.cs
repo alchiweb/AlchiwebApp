@@ -476,9 +476,6 @@ public partial class BitPlatformAppMod : BitPlatformApp
                     firstUsingItemGroup = new XElement("ItemGroup");
                     firstPackageReferenceItemGroup.AddBeforeSelf(firstUsingItemGroup);
                 }
-
-
-
                 var newElement = new XElement("Using");
                 newElement.SetAttributeValue("Include", $"Microsoft.Extensions.Options");
                 firstUsingItemGroup.Add(newElement);
@@ -688,7 +685,10 @@ public partial class BitPlatformAppMod : BitPlatformApp
                 Errors.Add($@"ItemGroup section (for Email resources) not found in target csproj file (for moving resources files).");
                 return;
             }
-
+            targetResourcesDirectory = targetResourcesDirectory.Replace('/', '\\');
+            sourceResourcesDirectory = sourceResourcesDirectory.Replace('/', '\\');
+            var targetResourcesDirectoryWithDot = targetResourcesDirectory.Replace('\\', '.');
+            
             foreach (var item in sourceItems)
             {
                 var attributeWithResourcesPath = item.Attribute("Update");
@@ -710,7 +710,7 @@ public partial class BitPlatformAppMod : BitPlatformApp
                 var elementWithNamespace = item.Element("StronglyTypedNamespace");
                 if (elementWithNamespace != null)
                 {
-                    elementWithNamespace.Value = $"{targetProject}.{targetResourcesDirectory.Replace(Path.DirectorySeparatorChar, '.')}";
+                    elementWithNamespace.Value = $"{targetProject}.{targetResourcesDirectoryWithDot}";
                 }
             }
 

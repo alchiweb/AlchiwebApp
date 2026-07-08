@@ -51,7 +51,7 @@ public abstract partial class BitPlatformApp
                 )
                 continue;
 
-            mod.Filename = mod.Filename.Replace("Alchiweb-App1", ProjectName);
+            mod.Filename = mod.Filename.Replace("Alchiweb-App1", ProjectName).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
             mod.SearchText = mod.SearchText.Replace("Alchiweb-App1", ProjectName);
             mod.ReplaceText = mod.ReplaceText.Replace("Alchiweb-App1", ProjectName);
             string fullPathFile = Path.Combine(BitPlatformProjectFolder, mod.Filename);
