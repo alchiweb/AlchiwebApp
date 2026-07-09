@@ -1,0 +1,3 @@
+[submodule "AlchiwebApp"]
+	path = AlchiwebApp
+	url = https://github.com/alchiweb/AlchiwebApp.git
