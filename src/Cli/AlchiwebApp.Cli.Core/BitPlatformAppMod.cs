@@ -103,7 +103,7 @@ public partial class BitPlatformAppMod : BitPlatformApp
             return;
         }
 
-        await ReplaceTextAsync($@"{ProjectName}.Server.Shared", $@"{ProjectName}.Server.Core", matchCase, expectedReplacements: 23);
+        await ReplaceTextAsync($@"{ProjectName}.Server.Shared", $@"{ProjectName}.Server.Core", matchCase, expectedReplacements: 26);
     }
     private async Task RenameSharedProjectAsync(bool matchCase = false)
     {
@@ -121,9 +121,9 @@ public partial class BitPlatformAppMod : BitPlatformApp
         await ReplaceTextAsync($@"Shared\{ProjectName}.Shared", $@"{ProjectName}.Core\{ProjectName}.Core", matchCase, expectedReplacements: 3);
         await ReplaceTextAsync($@"Shared\\{ProjectName}.Shared", $@"{ProjectName}.Core\\{ProjectName}.Core", matchCase, expectedReplacements: 1);
 
-        await ReplaceTextAsync($@"{ProjectName}.Shared", $@"{ProjectName}.Core", matchCase, expectedReplacements: 283);
+        await ReplaceTextAsync($@"{ProjectName}.Shared", $@"{ProjectName}.Core", matchCase, expectedReplacements: 320);
 
-        await ReplaceTextAsync($@"Shared/", $@"{ProjectName}.Core/", matchCase, expectedReplacements: 54);
+        await ReplaceTextAsync($@"Shared/", $@"{ProjectName}.Core/", matchCase, expectedReplacements: 55);
         await ReplaceTextAsync($@"Shared`", $@"{ProjectName}.Core`", matchCase, expectedReplacements: 3);
         await ReplaceTextAsync($@"Shared""", $@"{ProjectName}.Core""", matchCase, expectedReplacements: 1);
 
@@ -134,13 +134,13 @@ public partial class BitPlatformAppMod : BitPlatformApp
             "ISharedServiceCollectionExtensions", "ICoreServiceCollectionExtensions", matchCase, 7);
         await RenameCSharpCodeFile(
             Path.Combine("src", "Server", $"{ProjectName}.Server.Core"),
-            "ServerSharedSettings", "ServerCoreSettings", matchCase, 7);
+            "ServerSharedSettings", "ServerCoreSettings", matchCase, 8);
         await RenameCSharpCodeFile(
             Path.Combine("src", $"{ProjectName}.Core"),
             "SharedSettings", "CoreSettings", matchCase, 6);
         await RenameCSharpCodeFile(
             Path.Combine("src", $"{ProjectName}.Core", "Infrastructure", "Services"),
-            "SharedExceptionHandler", "CoreExceptionHandler", matchCase, 9);
+            "SharedExceptionHandler", "CoreExceptionHandler", matchCase, 15);
         await ReplaceTextAsync("AddSharedConfigurations", "AddCoreConfigurations", matchCase, matchWholeWord: true, expectedReplacements: 2);
         await ReplaceTextAsync("AddSharedProjectServices", "AddCoreProjectServices", matchCase, matchWholeWord: true, expectedReplacements: 5);
         await ReplaceTextAsync("AddServerSharedServices", "AddServerCoreServices", matchCase, matchWholeWord: true, expectedReplacements: 3);
@@ -273,14 +273,14 @@ public partial class BitPlatformAppMod : BitPlatformApp
             );
 
         // Move some extensions files (in /Instrastructure/Extension) from Core project to Server.Core project
-        MoveOrRenameFile(
-            Path.Combine(sourceCorePath, "Infrastructure", "Extensions", "ActivitySourceExtensions.cs"),
-            Path.Combine(sourceServerCorePath, "Infrastructure", "Extensions", "ActivitySourceExtensions.cs")
-            );
-        MoveOrRenameFile(
-            Path.Combine(sourceCorePath, "Infrastructure", "Extensions", "MeterExtensions.cs"),
-            Path.Combine(sourceServerCorePath, "Infrastructure", "Extensions", "MeterExtensions.cs")
-        );
+        //MoveOrRenameFile(
+        //    Path.Combine(sourceCorePath, "Infrastructure", "Extensions", "ActivitySourceExtensions.cs"),
+        //    Path.Combine(sourceServerCorePath, "Infrastructure", "Extensions", "ActivitySourceExtensions.cs")
+        //    );
+        //MoveOrRenameFile(
+        //    Path.Combine(sourceCorePath, "Infrastructure", "Extensions", "MeterExtensions.cs"),
+        //    Path.Combine(sourceServerCorePath, "Infrastructure", "Extensions", "MeterExtensions.cs")
+        //);
 
         // Rename some extensions files that are duplicated in Server.Api and Server.Core: *.cs -> *.FromApi.cs
         var extensionsCsFile1 = Path.Combine("Infrastructure", "Extensions", "HttpContextExtensions");
@@ -348,6 +348,9 @@ public partial class BitPlatformAppMod : BitPlatformApp
             [sourceServerApiPath, sourceServerWebPath],
             ["Program*.*"]);
         await ReplaceTextAsync(" Features.Identity.Models.", " Core.Features.Identity.Models.", true, false,
+            [sourceServerApiPath, sourceServerWebPath],
+            ["Program*.*"]);
+        await ReplaceTextAsync("<Features.Identity.Models.", "<Core.Features.Identity.Models.", true, false,
             [sourceServerApiPath, sourceServerWebPath],
             ["Program*.*"]);
         await ReplaceTextAsync(" Api.Features.Identity.Models.", " Core.Features.Identity.Models.", true, false,
@@ -563,7 +566,12 @@ public partial class BitPlatformAppMod : BitPlatformApp
                     newElement.SetAttributeValue("Include", $"{ProjectName}.Server.Core.Features.Todo");
                     firstUsingItemGroup.Add(newElement);
                 }
-
+                if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Tenants")))
+                {
+                    newElement = new XElement("Using");
+                    newElement.SetAttributeValue("Include", $"{ProjectName}.Server.Core.Features.Tenants");
+                    firstUsingItemGroup.Add(newElement);
+                }
                 //newElement = new XElement("PackageReference");
                 //newElement.SetAttributeValue("Include", $"Microsoft.EntityFrameworkCore");
                 //firstPackageReferenceItemGroup.Add(newElement);

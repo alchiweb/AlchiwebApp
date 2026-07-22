@@ -11,7 +11,7 @@ public class CustomVersionAction : SynchronousCommandLineAction
     {
         var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
 
-        Console.WriteLine($"Version: {assemblyVersion} / Tested with BitPlatform v10.4.4 / 10.4.5");
+        Console.WriteLine($"Version: {assemblyVersion} / Tested with BitPlatform v10.5.0");
 
         return 0;
     }

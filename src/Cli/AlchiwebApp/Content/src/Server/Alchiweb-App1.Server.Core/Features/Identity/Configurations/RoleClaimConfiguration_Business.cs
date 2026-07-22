@@ -7,6 +7,7 @@ public partial class RoleClaimConfiguration_Business : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<RoleClaim> builder)
     {
+#if ALCHIWEBAPP_USER_ROLE
         var id = 1000;
 
         // Assign non admin features to demo role
@@ -17,7 +18,7 @@ public partial class RoleClaimConfiguration_Business : IEntityTypeConfiguration<
             "3F921DF3-9177-4342-B0BC-543B865E371A",
         }.Select(s => Guid.Parse(s)))
         {
-            foreach (var feature in AppFeatures.GetAll()
+            foreach (var feature in AppFeatures.GetDemoFeatures()
                 .Where(f => f.Group != typeof(AppFeatures.System)
                          && f.Group != typeof(AppFeatures.Management)))
             {
@@ -30,5 +31,6 @@ public partial class RoleClaimConfiguration_Business : IEntityTypeConfiguration<
                 });
             }
         }
+#endif
     }
 }
