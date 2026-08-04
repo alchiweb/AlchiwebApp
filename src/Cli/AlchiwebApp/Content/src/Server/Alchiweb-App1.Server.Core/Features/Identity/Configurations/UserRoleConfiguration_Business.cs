@@ -7,10 +7,8 @@ public partial class UserRoleConfiguration_Business : IEntityTypeConfiguration<U
     public void Configure(EntityTypeBuilder<UserRole> builder)
     {
 #if ALCHIWEBAPP_USER_ROLE
-        #region [AlchiwebApp] Added
         builder.Navigation(ur => ur.Role)
             .AutoInclude();
-        #endregion
 #endif
     }
 }
