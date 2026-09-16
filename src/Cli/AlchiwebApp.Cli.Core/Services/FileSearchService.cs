@@ -261,7 +261,7 @@ public class FileSearchService
     }
     
     // Placeholder for replace functionality that can be implemented later
-    public async Task<int> ReplaceInFilesAsync(
+    public async Task<List<MatchCollection>> ReplaceInFilesAsync(
         string searchText,
         string replaceText,
         List<SearchResult> matchesToReplace,
@@ -272,6 +272,7 @@ public class FileSearchService
         Action<string, int, int>? progressCallback = null,
         CancellationToken cancellationToken = default)
     {
+        List<MatchCollection> replacedMatches = new List<MatchCollection>();
         int replacedCount = 0;
         
         // Group by file path to process each file once
@@ -299,7 +300,9 @@ public class FileSearchService
                             var regexOptions = matchCase ? RegexOptions.None : RegexOptions.IgnoreCase;
                             var regex = new Regex(searchText, regexOptions);
                             content = regex.Replace(content, replaceText);
-                            replacedCount += regex.Matches(content).Count;
+                            var matches = regex.Matches(content);
+                            replacedMatches.Add(matches);
+                            replacedCount += matches.Count;
                         }
                         catch
                         {
@@ -328,6 +331,6 @@ public class FileSearchService
             }
         }, cancellationToken);
         
-        return replacedCount;
+        return replacedMatches;
     }
 }

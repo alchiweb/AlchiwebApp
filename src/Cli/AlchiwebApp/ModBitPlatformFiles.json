@@ -14,7 +14,7 @@
         },
         {
             "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\Gender.cs",
-            "searchText": "Other,\\s*Male,\\s*Female,",
+            "searchText": "Other,¦\\s¦*Male,¦\\s¦*Female,",
             "replaceText": "#if ALCHIWEBAPP\n$1[Display(Name = \"Gender_Other\", ResourceType = typeof(I18n))]\n$1Other,\n$1[Display(Name = \"Gender_Male\", ResourceType = typeof(I18n))]\n$1Male,\n$1[Display(Name = \"Gender_Female\", ResourceType = typeof(I18n))]\n$1Female,\n#else\n$0\n#endif",
             "action": "modify"
         },
@@ -60,7 +60,7 @@
 
         {
             "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\UserDto.cs",
-            "searchText": "[Required(ErrorMessage = nameof(AppStrings.RequiredAttribute_ValidationError))]\\s*[Display(Name = nameof(AppStrings.Password))]\\s*public string? Password { get; set; }",
+            "searchText": "[Required(ErrorMessage = nameof(AppStrings.RequiredAttribute_ValidationError))]¦\\s¦*[Display(Name = nameof(AppStrings.Password))]¦\\s¦*public string? Password { get; set; }",
             "replaceText": "#if !ALCHIWEBAPP_SECURITY\n$0\n#endif",
             "action": "modify"
         },
@@ -153,6 +153,77 @@
             "searchText": "if (authUser.IsAuthenticated())",
             "replaceText": "#if ALCHIWEBAPP\n$1await SetNavPanelItemsBusiness(authUser, navPanelItems);\n#endif",
             "action": "add.before"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Api\\Features\\Attachments\\AttachmentController.cs",
+            "otherFilename": "src\\Server\\Alchiweb-App1.Server.Core\\Features\\Attachments\\IAttachmentControllerExtensions.cs",
+            "searchText": "/// <inheritdoc cref=\"GetFilePath(Guid, AttachmentKind)\"/>\n¦.¦*¦(\n¦.¦*¦)¦*};¦(\n¦\\s¦*¦)¦*}\n",
+            "replaceText": "using Alchiweb-App1.Server.Core;\n\nnamespace Alchiweb-App1.Core.Features.Attachments;\n\npublic static partial class IAttachmentControllerExtensions\n{\n  extension(IAttachmentController attachmentController)\n  {\n$0  }\n}",
+            "action": "core.modify"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Infrastructure\\DevMcp\\DevMcpDiagnosticTools.cs",
+            "searchText": "ApplicationVersion = typeof(Program).Assembly.GetName().Version?.ToString(),",
+            "replaceText": "$1ApplicationVersion = typeof(DevMcpDiagnosticTools).Assembly.GetName().Version?.ToString(),\n//$0",
+            "action": "modify"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Infrastructure\\SignalR\\AppChatbot.cs",
+            "searchText": "var path = AttachmentController.GetFilePath(appSettings, attachmentId.Value, AttachmentKind.AiChatImage);",
+            "replaceText": "$1var path = IAttachmentController.GetFilePath(appSettings, attachmentId.Value, AttachmentKind.AiChatImage);",
+            "action": "core.modify"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Infrastructure\\DevMcp\\DevMcpDiagnosticTools.cs",
+            "searchText": "using",
+            "replaceText": "$1using Alchiweb-App1.Core.Features.Attachments;\n$1using Alchiweb-App1.Core.Features.Chatbot;",
+            "action": "core.add.before"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Infrastructure\\DevMcp\\DevMcpDiagnosticTools.cs",
+            "searchText": "AttachmentUploadSizeLimitBytes = AttachmentController.MaxUploadSizeBytes,",
+            "replaceText": "$1AttachmentUploadSizeLimitBytes = IAttachmentController.MaxUploadSizeBytes,",
+            "action": "core.modify"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Infrastructure\\DevMcp\\DevMcpDiagnosticTools.cs",
+            "searchText": "SpeechUploadSizeLimitBytes = ChatbotController.MaxSpeechUploadSizeBytes",
+            "replaceText": "$1SpeechUploadSizeLimitBytes = IChatbotController.MaxSpeechUploadSizeBytes",
+            "action": "core.modify"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Api\\Features\\Attachments\\AttachmentController.cs",
+            "searchText": "[RequestSizeLimit(MaxUploadSizeBytes)]",
+            "replaceText": "$1[RequestSizeLimit(IAttachmentController.MaxUploadSizeBytes)]",
+            "action": "core.modify"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Api\\Features\\Attachments\\AttachmentController.cs",
+            "searchText": "private string GetFilePath(Guid attachmentId, AttachmentKind kind) => GetFilePath(AppSettings, attachmentId, kind);",
+            "replaceText": "$1private string GetFilePath(Guid attachmentId, AttachmentKind kind) => IAttachmentController.GetFilePath(AppSettings, attachmentId, kind);",
+            "action": "core.modify"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Api\\Features\\Chatbot\\ChatbotController.cs",
+            "searchText": "[RequestSizeLimit(MaxSpeechUploadSizeBytes)]",
+            "replaceText": "$1[RequestSizeLimit(IChatbotController.MaxSpeechUploadSizeBytes)]",
+            "action": "core.modify"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Api\\Features\\Attachments\\AttachmentController.cs",
+            "otherFilename": "src\\Alchiweb-App1.Core\\Features\\Attachments\\IAttachmentController.cs",
+            "searchTextForOtherFile": "¦.¦*: IAppController¦.¦*\n¦.¦*{",
+            "searchText": "/// <summary>¦.¦*\n¦\\s¦*public const int MaxUploadSizeBytes¦.¦*;\n",
+            "replaceText": "$0",
+            "action": "core.add.after"
+        },
+        {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Api\\Features\\Chatbot\\ChatbotController.cs",
+            "otherFilename": "src\\Alchiweb-App1.Core\\Features\\Chatbot\\IChatbotController.cs",
+            "searchTextForOtherFile": "¦.¦*: IAppController¦.¦*\n¦.¦*{",
+            "searchText": "/// <summary>¦.¦*\n¦\\s¦*public const int MaxSpeechUploadSizeBytes¦.¦*;\n",
+            "replaceText": "$0",
+            "action": "core.add.after"
         }
     ]
 }

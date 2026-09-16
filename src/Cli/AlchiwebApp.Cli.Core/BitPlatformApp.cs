@@ -27,7 +27,7 @@ public abstract partial class BitPlatformApp
 
     #region Json modifying BitPlatform files
     protected async Task ModifyBitPlatformFilesFromJsonAsync()
-    {        
+    {
         var contentDirPath = GetConsoleAppContentPath("ModBitPlatformFiles.json", false);
         if (string.IsNullOrEmpty(contentDirPath))
             return;
@@ -41,7 +41,7 @@ public abstract partial class BitPlatformApp
         var modBitPlatformFiles = await JsonSerializer.DeserializeAsync<ModBitPlatformFilesModel>(fileOpenStream, jsonOptions);
         if (modBitPlatformFiles?.Modifs == null)
             return;
-        foreach(var mod in modBitPlatformFiles.Modifs)
+        foreach (var mod in modBitPlatformFiles.Modifs)
         {
             if (mod == null
                 || mod.Action == ActionEnum.None
@@ -52,40 +52,104 @@ public abstract partial class BitPlatformApp
                 continue;
 
             mod.Filename = mod.Filename.Replace("Alchiweb-App1", ProjectName).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
+            mod.OtherFilename = mod.OtherFilename?.Replace("Alchiweb-App1", ProjectName).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
             mod.SearchText = mod.SearchText.Replace("Alchiweb-App1", ProjectName);
             mod.ReplaceText = mod.ReplaceText.Replace("Alchiweb-App1", ProjectName);
+
             string fullPathFile = Path.Combine(BitPlatformProjectFolder, mod.Filename);
-            string? fullPathDirectory = Path.GetDirectoryName(fullPathFile);
-            if (fullPathDirectory == null || !File.Exists(fullPathFile))
+            if (Path.GetDirectoryName(fullPathFile) == null || !File.Exists(fullPathFile))
                 continue;
-            var replaceText = "";
-            switch(mod.Action)
-            {
-                case ActionEnum.Modify:
-                    replaceText = $"$1#region [AlchiwebApp] Modified\n{mod.ReplaceText}\n$1#endregion";
-                break;
-                case ActionEnum.AddBefore:
-                    replaceText = $"$1#region [AlchiwebApp] Added\n{mod.ReplaceText}\n$1#endregion\n$0";
-                    break;
-                case ActionEnum.AddAfter:
-                    replaceText = $"$0\n$1#region [AlchiwebApp] Added\n{mod.ReplaceText}\n$1#endregion";
-                    break;
-            }
-            var searchText = Regex.Escape(mod.SearchText).Replace("\\\\s\\*", "\\s*");
-            if (!mod.SearchText.StartsWith("\n"))
-                searchText = $"(.*){searchText}";
-            if (!mod.SearchText.EndsWith("\n"))
-                searchText = $"{searchText}(.*)";
+            string? fullPathNewFile = null;
+            //if (text.Action == ActionEnum.NewFile)
+            //{
+            //    if (!string.IsNullOrEmpty(text.OtherFilename))
+            //    {
+            //        fullPathNewFile = Path.Combine(BitPlatformProjectFolder, text.OtherFilename);
+            //    }
+            //    if (string.IsNullOrEmpty(fullPathNewFile) || Path.GetDirectoryName(fullPathNewFile) == null || File.Exists(fullPathNewFile))
+            //        continue;
+            //}
+            var searchText = TransformText(mod.SearchText);
             var listExtensionsFiles = new List<SearchResult>
             {
                 new() { FilePath = fullPathFile }
             };
+
+            var replaceText = "";
+
+            if (!string.IsNullOrEmpty(mod.OtherFilename))
+            {
+
+                fullPathNewFile = Path.Combine(BitPlatformProjectFolder, mod.OtherFilename);
+                if (string.IsNullOrEmpty(fullPathNewFile) || Path.GetDirectoryName(fullPathNewFile) == null/* || File.Exists(fullPathNewFile)*/)
+                    continue;
+                replaceText = $"$1#region [AlchiwebApp] Part moved to a new file ({mod.OtherFilename})\n/*\n$0*/\n$1#endregion";
+
+                var replacedMatches = await _searchService.ReplaceInFilesAsync(searchText, replaceText, listExtensionsFiles, true,
+                    useRegex: true,
+                    useExtendedSearch: false
+                    );
+                mod.SearchTextForOtherFile = mod.SearchTextForOtherFile?.Replace("Alchiweb-App1", ProjectName);
+                searchText = string.IsNullOrEmpty(mod.SearchTextForOtherFile) ? "" : TransformText(mod.SearchTextForOtherFile);
+                if (replacedMatches.Count == 0 || replacedMatches[0].Count == 0)
+                    continue;
+                for (int i = 0; i < replacedMatches[0].Count; i++)
+                {
+                    mod.ReplaceText = mod.ReplaceText.Replace($"${i}", replacedMatches[0][i].Value);
+                }
+
+                if (!File.Exists(fullPathNewFile))
+                {
+                    searchText = "";
+                    try
+                    {
+                        File.WriteAllText(fullPathNewFile, searchText);
+                    }
+                    catch (Exception) { }
+                }
+
+                listExtensionsFiles[0].FilePath = fullPathNewFile;
+            }
+
+            switch (mod.Action)
+            {
+                case ActionEnum.Modify:
+                    replaceText = $"$1#region [AlchiwebApp] Modified\n{mod.ReplaceText}\n$1#endregion";
+                    break;
+                case ActionEnum.CoreModify:
+                    replaceText = $"{mod.ReplaceText}";
+                    break;
+                case ActionEnum.AddBefore:
+                    replaceText = $"$1#region [AlchiwebApp] Added\n{mod.ReplaceText}\n$1#endregion\n$0";
+                    break;
+                case ActionEnum.CoreAddBefore:
+                    replaceText = $"{mod.ReplaceText}\n$0";
+                    break;
+
+                case ActionEnum.AddAfter:
+                    replaceText = $"$0\n$1#region [AlchiwebApp] Added\n{mod.ReplaceText}\n$1#endregion";
+                    break;
+                case ActionEnum.CoreAddAfter:
+                    replaceText = $"$0\n{mod.ReplaceText}";
+                    break;
+            }
 
             await _searchService.ReplaceInFilesAsync(searchText, replaceText, listExtensionsFiles, true,
                 useRegex: true,
                 useExtendedSearch: false
                 );
         }
+    }
+
+    private static string TransformText(string text)
+    {
+        var searchText = Regex.Escape(text).Replace("¦\\", "");
+
+        if (!text.StartsWith("\n"))
+            searchText = $"(.*){searchText}";
+        if (!text.EndsWith("\n"))
+            searchText = $"{searchText}(.*)";
+        return searchText;
     }
     #endregion
 
@@ -127,7 +191,7 @@ public abstract partial class BitPlatformApp
         //    //)
         //    .ToList();
         updateValue = updateValue.Replace('/', '\\');
-        
+
         var items = sourceXDoc.Descendants("EmbeddedResource")
             .Where(e =>
             {
@@ -241,19 +305,19 @@ public abstract partial class BitPlatformApp
 
         foreach (var file in sourceFiles)
         {
-//            System.IO.File.SetAttributes(file, FileAttributes.Normal);
-            var content = File.ReadAllText(file).Replace("\r\n","\n");
+            //            System.IO.File.SetAttributes(file, FileAttributes.Normal);
+            var content = File.ReadAllText(file).Replace("\r\n", "\n");
             File.WriteAllText(file, content, utf8WithoutBOM);
         }
     }
-    protected async Task<List<string>> CopyFilesRecursivelyAsync(string sourcePath, string targetPath, bool isTemplateDirectory, string? excludeFilesPattern = null, string? excludeDirectory = null)
+    protected async Task<List<string>> CopyFilesRecursivelyAsync(string sourcePath, string targetPath, bool isTemplateDirectory, string[]? excludeFilesPattern = null, string[]? excludeDirectories = null)
     {
         var sourceDirectories = Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories)
-            .Where(filename => excludeDirectory == null || !filename.Split([Path.DirectorySeparatorChar]).Contains(excludeDirectory))
-            ;
+            .Where(filename => excludeDirectories == null || !excludeDirectories.Any(excd => filename.Split([Path.DirectorySeparatorChar]).Contains(excd)));
         var sourceFiles = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories)
-            .Where(filename => (string.IsNullOrEmpty(excludeFilesPattern) || !filename.Contains(excludeFilesPattern)) && (excludeDirectory == null || !filename.Split([Path.DirectorySeparatorChar]).Contains(excludeDirectory)))
-            ;
+            .Where(filename => (excludeFilesPattern == null || !excludeFilesPattern.Any(exc => filename.Contains(exc))) &&
+                (excludeDirectories == null || !excludeDirectories.Any(excd => filename.Split([Path.DirectorySeparatorChar]).Contains(excd))));
+
         // Create all of the directories
         foreach (string dirPath in sourceDirectories)
         {
@@ -282,12 +346,13 @@ public abstract partial class BitPlatformApp
         return copiedFiles;
     }
 
-    protected List<string> MoveFilesRecursively(string sourcePath, string targetPath, bool deleteEmptyDirectory, string? excludeFilesPattern = null, string? excludeDirectory = null)
+    protected List<string> MoveFilesRecursively(string sourcePath, string targetPath, bool deleteEmptyDirectory, string[]? excludeFilesPattern = null, string[]? excludeDirectories = null)
     {
         var sourceDirectories = Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories)
-            .Where(filename => excludeDirectory == null || !filename.Split([Path.DirectorySeparatorChar]).Contains(excludeDirectory));
+            .Where(filename => excludeDirectories == null || !excludeDirectories.Any(excd => filename.Split([Path.DirectorySeparatorChar]).Contains(excd)));
         var sourceFiles = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories)
-            .Where(filename => (string.IsNullOrEmpty(excludeFilesPattern) || !filename.Contains(excludeFilesPattern)) && (excludeDirectory == null || !filename.Split([Path.DirectorySeparatorChar]).Contains(excludeDirectory)));
+            .Where(filename => (excludeFilesPattern == null || !excludeFilesPattern.Any(exc => filename.Contains(exc))) &&
+                (excludeDirectories == null || !excludeDirectories.Any(excd => filename.Split([Path.DirectorySeparatorChar]).Contains(excd))));
         // Create all of the directories
         foreach (string dirPath in sourceDirectories)
         {
@@ -302,6 +367,7 @@ public abstract partial class BitPlatformApp
             File.Move(newPath, destPath, false);
             movedFiles.Add(destPath);
         }
+
         if (deleteEmptyDirectory)
         {
             foreach (var dir in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories).Reverse())
@@ -336,7 +402,7 @@ public abstract partial class BitPlatformApp
         }
         if (excludeDirectories == null)
         {
-            excludeDirectories = ["bin", "obj"];
+            excludeDirectories = ["bin", "obj" ];
         }
         if (filters == null || filters.Length == 0)
         {

@@ -103,7 +103,7 @@ public partial class BitPlatformAppMod : BitPlatformApp
             return;
         }
 
-        await ReplaceTextAsync($@"{ProjectName}.Server.Shared", $@"{ProjectName}.Server.Core", matchCase, expectedReplacements: 26);
+        await ReplaceTextAsync($@"{ProjectName}.Server.Shared", $@"{ProjectName}.Server.Core", matchCase, expectedReplacements: 27);
     }
     private async Task RenameSharedProjectAsync(bool matchCase = false)
     {
@@ -117,15 +117,15 @@ public partial class BitPlatformAppMod : BitPlatformApp
             return;
         }
 
-        await ReplaceTextAsync($@"Shared/{ProjectName}.Shared", $@"{ProjectName}.Core/{ProjectName}.Core", matchCase, expectedReplacements: 4);
+        await ReplaceTextAsync($@"Shared/{ProjectName}.Shared", $@"{ProjectName}.Core/{ProjectName}.Core", matchCase, expectedReplacements: 1);
         await ReplaceTextAsync($@"Shared\{ProjectName}.Shared", $@"{ProjectName}.Core\{ProjectName}.Core", matchCase, expectedReplacements: 3);
         await ReplaceTextAsync($@"Shared\\{ProjectName}.Shared", $@"{ProjectName}.Core\\{ProjectName}.Core", matchCase, expectedReplacements: 1);
 
-        await ReplaceTextAsync($@"{ProjectName}.Shared", $@"{ProjectName}.Core", matchCase, expectedReplacements: 320);
+        await ReplaceTextAsync($@"{ProjectName}.Shared", $@"{ProjectName}.Core", matchCase, expectedReplacements: 304);
 
-        await ReplaceTextAsync($@"Shared/", $@"{ProjectName}.Core/", matchCase, expectedReplacements: 55);
-        await ReplaceTextAsync($@"Shared`", $@"{ProjectName}.Core`", matchCase, expectedReplacements: 3);
-        await ReplaceTextAsync($@"Shared""", $@"{ProjectName}.Core""", matchCase, expectedReplacements: 1);
+        await ReplaceTextAsync($@"Shared/", $@"{ProjectName}.Core/", matchCase, expectedReplacements: 59, filters: ["*.cs", "*.md", "*.sln*"]);
+        await ReplaceTextAsync($@"Shared""", $@"{ProjectName}.Core""", matchCase, expectedReplacements: 1, filters: ["*.sln*"]);
+        await ReplaceTextAsync($@"Shared`", $@"{ProjectName}.Core`", matchCase, expectedReplacements: 3, filters: ["*.md"]);
 
         await ReplaceTextAsync($@"Shared project to", $@"shared project (`{ProjectName}.Core`) to", matchCase, expectedReplacements: 1);
 
@@ -134,13 +134,13 @@ public partial class BitPlatformAppMod : BitPlatformApp
             "ISharedServiceCollectionExtensions", "ICoreServiceCollectionExtensions", matchCase, 7);
         await RenameCSharpCodeFile(
             Path.Combine("src", "Server", $"{ProjectName}.Server.Core"),
-            "ServerSharedSettings", "ServerCoreSettings", matchCase, 8);
+            "ServerSharedSettings", "ServerCoreSettings", matchCase, 14);
         await RenameCSharpCodeFile(
             Path.Combine("src", $"{ProjectName}.Core"),
-            "SharedSettings", "CoreSettings", matchCase, 6);
+            "SharedSettings", "CoreSettings", matchCase, 7);
         await RenameCSharpCodeFile(
             Path.Combine("src", $"{ProjectName}.Core", "Infrastructure", "Services"),
-            "SharedExceptionHandler", "CoreExceptionHandler", matchCase, 15);
+            "SharedExceptionHandler", "CoreExceptionHandler", matchCase, 16);
         await ReplaceTextAsync("AddSharedConfigurations", "AddCoreConfigurations", matchCase, matchWholeWord: true, expectedReplacements: 2);
         await ReplaceTextAsync("AddSharedProjectServices", "AddCoreProjectServices", matchCase, matchWholeWord: true, expectedReplacements: 5);
         await ReplaceTextAsync("AddServerSharedServices", "AddServerCoreServices", matchCase, matchWholeWord: true, expectedReplacements: 3);
@@ -173,7 +173,7 @@ public partial class BitPlatformAppMod : BitPlatformApp
             [1, null, 0, 0, 1 ],
             [1, null, 0, 0, 1 ],
             [0, null, 0, 0, 0 ],
-            [1, null, 1, 1, 6 ]
+            [1, null, 0, 1, 6 ]
             ];
         for (int i = 0; i < 6; i++)
         {
@@ -269,7 +269,7 @@ public partial class BitPlatformAppMod : BitPlatformApp
             Path.Combine(sourceServerApiPath, "Features"),
             Path.Combine(sourceServerCorePath, "Features"),
             true,
-            "Controller."
+            [ "Controller.", "Endpoints.cs", "SelectExpandWrapper"]
             );
 
         // Move some extensions files (in /Instrastructure/Extension) from Core project to Server.Core project
@@ -299,7 +299,9 @@ public partial class BitPlatformAppMod : BitPlatformApp
             Path.Combine(sourceServerApiPath, "Infrastructure"),
             Path.Combine(sourceServerCorePath, "Infrastructure"),
             true,
-            excludeDirectory: "Controllers"
+            [ "SelectExpandWrapper"], //, "DevMcp", "AppChatbot", "AppHub" ],
+            excludeDirectories: [ "Controllers" ]
+
             );
 
         // Change "static class" to "static partial class" for the duplicated extensions files (that were in Server.Api and Server.Core projects)
@@ -341,16 +343,16 @@ public partial class BitPlatformAppMod : BitPlatformApp
         //await _searchService.ReplaceInFilesAsync($"(\\n\\n^namespace ({ProjectName}\\.Server\\.)Api;$)", "\\nusing $2Core;$1",
         //    [new SearchResult() { FilePath = Path.Combine(sourceServerApiPath, "Program.*") }],
         //    useRegex:true);
-        await ReplaceTextAsync("<Infrastructure.SignalR.", "<Core.Infrastructure.SignalR.", true, false,
+        await ReplaceTextAsync("<Infrastructure.", "<Core.Infrastructure.", true, false,
             [sourceServerApiPath, sourceServerWebPath],
             ["Program*.*"]);
-        await ReplaceTextAsync("<Api.Infrastructure.SignalR.", "<Core.Infrastructure.SignalR.", true, false,
+        await ReplaceTextAsync("<Api.", "<Core.", true, false,
             [sourceServerApiPath, sourceServerWebPath],
             ["Program*.*"]);
         await ReplaceTextAsync(" Features.Identity.Models.", " Core.Features.Identity.Models.", true, false,
             [sourceServerApiPath, sourceServerWebPath],
             ["Program*.*"]);
-        await ReplaceTextAsync("<Features.Identity.Models.", "<Core.Features.Identity.Models.", true, false,
+        await ReplaceTextAsync("<Features.", "<Core.Features.", true, false,
             [sourceServerApiPath, sourceServerWebPath],
             ["Program*.*"]);
         await ReplaceTextAsync(" Api.Features.Identity.Models.", " Core.Features.Identity.Models.", true, false,
@@ -480,33 +482,55 @@ public partial class BitPlatformAppMod : BitPlatformApp
                     firstPackageReferenceItemGroup.AddBeforeSelf(firstUsingItemGroup);
                 }
                 var newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"Microsoft.Extensions.Options");
+                newElement.SetAttributeValue("Include", "Microsoft.Extensions.Options");
                 firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.Authorization");
+                newElement.SetAttributeValue("Include", "Microsoft.AspNetCore.Authentication");
                 firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.Identity");
+                newElement.SetAttributeValue("Include", "Microsoft.AspNetCore.Authorization");
                 firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"Microsoft.EntityFrameworkCore");
+                newElement.SetAttributeValue("Include", "Microsoft.AspNetCore.Identity");
+                firstUsingItemGroup.Add(newElement);
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", "Microsoft.AspNetCore.SignalR");
+                firstUsingItemGroup.Add(newElement);
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", "Microsoft.EntityFrameworkCore");
                 firstUsingItemGroup.Add(newElement);
                 //newElement = new XElement("Using");
-                //newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.OData.Query");
+                //newElement.SetAttributeValue("Include", "Microsoft.AspNetCore.OData.Query");
                 //firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"Microsoft.AspNetCore.Mvc");
+                newElement.SetAttributeValue("Include", "Microsoft.AspNetCore.Mvc");
                 firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"Microsoft.Extensions.AI");
+                newElement.SetAttributeValue("Include", "Microsoft.Extensions.AI");
                 firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"Hangfire");
+                newElement.SetAttributeValue("Include", "System.Text");
                 firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
-                newElement.SetAttributeValue("Include", $"ZiggyCreatures.Caching.Fusion");
+                newElement.SetAttributeValue("Include", "Hangfire");
+                firstUsingItemGroup.Add(newElement);
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", "ZiggyCreatures.Caching.Fusion");
                 firstUsingItemGroup.Add(newElement);
 
+
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{ProjectName}.Core.Features.Identity");
+                firstUsingItemGroup.Add(newElement);
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{ProjectName}.Core.Features.Identity.Dtos");
+                firstUsingItemGroup.Add(newElement);
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{ProjectName}.Server.Api.Features.Identity.OAuth");
+                firstUsingItemGroup.Add(newElement);
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{ProjectName}.Server.Api.Infrastructure.Services");
+                firstUsingItemGroup.Add(newElement);
 
                 // TODO: specific -> generic
                 newElement = new XElement("Using");
@@ -534,6 +558,12 @@ public partial class BitPlatformAppMod : BitPlatformApp
                 {
                     newElement = new XElement("Using");
                     newElement.SetAttributeValue("Include", $"{ProjectName}.Server.Core.Features.Chatbot");
+                    firstUsingItemGroup.Add(newElement);
+                }
+                if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Diagnostic")))
+                {
+                    newElement = new XElement("Using");
+                    newElement.SetAttributeValue("Include", $"{ProjectName}.Server.Core.Features.Diagnostic");
                     firstUsingItemGroup.Add(newElement);
                 }
                 if (Directory.Exists(Path.Combine(sourceServerCorePath, "Features", "Identity")))
@@ -639,12 +669,12 @@ public partial class BitPlatformAppMod : BitPlatformApp
     private bool MustMoveToServerCore(string includeValueAttribute)
     {
         return !includeValueAttribute.Contains(".HealthChecks.") &&
-            !includeValueAttribute.Contains(".SignalR") &&
+            //!includeValueAttribute.Contains(".SignalR") &&
             !includeValueAttribute.StartsWith("Asp.Versioning") &&
             !includeValueAttribute.StartsWith("QRCoder") &&
             !includeValueAttribute.StartsWith("HtmlSanitizer") &&
             !includeValueAttribute.StartsWith("Humanizer") &&
-            !includeValueAttribute.StartsWith("Magick.") &&
+            //!includeValueAttribute.StartsWith("Magick.") &&
             !includeValueAttribute.StartsWith("Microsoft.AspNetCore.OData") &&
             !includeValueAttribute.StartsWith("Microsoft.AspNetCore.OpenApi") &&
             !includeValueAttribute.StartsWith("Microsoft.Extensions.AI.") &&

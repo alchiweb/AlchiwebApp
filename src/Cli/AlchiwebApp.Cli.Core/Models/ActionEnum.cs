@@ -6,9 +6,15 @@ public enum ActionEnum
     None = 0,
     [JsonStringEnumMemberName("modify")]
     Modify = 1,
+    [JsonStringEnumMemberName("core.modify")]
+    CoreModify = 2,
     [JsonStringEnumMemberName("add.before")]
-    AddBefore = 2,
+    AddBefore = 3,
+    [JsonStringEnumMemberName("core.add.before")]
+    CoreAddBefore = 4,
     [JsonStringEnumMemberName("add.after")]
-    AddAfter = 3,
+    AddAfter = 5,
+    [JsonStringEnumMemberName("core.add.after")]
+    CoreAddAfter = 6,
 }
 
