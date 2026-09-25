@@ -163,8 +163,8 @@
         },
         {
             "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Infrastructure\\DevMcp\\DevMcpDiagnosticTools.cs",
-            "searchText": "ApplicationVersion = typeof(Program).Assembly.GetName().Version?.ToString(),",
-            "replaceText": "$1ApplicationVersion = typeof(DevMcpDiagnosticTools).Assembly.GetName().Version?.ToString(),\n//$0",
+            "searchText": "ApplicationVersion = typeof(Program)¦(¦.¦*¦),",
+            "replaceText": "$1ApplicationVersion = typeof(DevMcpDiagnosticTools)$2,\n//$0",
             "action": "modify"
         },
         {
@@ -198,9 +198,15 @@
             "action": "core.modify"
         },
         {
+            "filename": "src\\Server\\Alchiweb-App1.Server.Api\\Features\\Diagnostic\\DiagnosticController.cs",
+            "searchText": "¦(¦.¦*¦) AttachmentController.MaxUploadSizeBytes;",
+            "replaceText": "$1$2 IAttachmentController.MaxUploadSizeBytes;",
+            "action": "core.modify"
+        },
+        {
             "filename": "src\\Server\\Alchiweb-App1.Server.Api\\Features\\Attachments\\AttachmentController.cs",
-            "searchText": "private string GetFilePath(Guid attachmentId, AttachmentKind kind) => GetFilePath(AppSettings, attachmentId, kind);",
-            "replaceText": "$1private string GetFilePath(Guid attachmentId, AttachmentKind kind) => IAttachmentController.GetFilePath(AppSettings, attachmentId, kind);",
+            "searchText": " GetFilePath(AppSettings, attachmentId, kind);",
+            "replaceText": "$1$2 IAttachmentController.GetFilePath(AppSettings, attachmentId, kind);",
             "action": "core.modify"
         },
         {

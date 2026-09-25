@@ -103,7 +103,7 @@ public partial class BitPlatformAppMod : BitPlatformApp
             return;
         }
 
-        await ReplaceTextAsync($@"{ProjectName}.Server.Shared", $@"{ProjectName}.Server.Core", matchCase, expectedReplacements: 27);
+        await ReplaceTextAsync($@"{ProjectName}.Server.Shared", $@"{ProjectName}.Server.Core", matchCase, expectedReplacements: 29);
     }
     private async Task RenameSharedProjectAsync(bool matchCase = false)
     {
@@ -121,7 +121,7 @@ public partial class BitPlatformAppMod : BitPlatformApp
         await ReplaceTextAsync($@"Shared\{ProjectName}.Shared", $@"{ProjectName}.Core\{ProjectName}.Core", matchCase, expectedReplacements: 3);
         await ReplaceTextAsync($@"Shared\\{ProjectName}.Shared", $@"{ProjectName}.Core\\{ProjectName}.Core", matchCase, expectedReplacements: 1);
 
-        await ReplaceTextAsync($@"{ProjectName}.Shared", $@"{ProjectName}.Core", matchCase, expectedReplacements: 304);
+        await ReplaceTextAsync($@"{ProjectName}.Shared", $@"{ProjectName}.Core", matchCase, expectedReplacements: 322);
 
         await ReplaceTextAsync($@"Shared/", $@"{ProjectName}.Core/", matchCase, expectedReplacements: 59, filters: ["*.cs", "*.md", "*.sln*"]);
         await ReplaceTextAsync($@"Shared""", $@"{ProjectName}.Core""", matchCase, expectedReplacements: 1, filters: ["*.sln*"]);
@@ -134,7 +134,7 @@ public partial class BitPlatformAppMod : BitPlatformApp
             "ISharedServiceCollectionExtensions", "ICoreServiceCollectionExtensions", matchCase, 7);
         await RenameCSharpCodeFile(
             Path.Combine("src", "Server", $"{ProjectName}.Server.Core"),
-            "ServerSharedSettings", "ServerCoreSettings", matchCase, 14);
+            "ServerSharedSettings", "ServerCoreSettings", matchCase, 16);
         await RenameCSharpCodeFile(
             Path.Combine("src", $"{ProjectName}.Core"),
             "SharedSettings", "CoreSettings", matchCase, 7);
@@ -358,6 +358,9 @@ public partial class BitPlatformAppMod : BitPlatformApp
         await ReplaceTextAsync(" Api.Features.Identity.Models.", " Core.Features.Identity.Models.", true, false,
             [sourceServerApiPath, sourceServerWebPath],
             ["Program*.*"]);
+        await ReplaceTextAsync(" Features.Chatbot.", " ", true, false,
+            [sourceServerApiPath, sourceServerWebPath],
+            ["Program*.*", "AttachmentController.cs"]);
 
     }
 
@@ -520,6 +523,9 @@ public partial class BitPlatformAppMod : BitPlatformApp
 
 
                 newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{ProjectName}.Core.Features.Attachments");
+                firstUsingItemGroup.Add(newElement);
+                newElement = new XElement("Using");
                 newElement.SetAttributeValue("Include", $"{ProjectName}.Core.Features.Identity");
                 firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
@@ -530,6 +536,10 @@ public partial class BitPlatformAppMod : BitPlatformApp
                 firstUsingItemGroup.Add(newElement);
                 newElement = new XElement("Using");
                 newElement.SetAttributeValue("Include", $"{ProjectName}.Server.Api.Infrastructure.Services");
+                firstUsingItemGroup.Add(newElement);
+
+                newElement = new XElement("Using");
+                newElement.SetAttributeValue("Include", $"{ProjectName}.Server.Api.Features.Attachments");
                 firstUsingItemGroup.Add(newElement);
 
                 // TODO: specific -> generic
