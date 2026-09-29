@@ -208,11 +208,11 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
         {
             var packageVersion = new XElement("PackageVersion");
             packageVersion.SetAttributeValue("Include", "CommunityToolkit.Aspire.Hosting.Ollama");
-            packageVersion.SetAttributeValue("Version", "13.3.0");
+            packageVersion.SetAttributeValue("Version", "13.5.0");
             itemGroupToAdd.Add(packageVersion);
             packageVersion = new XElement("PackageVersion");
             packageVersion.SetAttributeValue("Include", "CommunityToolkit.Aspire.OllamaSharp");
-            packageVersion.SetAttributeValue("Version", "13.3.0");
+            packageVersion.SetAttributeValue("Version", "13.5.0");
             itemGroupToAdd.Add(packageVersion);
         }
         sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
