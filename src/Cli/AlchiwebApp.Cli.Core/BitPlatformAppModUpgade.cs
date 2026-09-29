@@ -161,6 +161,15 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
             );
         sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
 
+        //// Add: <CoreCompileDependsOn>PrepareResources;$(CompileDependsOn)</CoreCompileDependsOn>
+        //var firstPropertyGroup = sourceXDoc.Document?.Element("Project")?.Element("PropertyGroup");
+        //if (firstPropertyGroup != null)
+        //{
+        //    var coreCompileDependsOn = new XElement("CoreCompileDependsOn");
+        //    coreCompileDependsOn.SetValue("PrepareResources;$(CompileDependsOn)");
+        //    firstPropertyGroup.Add(coreCompileDependsOn);
+        //}
+
         itemGroupToAdd = AddItemGroup(sourceXDoc);
         if (itemGroupToAdd != null)
         {
@@ -215,12 +224,12 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
             );
         sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
 
-        var firstPropertyGroup = sourceXDoc.Document?.Element("Project")?.Element("PropertyGroup");
-        if (firstPropertyGroup != null)
+        var firstPropertyGroupForConstants = sourceXDoc.Document?.Element("Project")?.Element("PropertyGroup");
+        if (firstPropertyGroupForConstants != null)
         {
             var defineConstants = new XElement("DefineConstants");
             defineConstants.SetValue("$(DefineConstants);ALCHIWEBAPP;ALCHIWEBAPP_SECURITY;ALCHIWEBAPP_USER_ROLE;ALCHIWEBAPP_AI_OLLAMA");
-            firstPropertyGroup.Add(defineConstants);
+            firstPropertyGroupForConstants.Add(defineConstants);
         }
         sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
         #endregion

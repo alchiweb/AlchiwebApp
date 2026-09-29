@@ -57,29 +57,47 @@
             "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1SignInRequestDto requestToSend = new();\n$1request.Patch(requestToSend);\n$1requestToSend.Password = await cryptoService.EncryptAsync(request.Password);\n$1var response = await identityController.SignIn(requestToSend, cancellationToken);\n#else\n$0\n#endif",
             "action": "modify"
         },
-
         {
-            "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\UserDto.cs",
-            "searchText": "[Required(ErrorMessage = nameof(AppStrings.RequiredAttribute_ValidationError))]¦\\s¦*[Display(Name = nameof(AppStrings.Password))]¦\\s¦*public string? Password { get; set; }",
-            "replaceText": "#if !ALCHIWEBAPP_SECURITY\n$0\n#endif",
+            "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Components\\Pages\\Identity\\SignIn\\SignInPanel.razor.cs",
+            "searchText": "[AutoInject] private IIdentityController identityController = default",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1[AutoInject] private ICryptoService cryptoService = default!;\n#endif",
+            "action": "add.before"
+        },
+        {
+            "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Components\\Pages\\Identity\\SignIn\\SignInPanel.razor.cs",
+            "searchText": "await identityController.SendTwoFactorToken(model, CurrentCancellationToken);",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1if (!string.IsNullOrEmpty(model.Password))\n$1{\n$1    SignInRequestDto requestToSend = new();\n$1    model.Patch(requestToSend);\n$1    requestToSend.Password = await cryptoService.EncryptAsync(model.Password);\n$1    await identityController.SendTwoFactorToken(requestToSend, CurrentCancellationToken);\n$1}\n$1else\n$1{\n    $0\n$1}\n#else\n$0\n#endif",
             "action": "modify"
         },
         {
+            "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Components\\Pages\\Settings\\Account\\ChangePasswordTab.razor.cs",
+            "searchText": "[AutoInject] private IUserController userController = default",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1[AutoInject] private ICryptoService cryptoService = default!;\n#endif",
+            "action": "add.before"
+        },
+        {
+            "filename": "src\\Client\\Alchiweb-App1.Client.Core\\Components\\Pages\\Settings\\Account\\ChangePasswordTab.razor.cs",
+            "searchText": "await userController.ChangePassword(model, CurrentCancellationToken);",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1model.OldPassword = await cryptoService.EncryptAsync(model.OldPassword);\n$1model.ConfirmPassword = await cryptoService.EncryptAsync(model.ConfirmPassword);\n$1model.NewPassword = await cryptoService.EncryptAsync(model.NewPassword);\n#endif",
+            "action": "add.before"
+        },
+
+        {
             "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\ChangePasswordRequestDto.cs",
             "searchText": "public string? OldPassword { get; set; }",
-            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1//[JsonConverter(typeof(SecureDataJsonConverter))]\n#endif",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1[JsonConverter(typeof(SecureDataJsonConverter))]\n#endif",
             "action": "add.before"
         },
         {
             "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\ChangePasswordRequestDto.cs",
             "searchText": "public string? NewPassword { get; set; }",
-            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1//[JsonConverter(typeof(SecureDataJsonConverter))]\n#endif",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1[JsonConverter(typeof(SecureDataJsonConverter))]\n#endif",
             "action": "add.before"
         },
         {
             "filename": "src\\Alchiweb-App1.Core\\Features\\Identity\\Dtos\\ChangePasswordRequestDto.cs",
             "searchText": "public string? ConfirmPassword { get; set; }",
-            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1//[JsonConverter(typeof(SecureDataJsonConverter))]\n#endif",
+            "replaceText": "#if ALCHIWEBAPP_SECURITY\n$1[JsonConverter(typeof(SecureDataJsonConverter))]\n#endif",
             "action": "add.before"
         },
         {
@@ -132,9 +150,9 @@
         },
         {
             "filename": "src\\Server\\Alchiweb-App1.Server.Api\\Program.Services.cs",
-            "searchText": "if (string.IsNullOrEmpty(appSettings.AI?.OpenAI?.ChatApiKey) is false)",
-            "replaceText": "#if ALCHIWEBAPP_AI_OLLAMA\n$1if (string.IsNullOrEmpty(appSettings.AI?.OpenAI?.ChatApiKey))\n$1{\n$1builder\n$1    .AddKeyedOllamaApiClient(\"mistral\")\n$1    .AddChatClient()\n$1    .UseLogging()\n$1    .UseFunctionInvocation()\n$1    .UseOpenTelemetry(configure: t => t.EnableSensitiveData = env.IsDevelopment());\n$1}\n$1else\n#else\n$0\n#endif",
-            "action": "modify"
+            "searchText": "builder.AddAppAIAgents();\n¦(¦.¦*¦)}",
+            "replaceText": "#if ALCHIWEBAPP_AI_OLLAMA\n$2else\n$2{\n$1builder\n$1.AddKeyedOllamaApiClient(\"mistral\")\n$1.AddChatClient()\n$1.UseLogging()\n$1.UseFunctionInvocation()\n$1.UseOpenTelemetry(configure: t => t.EnableSensitiveData = env.IsDevelopment());\n$2}\n#endif",
+            "action": "add.after"
         },
         {
             "filename": "src\\Server\\Alchiweb-App1.Server.AppHost\\Program.cs",
