@@ -4,10 +4,12 @@ using Alchiweb-App1.Core.Features.Chatbot;
 using Alchiweb-App1.Core.Features.Dashboard;
 using Alchiweb-App1.Core.Features.Diagnostic;
 using Alchiweb-App1.Core.Features.Identity;
+using Alchiweb-App1.Core.Features.Identity.OAuth;
 using Alchiweb-App1.Core.Features.MinimalApiSample;
 using Alchiweb-App1.Core.Features.Products;
 using Alchiweb-App1.Core.Features.PushNotification;
 using Alchiweb-App1.Core.Features.Statistics;
+using Alchiweb-App1.Core.Features.Tenants;
 using Alchiweb-App1.Core.Features.Todo;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -18,20 +20,25 @@ public static partial class ICoreServiceCollectionExtensions
     {
         if (manualAdding)
         {
-            services.TryAddTransient<IChatbotController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Chatbot_IChatbotController>();
-            services.TryAddTransient<IPushNotificationController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_PushNotification_IPushNotificationController>();
-            services.TryAddTransient<IRoleManagementController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Identity_IRoleManagementController>();
-            services.TryAddTransient<IAttachmentController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Attachments_IAttachmentController>();
-            services.TryAddTransient<IStatisticsController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Statistics_IStatisticsController>();
-            //services.TryAddTransient<IMinimalApiController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_MinimalApiSample_IMinimalApiController>();
-            services.TryAddTransient<IDiagnosticController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Diagnostic_IDiagnosticController>();
-            services.TryAddTransient<IUserManagementController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Identity_IUserManagementController>();
-            services.TryAddTransient<IUserController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Identity_IUserController>();
-            services.TryAddTransient<IIdentityController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Identity_IIdentityController>();
-            services.TryAddTransient<ICategoryController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Categories_ICategoryController>();
-            services.TryAddTransient<IProductController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Products_IProductController>();
-            services.TryAddTransient<IDashboardController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Dashboard_IDashboardController>();
-            services.TryAddTransient<ITodoItemController, IHttpClientServiceCollectionExtensions.Alchiweb-App1_Core_Features_Todo_ITodoItemController>();
+            services.TryAddTransient<IAttachmentController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Attachments_IAttachmentController>();
+            services.TryAddTransient<ICategoryController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Categories_ICategoryController>();
+            services.TryAddTransient<IChatbotController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Chatbot_IChatbotController>();
+            services.TryAddTransient<IDashboardController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Dashboard_IDashboardController>();
+            services.TryAddTransient<IDiagnosticController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Diagnostic_IDiagnosticController>();
+            services.TryAddTransient<IIdentityController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Identity_IIdentityController>();
+            services.TryAddTransient<IOAuthClientManagementController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Identity_OAuth_IOAuthClientManagementController>();
+            services.TryAddTransient<IOAuthController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Identity_OAuth_IOAuthController>();
+            services.TryAddTransient<IRoleManagementController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Identity_IRoleManagementController>();
+            services.TryAddTransient<IUserController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Identity_IUserController>();
+            services.TryAddTransient<IUserManagementController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Identity_IUserManagementController>();
+            services.TryAddTransient<IProductController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Products_IProductController>();
+            services.TryAddTransient<IPushNotificationController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_PushNotification_IPushNotificationController>();
+            services.TryAddTransient<IStatisticsController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Statistics_IStatisticsController>();
+            services.TryAddTransient<ITenantController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Tenants_ITenantController>();
+            services.TryAddTransient<ITenantManagementController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Tenants_ITenantManagementController>();
+            services.TryAddTransient<ITodoItemController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_Todo_ITodoItemController>();
+
+            //services.TryAddTransient<IMinimalApiController, IHttpClientServiceCollectionExtensions.Syllabus_Core_Features_MinimalApiSample_IMinimalApiController>();
         }
         else
         {

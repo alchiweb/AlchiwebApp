@@ -1,3 +1,6 @@
+using Alchiweb-App1.Core.Features.Security;
+using Alchiweb-App1.Server.Core.Features.Security;
+
 namespace Microsoft.Extensions.Hosting;
 
 public static partial class WebApplicationBuilderExtensions
@@ -8,11 +11,11 @@ public static partial class WebApplicationBuilderExtensions
         //  Add services like:
         //services.AddSingleton<DtoMapper>();
         //services.AddScoped<IFileService, FileService>();
-        //if (!AppPlatform.IsBlazorHybridOrBrowser)
-        //{
-        //    services.AddScoped<ICryptoService, CryptoService>();
-        //    services.ConfigureBusinessApplicationApiServices();
-        //}
+        if (!AppPlatform.IsBlazorHybridOrBrowser)
+        {
+            services.AddScoped<ICryptoService, CryptoService>();
+            services.ConfigureBusinessApplicationApiServices();
+        }
         return services;
     }
 
@@ -20,7 +23,7 @@ public static partial class WebApplicationBuilderExtensions
     {
         // [BusinessCustomCode]
         //  Add services like:
-        // services.AddScoped<ICustomApiService, CustomeApiService>();
+        // services.AddScoped<ICustomApiService, CustomApiService>();
         return services;
     }
 
