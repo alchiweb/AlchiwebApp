@@ -23,10 +23,10 @@ internal class Program
                 optionResult => DirectoryValidation(optionResult)
             }
         };
-        Option<DirectoryInfo> sourceDirectoryOption = new("--source", "-s")
+        Option<DirectoryInfo?> sourceDirectoryOption = new("--source", "-s")
         {
             Description = "The folder of the source BitPlatform application (to read parameters)",
-            Required = true,
+            Required = false,
             //DefaultValueFactory = parseResult => new DirectoryInfo(Path.Combine("..", "..")),
             HelpName = "BitPlatform folder",
             Arity = ArgumentArity.ExactlyOne,
@@ -56,11 +56,16 @@ internal class Program
         modCommand.SetAction(async (parseResult) =>
         {
             if (parseResult.GetRequiredValue(targetDirectoryOption) is DirectoryInfo targetParsedDirectory
-                && parseResult.GetRequiredValue(sourceDirectoryOption) is DirectoryInfo sourceParsedDirectory
                 && parseResult.GetValue(showExpectedReplacementsOption) is bool showExpectedReplacements
             )
             {
-                var bitPlatformAppMod = new BitPlatformAppMod(targetParsedDirectory.FullName, sourceParsedDirectory.FullName, showExpectedReplacements, new FileSearchService());
+                DirectoryInfo sourceParsedDirectory = parseResult.GetValue(sourceDirectoryOption) ?? targetParsedDirectory;
+                var bitPlatformAppMod = new BitPlatformAppMod(
+                    targetParsedDirectory.FullName,
+                    sourceParsedDirectory.FullName,
+                    showExpectedReplacements,
+                    new FileSearchService()
+                    );
                 await bitPlatformAppMod.ModifyBitPlatformProject();
             }
         });
@@ -77,7 +82,11 @@ internal class Program
                 && parseResult.GetValue(showExpectedReplacementsOption) is bool showExpectedReplacements
             )
             {
-                var bitPlatformAppModUpgrade = new BitPlatformAppModUpgrade(targetParsedDirectory.FullName, showExpectedReplacements, new FileSearchService());
+                var bitPlatformAppModUpgrade = new BitPlatformAppModUpgrade(
+                    targetParsedDirectory.FullName,
+                    showExpectedReplacements,
+                    new FileSearchService()
+                    );
                 await bitPlatformAppModUpgrade.AddAlchiwebApp();
             }
         });
