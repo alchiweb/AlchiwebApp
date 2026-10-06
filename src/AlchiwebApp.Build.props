@@ -1,0 +1,65 @@
+<Project>
+
+    <PropertyGroup>
+
+        <!-- Info -->
+        <Authors>Alchiweb</Authors>
+        <Company>Alchiweb.fr</Company>
+        <Product>AlchiwebApp</Product>
+        <Title>$(MSBuildProjectName)</Title>
+        <Description>$(MSBuildProjectName)</Description>
+        <Copyright>Copyright © Alchiweb 2026</Copyright>
+
+        <!-- Repo -->
+        <RepositoryUrl>https://github.com/alchiweb/AlchiwebApp</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+
+        <!-- nupkg -->
+        <PackageId>$(MSBuildProjectName)</PackageId>
+        <PackageTags>Bit;alchiweb;blazor</PackageTags>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <GeneratePackageOnBuild Condition=" '$(Configuration)' == 'Release' ">true</GeneratePackageOnBuild>
+        <AllowedOutputExtensionsInPackageBuildOutputFolder Condition=" '$(Configuration)' == 'Release' ">$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+        <PackageDescription>$(MSBuildProjectName)</PackageDescription>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <!--<PackageIcon>PackageIcon.png</PackageIcon>-->
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageProjectUrl>https://github.com/alchiweb/AlchiwebApp</PackageProjectUrl>
+
+        <!-- Version -->
+        <ReleaseVersion>0.6.2.4</ReleaseVersion>
+          <PackageVersion>$(ReleaseVersion)</PackageVersion>
+        <PackageReleaseNotes>based on BitPlatform v10.6.2</PackageReleaseNotes>
+        <Version Condition=" '$(Configuration)' == 'Release' ">$([System.String]::Copy($(ReleaseVersion)).Replace('-pre-', '.'))</Version>
+        <Version Condition=" '$(Configuration)' == 'Debug' ">$([System.String]::Copy($(ReleaseVersion)).Replace('-pre-', '.'))</Version>
+        <Deterministic>true</Deterministic>
+
+        <!-- Compile -->
+        <NeutralLanguage>en</NeutralLanguage>
+        <LangVersion>preview</LangVersion>
+        <Nullable>enable</Nullable>
+        <NoWarn>$(NoWarn);NU1605;CS1591;NU1701;CA1303;CA1308;CA2007;CA1014;CA2227;BL0007;CA1056;BL0005;CS1998</NoWarn>
+        <WarningsAsErrors>$(WarningsAsErrors);CS0114;RZ10012</WarningsAsErrors>
+        <!-- https://stackoverflow.com/a/46815541/2720104 -->
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    </PropertyGroup>
+
+
+    <!-- README and LICENSE -->
+    <PropertyGroup>
+        <SignAssembly>True</SignAssembly>
+        <AssemblyOriginatorKeyFile>$([System.IO.Path]::GetFullPath($([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildProjectDirectory)', 'AssemblyOriginatorKeyFile.snk'))\AssemblyOriginatorKeyFile.snk))</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="$([System.IO.Path]::GetFullPath($([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildProjectDirectory)', 'LICENSE.txt'))\LICENSE.txt))">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+        <None Include="$([System.IO.Path]::GetFullPath($([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildProjectDirectory)', 'README.md'))\README.md))">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+    </ItemGroup>
+
+</Project>

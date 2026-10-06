@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
+    <Import Project="../AlchiwebApp.Build.props" />
+
+    <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <CoreCompileDependsOn>PrepareResources;$(CompileDependsOn)</CoreCompileDependsOn>
         <IsAotCompatible>true</IsAotCompatible>
