@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    
+
+    <Import Project="../AlchiwebApp.Build.props" />
+
     <PropertyGroup>
         <TargetFrameworks>net10.0</TargetFrameworks>
         <AssemblyName>Ardalis.Specification.EntityFrameworkCore</AssemblyName>
-        <PackageId>Ardalis.Specification.EntityFrameworkCore</PackageId>
-        <Title>Ardalis.Specification.EntityFrameworkCore</Title>
-        <Description>EF Core plugin package to Ardalis.Specification containing EF Core evaluator and abstract repository.</Description>
-        <Summary>EF Core plugin package to Ardalis.Specification containing EF Core evaluator and abstract repository.</Summary>
+        <PackageId>AlchiwebApp.Ardalis.Specification.EntityFrameworkCore</PackageId>
+        <Title>AlchiwebApp.Ardalis.Specification.EntityFrameworkCore</Title>
+        <Description>AlchiwebApp version of EF Core plugin package to Ardalis.Specification containing EF Core evaluator and abstract repository.</Description>
+        <Summary>AlchiwebApp version of EF Core plugin package to Ardalis.Specification containing EF Core evaluator and abstract repository.</Summary>
     
-        <Version>9.3.1</Version>
-        <PackageTags>spec;specification;repository;ddd;ef;ef core;entity framework;entity framework core</PackageTags>
+        <PackageTags>spec;specification;repository;ddd;ef;ef core;entity framework;entity framework core;alchiweb</PackageTags>
         <PackageReleaseNotes>
-            The change log and breaking changes are listed here.
-            https://github.com/ardalis/Specification/issues/427
+            Based on Ardalis.Specification.EntityFrameworkCore v9.3.1.
         </PackageReleaseNotes>
     </PropertyGroup>
 

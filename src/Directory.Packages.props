@@ -1,5 +1,5 @@
 <Project>
-  <!-- Pour "Ardalis.Specification.EntityFrameworkCore", "AlchiwebApp.Client.Core" et "AlchiwebApp.Server.Core"  -->
+  <!-- For "AlchiwebApp.Ardalis.Specification.EntityFrameworkCore", "AlchiwebApp.Client.Core" and "AlchiwebApp.Server.Core"  -->
   <ItemGroup>
     <PackageVersion Include="AntDesign" Version="1.6.2" />
     <PackageVersion Include="Ardalis.GuardClauses" Version="5.0.0" />
@@ -12,7 +12,7 @@
     <PackageVersion Include="Rejigs" Version="1.3.0" />
     <PackageVersion Include="System.CommandLine" Version="2.0.12" />
   </ItemGroup>
-  <!-- Pour "AlchiwebApp.AntD", "EditorJsonToHtmlConverter", "EditorJsonToHtmlConverter.Tests" et "SampleEditorBlazorApp"  -->
+  <!-- For "AlchiwebApp.AntD", "EditorJsonToHtmlConverter", "EditorJsonToHtmlConverter.Tests" and "SampleEditorBlazorApp"  -->
   <ItemGroup>
     <PackageVersion Include="AntDesign.Charts" Version="0.9.0" />
     <PackageVersion Include="AntDesign.Extensions.Localization" Version="1.6.2" />

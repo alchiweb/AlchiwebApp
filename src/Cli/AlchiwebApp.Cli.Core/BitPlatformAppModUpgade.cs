@@ -276,7 +276,7 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
         projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/AlchiwebApp.Server.Core/AlchiwebApp.Server.Core.csproj");
         folderToAdd.Add(projectToAdd);
         projectToAdd = new("Project");
-        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/Ardalis.Specification.EntityFrameworkCore/Ardalis.Specification.EntityFrameworkCore.csproj");
+        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/AlchiwebApp.Ardalis.Specification.EntityFrameworkCore/AlchiwebApp.Ardalis.Specification.EntityFrameworkCore.csproj");
         folderToAdd.Add(projectToAdd);
 
 

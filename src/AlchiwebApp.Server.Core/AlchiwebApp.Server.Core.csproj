@@ -12,7 +12,7 @@
    
     <ItemGroup>
         <ProjectReference Include="..\AlchiwebApp.Core\AlchiwebApp.Core.csproj" />
-        <ProjectReference Include="..\Ardalis.Specification.EntityFrameworkCore\Ardalis.Specification.EntityFrameworkCore.csproj" />
+        <ProjectReference Include="..\AlchiwebApp.Ardalis.Specification.EntityFrameworkCore\AlchiwebApp.Ardalis.Specification.EntityFrameworkCore.csproj" />
     </ItemGroup>
 
 </Project>
