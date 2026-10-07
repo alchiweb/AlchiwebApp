@@ -6,12 +6,23 @@ namespace AlchiwebApp.Cli.Core;
 
 public partial class BitPlatformAppModUpgrade : BitPlatformApp
 {
+    protected bool WithoutAlchiwebAppNugets { get; }
+    protected string? AlchiwebAppVersion { get; }
+
     private readonly FileSearchService _searchService;
 
-    public BitPlatformAppModUpgrade(string bitPlatformProjectFolderPath, bool useExpectedReplacements, FileSearchService searchService)
+    public BitPlatformAppModUpgrade(
+        string bitPlatformProjectFolderPath,
+        bool useExpectedReplacements,
+        bool withoutAlchiwebAppNugets,
+        string? alchiwebAppVersion,
+        FileSearchService searchService
+        )
         : base(bitPlatformProjectFolderPath, bitPlatformProjectFolderPath, useExpectedReplacements, searchService)
     {
         _searchService = searchService;
+        WithoutAlchiwebAppNugets = withoutAlchiwebAppNugets;
+        AlchiwebAppVersion = alchiwebAppVersion;
     }
 
     public async Task AddAlchiwebApp()
@@ -21,7 +32,10 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
         try
         {
             ModifyCsProjFiles();
-            ModifySolutionFile();
+            if (WithoutAlchiwebAppNugets)
+            {
+                ModifySolutionFile();
+            }
             await CopyAlchiwebAppFilesAsync();
             AddGit();
         }
@@ -60,13 +74,10 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
             );
 
         var itemGroupToAdd = AddItemGroup(sourceXDoc);
+
         if (itemGroupToAdd != null)
         {
-            var projectReferenceToAdd = new XElement("ProjectReference");
-            projectReferenceToAdd.SetAttributeValue("Include", Path.Combine(
-                "..", "..", "AlchiwebApp", "src", "AlchiwebApp.Core", "AlchiwebApp.Core.csproj"
-                ).Replace('/','\\'));
-            itemGroupToAdd.Add(projectReferenceToAdd);
+            itemGroupToAdd.Add(CreateAlchiwebAppProjectReference("AlchiwebApp.Core", false));
         }
         itemGroupToAdd = AddItemGroup(sourceXDoc);
         if (itemGroupToAdd != null)
@@ -95,13 +106,10 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
             );
 
         itemGroupToAdd = AddItemGroup(sourceXDoc);
+
         if (itemGroupToAdd != null)
         {
-            var projectReferenceToAdd = new XElement("ProjectReference");
-            projectReferenceToAdd.SetAttributeValue("Include", Path.Combine(
-                "..", "..", "..", "AlchiwebApp", "src", "AlchiwebApp.Client.Core", "AlchiwebApp.Client.Core.csproj"
-                ).Replace('/', '\\'));
-            itemGroupToAdd.Add(projectReferenceToAdd);
+            itemGroupToAdd.Add(CreateAlchiwebAppProjectReference("AlchiwebApp.Client.Core", true));
         }
         //itemGroupToAdd = AddItemGroup(sourceXDoc);
         //if (itemGroupToAdd != null)
@@ -145,11 +153,7 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
         itemGroupToAdd = AddItemGroup(sourceXDoc);
         if (itemGroupToAdd != null)
         {
-            var projectReferenceToAdd = new XElement("ProjectReference");
-            projectReferenceToAdd.SetAttributeValue("Include", Path.Combine(
-                "..", "..", "..", "AlchiwebApp", "src", "AlchiwebApp.Server.Core", "AlchiwebApp.Server.Core.csproj"
-                ).Replace('/', '\\'));
-            itemGroupToAdd.Add(projectReferenceToAdd);
+            itemGroupToAdd.Add(CreateAlchiwebAppProjectReference("AlchiwebApp.Server.Core", true));
         }
         sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
         #endregion
@@ -214,6 +218,26 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
             packageVersion.SetAttributeValue("Include", "CommunityToolkit.Aspire.OllamaSharp");
             packageVersion.SetAttributeValue("Version", "13.5.0");
             itemGroupToAdd.Add(packageVersion);
+
+            if (!WithoutAlchiwebAppNugets)
+            {
+                if (!string.IsNullOrWhiteSpace(AlchiwebAppVersion))
+                {
+                    packageVersion = new XElement("PackageVersion");
+                    packageVersion.SetAttributeValue("Include", "AlchiwebApp.Core");
+                    packageVersion.SetAttributeValue("Version", AlchiwebAppVersion);
+                    itemGroupToAdd.Add(packageVersion);
+                    packageVersion = new XElement("PackageVersion");
+                    packageVersion.SetAttributeValue("Include", "AlchiwebApp.CLient.Core");
+                    packageVersion.SetAttributeValue("Version", AlchiwebAppVersion);
+                    itemGroupToAdd.Add(packageVersion);
+                    packageVersion = new XElement("PackageVersion");
+                    packageVersion.SetAttributeValue("Include", "AlchiwebApp.Server.Core");
+                    packageVersion.SetAttributeValue("Version", AlchiwebAppVersion);
+                    itemGroupToAdd.Add(packageVersion);
+                }
+            }
+            
         }
         sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
         #endregion
@@ -233,6 +257,26 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
         }
         sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);
         #endregion
+    }
+
+    private XElement CreateAlchiwebAppProjectReference(string projectName, bool movingBack)
+    {
+        XElement referenceToAdd;
+        if (WithoutAlchiwebAppNugets)
+        {
+            referenceToAdd = new XElement("ProjectReference");
+            var relativeDirectory = movingBack ? Path.Combine("..", "..", "..") : Path.Combine("..", "..");
+            referenceToAdd.SetAttributeValue("Include", Path.Combine(
+                relativeDirectory, "AlchiwebApp", "src", projectName, $"{projectName}.csproj"
+                ).Replace('/', '\\'));
+        }
+        else
+        {
+            referenceToAdd = new XElement("PackageReference");
+            referenceToAdd.SetAttributeValue("Include", projectName);
+        }
+
+        return referenceToAdd;
     }
 
     private void ModifySolutionFile()
@@ -310,12 +354,14 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
         gitCommand.Arguments = "init";
         Process.Start(gitCommand)?.WaitForExit();
 
-        gitCommand.Arguments = "submodule add https://github.com/alchiweb/AlchiwebApp.git AlchiwebApp";
-        Process.Start(gitCommand)?.WaitForExit();
+        if (WithoutAlchiwebAppNugets)
+        {
+            gitCommand.Arguments = "submodule add https://github.com/alchiweb/AlchiwebApp.git AlchiwebApp";
+            Process.Start(gitCommand)?.WaitForExit();
 
-        gitCommand.Arguments = "submodule update --init --recursive";
-        Process.Start(gitCommand)?.WaitForExit();
-
+            gitCommand.Arguments = "submodule update --init --recursive";
+            Process.Start(gitCommand)?.WaitForExit();
+        }
         gitCommand.Arguments = "add .";
         Process.Start(gitCommand)?.WaitForExit();
         gitCommand.Arguments = @"commit -m ""AlchiwebApp generated version""";

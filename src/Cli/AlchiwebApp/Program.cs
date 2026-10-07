@@ -40,7 +40,15 @@ internal class Program
             Description = "Show the expected replacements for a standard project (PostgreSQL, API Standalone, Pipeline Azure, Admin, Sample)",
             Required = false,
             DefaultValueFactory = parseResult => false,
-            HelpName = "",
+            HelpName = "expected replacements",
+            Arity = ArgumentArity.Zero,
+        };
+        Option<bool> withoutAlchiwebAppNugetsOption = new("--without-nugets", "-wn")
+        {
+            Description = "Use AlchiwebApp Git fork instead of Nugets packages",
+            Required = false,
+            DefaultValueFactory = parseResult => false,
+            HelpName = "without nugets",
             Arity = ArgumentArity.Zero,
         };
         Console.WriteLine($"AddToBitPlatform v{assemblyVersion}");
@@ -74,17 +82,21 @@ internal class Program
         // Add AlchiwebApp command
         Command upgradeCommand = new("upgrade", "Upgrade a modified BitPlatform app to AlchiwebApp.") {
             targetDirectoryOption,
-            showExpectedReplacementsOption
+            showExpectedReplacementsOption,
+            withoutAlchiwebAppNugetsOption
         };
         upgradeCommand.SetAction(async (parseResult) =>
         {
             if (parseResult.GetRequiredValue(targetDirectoryOption) is DirectoryInfo targetParsedDirectory
                 && parseResult.GetValue(showExpectedReplacementsOption) is bool showExpectedReplacements
+                && parseResult.GetValue(withoutAlchiwebAppNugetsOption) is bool withoutAlchiwebAppNugets
             )
             {
                 var bitPlatformAppModUpgrade = new BitPlatformAppModUpgrade(
                     targetParsedDirectory.FullName,
                     showExpectedReplacements,
+                    withoutAlchiwebAppNugets,
+                    Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
                     new FileSearchService()
                     );
                 await bitPlatformAppModUpgrade.AddAlchiwebApp();

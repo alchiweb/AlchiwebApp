@@ -14,7 +14,6 @@ public abstract partial class BitPlatformApp
     protected string ProjectName { get; } = "";
     protected List<string> Errors { get; } = [];
     protected bool UseExpectedReplacements { get; }
-
     private readonly FileSearchService _searchService;
     public BitPlatformApp(string bitPlatformProjectFolderPath, string sourceProjectFolder, bool useExpectedReplacements, FileSearchService searchService)
     {
