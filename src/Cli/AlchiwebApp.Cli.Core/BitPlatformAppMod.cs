@@ -330,6 +330,9 @@ public partial class BitPlatformAppMod : BitPlatformApp
         // Replace references to Server.Api with Server.Core
         await ReplaceTextAsync($@"{ProjectName}.Server.Api", $@"{ProjectName}.Server.Core", true, true,
             [sourceServerCorePath, sourceTestsPath]);
+        await ReplaceTextAsync($@"{ProjectName}.Server.Core\{ProjectName}.Server.Core", $@"{ProjectName}.Server.Api\{ProjectName}.Server.Api", true, true,
+            [sourceTestsPath],
+            [$"{ProjectName}.Tests.csproj"]);
         await ReplaceTextAsync($@"using {ProjectName}.Server.Api.Infrastructure", $@"using {ProjectName}.Server.Core.Infrastructure", true, true,
             [sourceServerApiPath, sourceServerWebPath]);
         await ReplaceTextAsync($@"using {ProjectName}.Server.Api.Features", $@"using {ProjectName}.Server.Core.Features", true, true,
@@ -343,6 +346,9 @@ public partial class BitPlatformAppMod : BitPlatformApp
         //await _searchService.ReplaceInFilesAsync($"(\\n\\n^namespace ({ProjectName}\\.Server\\.)Api;$)", "\\nusing $2Core;$1",
         //    [new SearchResult() { FilePath = Path.Combine(sourceServerApiPath, "Program.*") }],
         //    useRegex:true);
+        await ReplaceTextAsync("Infrastructure.SignalR.", "", true, false,
+            [sourceServerApiPath],
+            ["Program*.*"]);
         await ReplaceTextAsync("<Infrastructure.", "<Core.Infrastructure.", true, false,
             [sourceServerApiPath, sourceServerWebPath],
             ["Program*.*"]);
@@ -354,6 +360,9 @@ public partial class BitPlatformAppMod : BitPlatformApp
             ["Program*.*"]);
         await ReplaceTextAsync("<Features.", "<Core.Features.", true, false,
             [sourceServerApiPath, sourceServerWebPath],
+            ["Program*.*"]);
+        await ReplaceTextAsync("<Core.Features.Todo", "<Features.Todo", true, false,
+            [sourceServerApiPath],
             ["Program*.*"]);
         await ReplaceTextAsync(" Api.Features.Identity.Models.", " Core.Features.Identity.Models.", true, false,
             [sourceServerApiPath, sourceServerWebPath],

@@ -86,11 +86,10 @@ public class FileSearchService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if ((excludeDirectories != null && excludeDirectories.Any(d => directory.EndsWith($@"\{d}"))) || !Directory.Exists(directory))
+            if ((excludeDirectories != null && excludeDirectories.Any(de => directory.Split(Path.DirectorySeparatorChar).Contains($"{de}"))) || !Directory.Exists(directory))
             {
                 continue;
             }
-
             try
             {
                 foreach (var filter in filters)
@@ -103,7 +102,7 @@ public class FileSearchService
 
                 if (searchInSubFolders)
                 {
-                    var subDirectories = await Task.Run(() => Directory.GetDirectories(directory).SkipWhile(d => excludeDirectories != null && excludeDirectories.Any(d => directory.EndsWith($@"\{d}"))), cancellationToken);
+                    var subDirectories = await Task.Run(() => Directory.GetDirectories(directory).Where(d => !(excludeDirectories != null && excludeDirectories.Any(de => d.Split(Path.DirectorySeparatorChar).Contains($"{de}")))), cancellationToken);
                     foreach (var subDir in subDirectories)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
@@ -143,7 +142,7 @@ public class FileSearchService
                 files.AddRange(filesInCurrentDir);
             }
 
-            var subDirectories = await Task.Run(() => Directory.GetDirectories(directory).SkipWhile(d => excludeDirectories != null && excludeDirectories.Any(d => directory.EndsWith($@"\{d}"))), cancellationToken);
+            var subDirectories = await Task.Run(() => Directory.GetDirectories(directory).Where(d => !(excludeDirectories != null && excludeDirectories.Any(de => d.Split(Path.DirectorySeparatorChar).Contains($"{de}")))), cancellationToken);
             foreach (var subDir in subDirectories)
             {
                 cancellationToken.ThrowIfCancellationRequested();

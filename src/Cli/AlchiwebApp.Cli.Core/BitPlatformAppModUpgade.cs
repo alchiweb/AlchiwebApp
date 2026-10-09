@@ -339,11 +339,7 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
     private void AddGit()
     {
         var gitFolderPath = Path.Combine(BitPlatformProjectFolder, ".git");
-        if (Directory.Exists(gitFolderPath))
-        {
-            Errors.Add("The target folder already contains a .git folder.");
-            return;
-        }
+        var gitExists = Directory.Exists(gitFolderPath);
         ProcessStartInfo gitCommand = new("git")
         {
             WorkingDirectory = BitPlatformProjectFolder
@@ -351,8 +347,12 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
 
         //gitCommand.Arguments = "clone --recurse-submodules https://github.com/alchiweb/AlchiwebApp.git AlchiwebApp";
         //Process.Start(gitCommand)?.WaitForExit();
-        gitCommand.Arguments = "init";
-        Process.Start(gitCommand)?.WaitForExit();
+
+        if (!gitExists)
+        {
+            gitCommand.Arguments = "init";
+            Process.Start(gitCommand)?.WaitForExit();
+        }
 
         if (WithoutAlchiwebAppNugets)
         {
@@ -362,9 +362,13 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
             gitCommand.Arguments = "submodule update --init --recursive";
             Process.Start(gitCommand)?.WaitForExit();
         }
-        gitCommand.Arguments = "add .";
-        Process.Start(gitCommand)?.WaitForExit();
-        gitCommand.Arguments = @"commit -m ""AlchiwebApp generated version""";
-        Process.Start(gitCommand)?.WaitForExit();
+        if (!gitExists)
+        {
+            // First commit
+            gitCommand.Arguments = "add .";
+            Process.Start(gitCommand)?.WaitForExit();
+            gitCommand.Arguments = @"commit -m ""AlchiwebApp generated version""";
+            Process.Start(gitCommand)?.WaitForExit();
+        }
     }
 }

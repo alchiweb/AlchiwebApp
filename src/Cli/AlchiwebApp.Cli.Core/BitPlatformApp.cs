@@ -399,10 +399,15 @@ public abstract partial class BitPlatformApp
         {
             directories = [BitPlatformProjectFolder];
         }
+        string[] mandatoryExcludeDirectories = ["bin", "obj", ".git"];
         if (excludeDirectories == null)
         {
-            excludeDirectories = ["bin", "obj" ];
+            excludeDirectories = mandatoryExcludeDirectories;
         }
+        else
+        {
+            excludeDirectories = mandatoryExcludeDirectories.Concat(excludeDirectories).ToArray();
+        }   
         if (filters == null || filters.Length == 0)
         {
             filters = ["*.*"];

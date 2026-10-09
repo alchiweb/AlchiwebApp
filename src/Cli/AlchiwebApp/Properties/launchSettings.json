@@ -1,7 +1,7 @@
 {
   "profiles": {
     "AlchiwebApp": {
-      "commandName": "Project"
+        "commandName": "Project"
     }
   }
 }
