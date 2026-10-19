@@ -476,6 +476,14 @@ public abstract partial class BitPlatformApp
         }
         await ReplaceTextAsync(stringOld, stringNew, matchCase, matchWholeWord:true, expectedReplacements: expectedReplacements);
     }
+    protected string GetPathProjectDirectory(string subProjectName, string subDirectory = "", bool withFullName = false)
+    {
+        return Path.Combine(BitPlatformProjectFolder, "src", subDirectory, $"{(withFullName ? $"{ProjectName}." : "")}{(string.IsNullOrEmpty(subDirectory) ? "" : $"{subDirectory}.")}{subProjectName}");
+    }
+    protected string GetPathProjectFile(string subProjectName, string subDirectory = "", bool withFullName = false)
+    {
+        return Path.Combine(GetPathProjectDirectory(subProjectName, subDirectory, withFullName), $"{ProjectName}.{(string.IsNullOrEmpty(subDirectory) ? "" : $"{subDirectory}.")}{subProjectName}.csproj");
+    }
     #endregion
 
 }

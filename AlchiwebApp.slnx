@@ -19,8 +19,8 @@
     <File Path="vs-spell.dic" />
   </Folder>
   <Folder Name="/Cli/">
-    <Project Path="src/Cli/AlchiwebApp.Cli.Core/AlchiwebApp.Cli.Core.csproj" />
-    <Project Path="src/Cli/AlchiwebApp/AlchiwebApp.csproj" />
+    <Project Path="src/AlchiwebApp.Cli.Core/AlchiwebApp.Cli.Core.csproj" />
+    <Project Path="src/AlchiwebApp.Cli/AlchiwebApp.Cli.csproj" />
   </Folder>
   <Project Path="src/AlchiwebApp.Client.Core/AlchiwebApp.Client.Core.csproj" />
   <Project Path="src/AlchiwebApp.Core/AlchiwebApp.Core.csproj" />

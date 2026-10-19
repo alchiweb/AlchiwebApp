@@ -4,14 +4,14 @@ using AlchiwebApp.Cli.Core.Services;
 
 namespace AlchiwebApp.Cli.Core;
 
-public partial class BitPlatformAppModUpgrade : BitPlatformApp
+public partial class BitPlatformAppUpgrade : BitPlatformApp
 {
     protected bool WithoutAlchiwebAppNugets { get; }
     protected string? AlchiwebAppVersion { get; }
 
     private readonly FileSearchService _searchService;
 
-    public BitPlatformAppModUpgrade(
+    public BitPlatformAppUpgrade(
         string bitPlatformProjectFolderPath,
         bool useExpectedReplacements,
         bool withoutAlchiwebAppNugets,
@@ -25,7 +25,7 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
         AlchiwebAppVersion = alchiwebAppVersion;
     }
 
-    public async Task AddAlchiwebApp()
+    public async Task Upgrade()
     {
         Console.WriteLine($"Project name: {ProjectName} / Project directory: {BitPlatformProjectFolder}");
 
@@ -292,21 +292,15 @@ public partial class BitPlatformAppModUpgrade : BitPlatformApp
         }
 
         XElement folderToAdd = new("Folder");
-        folderToAdd.SetAttributeValue("Name", "/AlchiwebApp/Cli/");
-        solutionElement.AddFirst(folderToAdd);
-
-        XElement projectToAdd = new("Project");
-        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/Cli/AlchiwebApp.Cli.Core/AlchiwebApp.Cli.Core.csproj");
-        folderToAdd.Add(projectToAdd);
-        projectToAdd = new("Project");
-        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/Cli/AlchiwebApp/AlchiwebApp.csproj");
-        folderToAdd.Add(projectToAdd);
-
-
-        folderToAdd = new("Folder");
         folderToAdd.SetAttributeValue("Name", "/AlchiwebApp/");
         solutionElement.AddFirst(folderToAdd);
 
+        XElement projectToAdd = new("Project");
+        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/AlchiwebApp.Cli.Core/AlchiwebApp.Cli.Core.csproj");
+        folderToAdd.Add(projectToAdd);
+        projectToAdd = new("Project");
+        projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/AlchiwebApp.Cli/AlchiwebApp.Cli.csproj");
+        folderToAdd.Add(projectToAdd);
         projectToAdd = new("Project");
         projectToAdd.SetAttributeValue("Path", "AlchiwebApp/src/AlchiwebApp.Client.Core/AlchiwebApp.Client.Core.csproj");
         folderToAdd.Add(projectToAdd);

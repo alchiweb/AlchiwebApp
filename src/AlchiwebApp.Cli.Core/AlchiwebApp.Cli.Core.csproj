@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="../../AlchiwebApp.Build.props" />
+    <Import Project="../AlchiwebApp.Build.props" />
 
     <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>

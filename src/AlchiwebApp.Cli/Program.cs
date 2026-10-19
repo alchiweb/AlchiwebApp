@@ -56,7 +56,7 @@ internal class Program
         rootCommand.Options.Where(opt => opt as VersionOption != null)?.FirstOrDefault()?.Action = new CustomVersionAction();
 
         // Mod command
-        Command modCommand = new("mod-bp", "Modify generated BitPlatform app.") {
+        Command modCommand = new("prepare", "Modify generated BitPlatform app in order to prepare it for AlchiwebApp integration.") {
             targetDirectoryOption,
             sourceDirectoryOption,
             showExpectedReplacementsOption
@@ -68,13 +68,13 @@ internal class Program
             )
             {
                 DirectoryInfo sourceParsedDirectory = parseResult.GetValue(sourceDirectoryOption) ?? targetParsedDirectory;
-                var bitPlatformAppMod = new BitPlatformAppMod(
+                var bitPlatformAppMod = new BitPlatformAppPrepare(
                     targetParsedDirectory.FullName,
                     sourceParsedDirectory.FullName,
                     showExpectedReplacements,
                     new FileSearchService()
                     );
-                await bitPlatformAppMod.ModifyBitPlatformProject();
+                await bitPlatformAppMod.Prepare();
             }
         });
         rootCommand.Subcommands.Add(modCommand);
@@ -92,14 +92,14 @@ internal class Program
                 && parseResult.GetValue(withoutAlchiwebAppNugetsOption) is bool withoutAlchiwebAppNugets
             )
             {
-                var bitPlatformAppModUpgrade = new BitPlatformAppModUpgrade(
+                var bitPlatformAppModUpgrade = new BitPlatformAppUpgrade(
                     targetParsedDirectory.FullName,
                     showExpectedReplacements,
                     withoutAlchiwebAppNugets,
                     Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
                     new FileSearchService()
                     );
-                await bitPlatformAppModUpgrade.AddAlchiwebApp();
+                await bitPlatformAppModUpgrade.Upgrade();
             }
         });
         rootCommand.Subcommands.Add(upgradeCommand);

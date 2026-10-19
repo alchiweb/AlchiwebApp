@@ -1,19 +1,21 @@
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using AlchiwebApp.Cli.Core.Services;
 
 namespace AlchiwebApp.Cli.Core;
 
-public partial class BitPlatformAppMod : BitPlatformApp
+public partial class BitPlatformAppPrepare : BitPlatformApp
 {
     private readonly FileSearchService _searchService;
 
-    public BitPlatformAppMod(string bitPlatformProjectFolderPath, string sourceProjectFolder, bool useExpectedReplacements, FileSearchService searchService)
+    public BitPlatformAppPrepare(string bitPlatformProjectFolderPath, string sourceProjectFolder, bool useExpectedReplacements, FileSearchService searchService)
         : base(bitPlatformProjectFolderPath, sourceProjectFolder, useExpectedReplacements, searchService)
     {
         _searchService = searchService;
     }
 
-    public async Task ModifyBitPlatformProject()
+    public async Task Prepare()
     {
         Console.WriteLine($"Project name: {ProjectName} / Project directory: {BitPlatformProjectFolder}");
         int[]? bitPlatformForwardPorts = null;
@@ -22,6 +24,20 @@ public partial class BitPlatformAppMod : BitPlatformApp
         string sourceUserSecrets = "";
 
         bool hasSourceBitPlatformProject = !string.Equals(BitPlatformProjectFolder, SourceProjectFolder);
+
+        // Check if the project is a valid BitPlatform project
+        IsValidBitPlatformProject();
+        await VerifyAspireProject();
+
+        if (Errors.Count > 0)
+        {
+            Console.WriteLine($"Nothing to do: this is not a valid BitPlatform project.");
+            foreach (var error in Errors)
+            {
+                Console.WriteLine($" - Error: {error}");
+            }
+            return;
+        }
 
         // Clean projects
         try
@@ -89,6 +105,56 @@ public partial class BitPlatformAppMod : BitPlatformApp
         }
 
     }
+
+    #region Checking for a valid BitPlatform project
+    private bool IsValidBitPlatformProject()
+    {
+        bool isValid =
+            File.Exists(GetPathProjectFile("Shared")) &&
+            File.Exists(GetPathProjectFile("Tests")) &&
+            File.Exists(GetPathProjectFile("Maui", "Client", true)) &&
+            File.Exists(GetPathProjectFile("Core", "Client", true)) &&
+            File.Exists(GetPathProjectFile("Web", "Client", true)) &&
+            File.Exists(GetPathProjectFile("Windows", "Client", true)) &&
+            File.Exists(GetPathProjectFile("Api", "Server", true)) &&
+            File.Exists(GetPathProjectFile("Shared", "Server", true)) &&
+            File.Exists(GetPathProjectFile("Web", "Server", true))
+            ;
+        if (!isValid)
+        {
+            Errors.Add($"The project does not have all required projects.");
+        }
+        return isValid;
+    }
+
+    private async Task<bool> VerifyAspireProject()
+    {
+        var filePath = Path.Combine(GetPathProjectDirectory("AppHost", "Server", true), "Program.cs");
+        if (!File.Exists(filePath))
+        {
+            Errors.Add($"The project does not have Aspire project.\n  Remove '--aspire false' option while generating the project.\n  Note: default is '--aspire true'.");
+            return false;
+        }
+        using var reader = new StreamReader(filePath, Encoding.UTF8);
+        string content = await reader.ReadToEndAsync();
+        bool hasApiProject =
+            _searchService.PerformNormalSearch(content, $"{ProjectName}.Server.Api", true, true) ||
+            _searchService.PerformNormalSearch(content, $"{ProjectName}_Server_Api", true, true);
+
+        if (!hasApiProject)
+        {
+            Errors.Add($"The project does not have a separate API for publishing.\n  Add '--api Standalone' (and remove '--api Integrated' if present) while generating the project.\n  Note: default is '--api Integrated'.\"");
+        }
+        bool hasPostgres = _searchService.PerformNormalSearch(content, $"{ProjectName}.Server.Api", true);
+
+        if (!_searchService.PerformNormalSearch(content, $"AddPostgre", true))
+        {
+            Errors.Add($"The project does not use a PostgreSQL database.\n  Add '--database PostgreSQL' (and remove '--database [...]' if present) while generating the project.\n  Note: default is '--database SQLite'.\"");
+        }
+        return hasApiProject;
+    }
+
+    #endregion
 
     #region Renaming Shared projects to Core projects
     private async Task RenameServerSharedProjectAsync(bool matchCase = false)
