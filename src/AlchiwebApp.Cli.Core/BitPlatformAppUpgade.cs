@@ -98,6 +98,9 @@ public partial class BitPlatformAppUpgrade : BitPlatformApp
             );
         sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
 
+        AddCoreCompileDependsOnElement(sourceXDoc);
+        AddBitResxTranslatorElement(sourceXDoc, @"..\..\..\Bit.ResxTranslator.json", @"Resources\Bit.ResxTranslator.json");
+
         CopyResources("AppStrings",
             "ClientI18n",
             sourceProject,
@@ -149,6 +152,8 @@ public partial class BitPlatformAppUpgrade : BitPlatformApp
             BitPlatformProjectFolder, "src", "Server", $"{sourceProject}", $"{sourceProject}.csproj"
             );
         sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
+        AddCoreCompileDependsOnElement(sourceXDoc);
+        AddBitResxTranslatorElement(sourceXDoc, @"..\..\..\Bit.ResxTranslator.json", @"Features\Identity\Resources\Bit.ResxTranslator.json");
 
         itemGroupToAdd = AddItemGroup(sourceXDoc);
         if (itemGroupToAdd != null)
@@ -164,15 +169,6 @@ public partial class BitPlatformAppUpgrade : BitPlatformApp
             BitPlatformProjectFolder, "src", "Server", $"{sourceProject}", $"{sourceProject}.csproj"
             );
         sourceXDoc = XDocument.Load(sourceResourcesProjectFile);
-
-        //// Add: <CoreCompileDependsOn>PrepareResources;$(CompileDependsOn)</CoreCompileDependsOn>
-        //var firstPropertyGroup = sourceXDoc.Document?.Element("Project")?.Element("PropertyGroup");
-        //if (firstPropertyGroup != null)
-        //{
-        //    var coreCompileDependsOn = new XElement("CoreCompileDependsOn");
-        //    coreCompileDependsOn.SetValue("PrepareResources;$(CompileDependsOn)");
-        //    firstPropertyGroup.Add(coreCompileDependsOn);
-        //}
 
         itemGroupToAdd = AddItemGroup(sourceXDoc);
         if (itemGroupToAdd != null)
@@ -252,7 +248,32 @@ public partial class BitPlatformAppUpgrade : BitPlatformApp
         if (firstPropertyGroupForConstants != null)
         {
             var defineConstants = new XElement("DefineConstants");
-            defineConstants.SetValue("$(DefineConstants);ALCHIWEBAPP;ALCHIWEBAPP_SECURITY;ALCHIWEBAPP_USER_ROLE;ALCHIWEBAPP_AI_OLLAMA");
+            var valueDefineConstants = "$(DefineConstants);ALCHIWEBAPP;ALCHIWEBAPP_SECURITY;ALCHIWEBAPP_USER_ROLE";
+            if (HasFeature("Chatbot"))
+            {
+                valueDefineConstants += ";ALCHIWEBAPP_CHATBOT;ALCHIWEBAPP_AI_OLLAMA";
+            }
+            if (HasFeature("Tenant", "Tenants"))
+            {
+                valueDefineConstants += ";ALCHIWEBAPP_TENANTS";
+            }
+            if (HasFeature("Dashboard") || HasFeature("Product", "Products") || HasFeature("Category", "Categories"))
+            {
+                valueDefineConstants += ";ALCHIWEBAPP_MODULE_ADMIN";
+            }
+            if (HasFeature("ProductView", "Products"))
+            {
+                valueDefineConstants += ";ALCHIWEBAPP_MODULE_SALES";
+            }
+            if (HasFeature("MinimalApiSample"))
+            {
+                valueDefineConstants += ";ALCHIWEBAPP_SAMPLE_MINIMALAPI";
+            }
+            if (HasFeature("TodoItem", "Todo"))
+            {
+                valueDefineConstants += ";ALCHIWEBAPP_SAMPLE_TODO";
+            }
+            defineConstants.SetValue(valueDefineConstants);
             firstPropertyGroupForConstants.Add(defineConstants);
         }
         sourceXDoc?.SaveXmlFile(sourceResourcesProjectFile);

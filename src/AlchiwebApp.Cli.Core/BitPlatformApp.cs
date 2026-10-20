@@ -279,6 +279,39 @@ public abstract partial class BitPlatformApp
 
         return sourceItems;
     }
+
+    protected void AddCoreCompileDependsOnElement(XDocument sourceXDoc)
+    {
+        // Add: <CoreCompileDependsOn>PrepareResources;$(CompileDependsOn)</CoreCompileDependsOn>
+        var coreCompileDependsOnElement = sourceXDoc.Document?.Element("Project")?.Element("PropertyGroup")?.Element("CoreCompileDependsOn");
+        if (coreCompileDependsOnElement == null)
+        {
+            var firstPropertyGroup = sourceXDoc.Document?.Element("Project")?.Element("PropertyGroup");
+            if (firstPropertyGroup != null)
+            {
+                var coreCompileDependsOn = new XElement("CoreCompileDependsOn");
+                coreCompileDependsOn.SetValue("PrepareResources;$(CompileDependsOn)");
+                firstPropertyGroup.Add(coreCompileDependsOn);
+            }
+
+        }
+    }
+
+    protected void AddBitResxTranslatorElement(XDocument sourceXDoc, string relativeJsonPath, string linkPath)
+    {
+        var sourceElements = sourceXDoc.Descendants("Content").Where(elt => string.Equals(elt.Attribute("Include")?.Value, @"..\..\..\Bit.ResxTranslator.json"))?.ToArray();
+        if (sourceElements == null || sourceElements.Length == 0)
+        {
+            var itemGroupToAdd = AddItemGroup(sourceXDoc);
+            if (itemGroupToAdd != null)
+            {
+                var itemToAdd = new XElement("Content");
+                itemToAdd.SetAttributeValue("Include", relativeJsonPath);
+                itemToAdd.SetAttributeValue("Link", linkPath);
+                itemGroupToAdd.Add(itemToAdd);
+            }
+        }
+    }
     #endregion
 
     #region Files and directories management
@@ -484,6 +517,8 @@ public abstract partial class BitPlatformApp
     {
         return Path.Combine(GetPathProjectDirectory(subProjectName, subDirectory, withFullName), $"{ProjectName}.{(string.IsNullOrEmpty(subDirectory) ? "" : $"{subDirectory}.")}{subProjectName}.csproj");
     }
+    protected bool HasFeature(string controllerName, string featureDirectoryName = "")
+        => File.Exists(Path.Combine(GetPathProjectDirectory($"{ProjectName}.Core"), "Features", string.IsNullOrEmpty(featureDirectoryName) ? controllerName : featureDirectoryName, $"I{controllerName}Controller.cs"));
     #endregion
 
 }

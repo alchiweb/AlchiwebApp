@@ -5,8 +5,6 @@ using Alchiweb-App1.Client.Core.Infrastructure.Services.HttpMessageHandlers;
 using Alchiweb-App1.Core.Features.Security;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Services;
-using Microsoft.AspNetCore.Http.Connections;
-using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

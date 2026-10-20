@@ -193,8 +193,8 @@
         },
         {
             "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Infrastructure\\DevMcp\\DevMcpDiagnosticTools.cs",
-            "searchText": "using",
-            "replaceText": "$1using Alchiweb-App1.Core.Features.Attachments;\n$1using Alchiweb-App1.Core.Features.Chatbot;",
+            "searchText": "using System.ComponentModel;",
+            "replaceText": "$1using Alchiweb-App1.Core.Features.Attachments;\n#if ALCHIWEBAPP_CHATBOT\n$1using Alchiweb-App1.Core.Features.Chatbot;\n#endif\n",
             "action": "core.add.before"
         },
         {
