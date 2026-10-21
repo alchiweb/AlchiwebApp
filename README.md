@@ -6,14 +6,14 @@ For instance, [BlazorUI graphical components](https://blazorui.bitplatform.dev/)
 
 ## TLTR;
 
-Use the following commands to generate a custom application based on BitPlatform and AlchiwebApp:
+Use the following commands (on Windows, Linux or macos) to generate a custom application based on BitPlatform and AlchiwebApp:
 ```bash
 dotnet new install Bit.Boilerplate
 dotnet new bit-bp --name MyCustomApp --database PostgreSQL --api Standalone --sample --module Admin
-dnx AlchiwebApp.Cli prepare -t .\MyCustomApp\
-dnx AlchiwebApp.Cli upgrade -t .\MyCustomApp\
+dnx AlchiwebApp.Cli prepare -t MyCustomApp
+dnx AlchiwebApp.Cli upgrade -t MyCustomApp
 ```
-Build the solution (`MyCustomApp\MyCustomApp.slnx` solution file), and enjoy your custom Blazor application!
+Build the solution (`MyCustomApp.slnx` solution file in the `MyCustomApp` directory), and enjoy your custom Blazor application!
 
 This includes:
 - a Blazor server app -> Server + Client
@@ -80,12 +80,12 @@ Once the application has been generated using `dotnet new bit-bp`, simply run th
   For example:
 - Prepare the application with DDD architecture for using AlchiweApp framework:<br>
 ```bash
-alchiwebapp prepare -t .\MyApp\
+alchiwebapp prepare -t MyApp
 ```
 
 - Upgrade the application in order to use AlchiwebApp framework (NuGet libraries), with separation of "Business" code:<br>
 ```bash
-alchiwebapp upgrade -t .\MyApp\
+alchiwebapp upgrade -t MyApp
 ```
 
 > Installation of the `alchiwebapp` CLI command:
@@ -102,3 +102,6 @@ And that's it! All that remains is to apply the Git changes.
 Since Bitplatform version 10.4 (latest version is currently 10.6.2, on october 2026), I have been able to easily update a custom test sample application, with the lastest version of BitPlatform.
 
 And it works great! So I can maintain an application that is always up-to-date, secure, and fully customized (adapted for DDD, a different UI framework, etc.).
+
+### AlchiwebApp is in a beta version
+AlchiwebApp has not reach the v1 yet, but it is already usable and stable.
