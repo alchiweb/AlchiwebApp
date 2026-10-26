@@ -1,6 +1,6 @@
 # AlchiwebApp: a framework based on [BitPlatform](https://bitplatform.dev/)
 
-BitPlatform has made great strides: now the framework is now mature at v10.6 (with the addition of multi-tenancy), the documentation is polished, and the components have evolved significantly...
+BitPlatform has made great strides: now the framework is now mature at v10.7 (with the addition of multi-tenancy), the documentation is polished, and the components have evolved significantly...
 
 For instance, [BlazorUI graphical components](https://blazorui.bitplatform.dev/) — it’s very impressive!
 
@@ -99,7 +99,7 @@ And that's it! All that remains is to apply the Git changes.
 ## Notes
 
 ### I'm testing AlchiwebApp with a custom app
-Since Bitplatform version 10.4 (latest version is currently 10.6.2, on october 2026), I have been able to easily update a custom test sample application, with the lastest version of BitPlatform.
+Since Bitplatform version 10.4 (latest stable version is currently 10.7.0, on october 2026), I have been able to easily update a custom test sample application, with the lastest version of BitPlatform.
 
 And it works great! So I can maintain an application that is always up-to-date, secure, and fully customized (adapted for DDD, a different UI framework, etc.).
 

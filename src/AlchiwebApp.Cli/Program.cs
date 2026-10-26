@@ -52,7 +52,7 @@ internal class Program
             Arity = ArgumentArity.Zero,
         };
         Console.WriteLine($"AddToBitPlatform v{assemblyVersion}");
-        RootCommand rootCommand = new($"AlchiwebApp / Add To BitPlatform v{assemblyVersion} (tested with BitPlatform v10.6.2");
+        RootCommand rootCommand = new($"AlchiwebApp / Add To BitPlatform v{assemblyVersion} (tested with BitPlatform v10.7.0");
         rootCommand.Options.Where(opt => opt as VersionOption != null)?.FirstOrDefault()?.Action = new CustomVersionAction();
 
         // Mod command

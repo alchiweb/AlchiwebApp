@@ -175,7 +175,7 @@
         {
             "filename": "src\\Server\\Alchiweb-App1.Server.Api\\Features\\Attachments\\AttachmentController.cs",
             "otherFilename": "src\\Server\\Alchiweb-App1.Server.Core\\Features\\Attachments\\IAttachmentControllerExtensions.cs",
-            "searchText": "/// <inheritdoc cref=\"GetFilePath(Guid, AttachmentKind)\"/>\n¦.¦*¦(\n¦.¦*¦)¦*};¦(\n¦\\s¦*¦)¦*}\n",
+            "searchText": "/// <inheritdoc cref=\"GetFilePath(Guid, AttachmentKind)\"/>¦(¦(¦?!}\n¦)\n¦\\s¦.¦*¦)¦*}\n",
             "replaceText": "using Alchiweb-App1.Server.Core;\n\nnamespace Alchiweb-App1.Core.Features.Attachments;\n\npublic static partial class IAttachmentControllerExtensions\n{\n  extension(IAttachmentController attachmentController)\n  {\n$0  }\n}",
             "action": "core.modify"
         },
@@ -193,20 +193,14 @@
         },
         {
             "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Infrastructure\\DevMcp\\DevMcpDiagnosticTools.cs",
-            "searchText": "using System.ComponentModel;",
-            "replaceText": "$1using Alchiweb-App1.Core.Features.Attachments;\n#if ALCHIWEBAPP_CHATBOT\n$1using Alchiweb-App1.Core.Features.Chatbot;\n#endif\n",
-            "action": "core.add.before"
-        },
-        {
-            "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Infrastructure\\DevMcp\\DevMcpDiagnosticTools.cs",
-            "searchText": "AttachmentUploadSizeLimitBytes = AttachmentController.MaxUploadSizeBytes,",
-            "replaceText": "$1AttachmentUploadSizeLimitBytes = IAttachmentController.MaxUploadSizeBytes,",
+            "searchText": "¦(using System.ComponentModel;¦[¦\\s¦\\S¦]¦*¦) ChatbotController",
+            "replaceText": "$1using Alchiweb-App1.Core.Features.Chatbot;\n$2IChatbotController$3",
             "action": "core.modify"
         },
         {
             "filename": "src\\Server\\Alchiweb-App1.Server.Core\\Infrastructure\\DevMcp\\DevMcpDiagnosticTools.cs",
-            "searchText": "SpeechUploadSizeLimitBytes = ChatbotController.MaxSpeechUploadSizeBytes",
-            "replaceText": "$1SpeechUploadSizeLimitBytes = IChatbotController.MaxSpeechUploadSizeBytes",
+            "searchText": "¦(using System.ComponentModel;¦[¦\\s¦\\S¦]¦*¦) AttachmentController",
+            "replaceText": "$1using Alchiweb-App1.Core.Features.Attachments;\n$2IAttachmentController$3",
             "action": "core.modify"
         },
         {

@@ -27,9 +27,9 @@
         <PackageProjectUrl>https://github.com/alchiweb/AlchiwebApp</PackageProjectUrl>
 
         <!-- Version -->
-        <ReleaseVersion>0.6.2.9</ReleaseVersion>
+        <ReleaseVersion>0.7.0.0</ReleaseVersion>
           <PackageVersion>$(ReleaseVersion)</PackageVersion>
-        <PackageReleaseNotes>based on BitPlatform v10.6.2</PackageReleaseNotes>
+        <PackageReleaseNotes>based on BitPlatform v10.7.0</PackageReleaseNotes>
         <Version Condition=" '$(Configuration)' == 'Release' ">$([System.String]::Copy($(ReleaseVersion)).Replace('-pre-', '.'))</Version>
         <Version Condition=" '$(Configuration)' == 'Debug' ">$([System.String]::Copy($(ReleaseVersion)).Replace('-pre-', '.'))</Version>
         <Deterministic>true</Deterministic>
