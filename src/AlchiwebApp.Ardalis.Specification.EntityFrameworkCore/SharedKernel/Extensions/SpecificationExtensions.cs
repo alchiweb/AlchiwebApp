@@ -46,28 +46,28 @@ public static class SpecificationExtensions
             catch (Exception) { }
         }
     }
-    public static void ApplyFiltering<TEntity, TEnum, TField, TFilteringEnum>(this Specification<TEntity> spec, IEnumerable<FieldFilter<TEnum, TField>> filterList, TFilteringEnum fieldTypes)
+    public static void ApplyFiltering<TEntity, TEnum, TField, TFilteringEnum>(this Specification<TEntity> spec, IEnumerable<FieldFilter<TEnum, TField>> filterList, TFilteringEnum fieldTypes, bool withIsMatch = true)
         where TField : notnull
         where TEnum : struct, Enum
         where TFilteringEnum : struct, Enum
     {
-        var queryFilters = filterList.GetFiltersForQuery<TEntity, TEnum, TField, TFilteringEnum>(fieldTypes);
+        var queryFilters = filterList.GetFiltersForQuery<TEntity, TEnum, TField, TFilteringEnum>(fieldTypes, withIsMatch);
         if (queryFilters != null)
-            spec.Query.Where(queryFilters);
+            spec.Query.Where(queryFilters); 
     }
-    public static void ApplyFiltering<TEntity, TEnum, TField>(this Specification<TEntity> spec, IEnumerable<FieldFilter<TEnum, TField>> filterList, Expression expression)
+    public static void ApplyFiltering<TEntity, TEnum, TField>(this Specification<TEntity> spec, IEnumerable<FieldFilter<TEnum, TField>> filterList, Expression expression, bool withIsMatch = true)
         where TField : notnull
         where TEnum : struct, Enum
     {
-        var queryFilters = filterList.GetFiltersForQuery<TEntity, TEnum, TField>(expression);
+        var queryFilters = filterList.GetFiltersForQuery<TEntity, TEnum, TField>(expression, withIsMatch);
         if (queryFilters != null)
             spec.Query.Where(queryFilters);
     }
-    public static void ApplyFiltering<TEntity, TEnum, TField>(this Specification<TEntity> spec, IEnumerable<FieldFilter<TEnum, TField>> filterList, Expression[] expressions)
+    public static void ApplyFiltering<TEntity, TEnum, TField>(this Specification<TEntity> spec, IEnumerable<FieldFilter<TEnum, TField>> filterList, Expression[] expressions, bool withIsMatch = true)
         where TField : notnull
         where TEnum : struct, Enum
     {
-        var queryFilters = filterList.GetFiltersForQuery<TEntity, TEnum, TField>(expressions);
+        var queryFilters = filterList.GetFiltersForQuery<TEntity, TEnum, TField>(expressions, withIsMatch);
         if (queryFilters != null)
             spec.Query.Where(queryFilters);
     }

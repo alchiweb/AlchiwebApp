@@ -1,13 +1,18 @@
 <Project>
 
     <PropertyGroup>
+        <AlchiwebAppForSqlServer>false</AlchiwebAppForSqlServer>
+
+        <DefineConstants Condition=" '$(AlchiwebAppServer)' == 'true' And '$(AlchiwebAppForSqlServer)' == 'true' ">$(DefineConstants);ALCHIWEBAPP_SQLSERVER</DefineConstants>
+        <BuildProjectName Condition=" '$(AlchiwebAppServer)' == 'true' And '$(AlchiwebAppForSqlServer)' == 'true' ">$(MSBuildProjectName).SqlServer</BuildProjectName>
+        <BuildProjectName Condition=" !('$(AlchiwebAppServer)' == 'true' And '$(AlchiwebAppForSqlServer)' == 'true') ">$(MSBuildProjectName)</BuildProjectName>
 
         <!-- Info -->
         <Authors>Alchiweb</Authors>
         <Company>Alchiweb.fr</Company>
         <Product>AlchiwebApp</Product>
-        <Title>$(MSBuildProjectName)</Title>
-        <Description>$(MSBuildProjectName)</Description>
+        <Title>$(BuildProjectName)</Title>
+        <Description>$(BuildProjectName)</Description>
         <Copyright>Copyright © Alchiweb 2026</Copyright>
 
         <!-- Repo -->
@@ -15,20 +20,20 @@
         <RepositoryType>git</RepositoryType>
 
         <!-- nupkg -->
-        <PackageId>$(MSBuildProjectName)</PackageId>
+        <PackageId>$(BuildProjectName)</PackageId>
         <PackageTags>Bit;alchiweb;blazor</PackageTags>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <GeneratePackageOnBuild Condition=" '$(Configuration)' == 'Release' ">true</GeneratePackageOnBuild>
         <AllowedOutputExtensionsInPackageBuildOutputFolder Condition=" '$(Configuration)' == 'Release' ">$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-        <PackageDescription>$(MSBuildProjectName)</PackageDescription>
+        <PackageDescription>$(BuildProjectName)</PackageDescription>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <!--<PackageIcon>PackageIcon.png</PackageIcon>-->
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageProjectUrl>https://github.com/alchiweb/AlchiwebApp</PackageProjectUrl>
 
         <!-- Version -->
-        <ReleaseVersion>0.7.0.0</ReleaseVersion>
-          <PackageVersion>$(ReleaseVersion)</PackageVersion>
+        <ReleaseVersion>0.7.0.1</ReleaseVersion>
+        <PackageVersion>$(ReleaseVersion)</PackageVersion>
         <PackageReleaseNotes>based on BitPlatform v10.7.0</PackageReleaseNotes>
         <Version Condition=" '$(Configuration)' == 'Release' ">$([System.String]::Copy($(ReleaseVersion)).Replace('-pre-', '.'))</Version>
         <Version Condition=" '$(Configuration)' == 'Debug' ">$([System.String]::Copy($(ReleaseVersion)).Replace('-pre-', '.'))</Version>

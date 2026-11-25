@@ -10,7 +10,7 @@ namespace Ardalis.Specification.EntityFrameworkCore.SharedKernel.Extensions;
 
 public static class FieldFilterListExtensions
 {
-    public static Expression<Func<TEntity, bool>>? GetFiltersForQuery<TEntity, TEnum, TField, TFilteringEnum>(this IEnumerable<FieldFilter<TEnum, TField>> filterList, TFilteringEnum fieldTypes)
+    public static Expression<Func<TEntity, bool>>? GetFiltersForQuery<TEntity, TEnum, TField, TFilteringEnum>(this IEnumerable<FieldFilter<TEnum, TField>> filterList, TFilteringEnum fieldTypes, bool withIsMatch = true)
         where TField : notnull
         where TEnum : struct, Enum
         where TFilteringEnum : struct, Enum
@@ -38,7 +38,7 @@ public static class FieldFilterListExtensions
             {
                 continue;
             }
-            bool flowControl = CreateExpression(filterList, propertyField, ref totalExpression);
+            bool flowControl = CreateExpression(filterList, propertyField, ref totalExpression, withIsMatch);
             if (!flowControl)
             {
                 continue;
@@ -49,12 +49,12 @@ public static class FieldFilterListExtensions
         return Expression.Lambda<Func<TEntity, bool>>(totalExpression, [entity]);
     }
 
-    public static Expression<Func<TEntity, bool>>? GetFiltersForQuery<TEntity, TEnum, TField>(this IEnumerable<FieldFilter<TEnum, TField>> filterList, Expression expression)
+    public static Expression<Func<TEntity, bool>>? GetFiltersForQuery<TEntity, TEnum, TField>(this IEnumerable<FieldFilter<TEnum, TField>> filterList, Expression expression, bool withIsMatch = true)
         where TField : notnull
         where TEnum : struct, Enum
-    => filterList.GetFiltersForQuery<TEntity, TEnum, TField>([expression]);
+    => filterList.GetFiltersForQuery<TEntity, TEnum, TField>([expression], withIsMatch);
 
-    public static Expression<Func<TEntity, bool>>? GetFiltersForQuery<TEntity, TEnum, TField>(this IEnumerable<FieldFilter<TEnum, TField>> filterList, Expression[] expressions)
+    public static Expression<Func<TEntity, bool>>? GetFiltersForQuery<TEntity, TEnum, TField>(this IEnumerable<FieldFilter<TEnum, TField>> filterList, Expression[] expressions, bool withIsMatch = true)
         where TField : notnull
         where TEnum : struct, Enum
     {
@@ -72,7 +72,7 @@ public static class FieldFilterListExtensions
         Expression? totalExpression = null;
         foreach (var propertyField in expressions)
         {
-            bool flowControl = CreateExpression(filterList, propertyField, ref totalExpression);
+            bool flowControl = CreateExpression(filterList, propertyField, ref totalExpression, withIsMatch);
             if (!flowControl)
             {
                 continue;
@@ -83,7 +83,7 @@ public static class FieldFilterListExtensions
         return Expression.Lambda<Func<TEntity, bool>>(totalExpression, [entity]);
     }
 
-    private static bool CreateExpression<TEnum, TField>(IEnumerable<FieldFilter<TEnum, TField>> filterList, Expression propertyField, ref Expression? totalExpression) where TEnum : struct, Enum
+    private static bool CreateExpression<TEnum, TField>(IEnumerable<FieldFilter<TEnum, TField>> filterList, Expression propertyField, ref Expression? totalExpression, bool withIsMatch = true) where TEnum : struct, Enum
         where TField : notnull
     {
         bool isFirstFilter = true;
@@ -98,9 +98,12 @@ public static class FieldFilterListExtensions
                 MethodInfo? endswithMethod = null;
 
                 var regexOptions = Expression.Constant(RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                if (withIsMatch)
+                {
 #if !ALCHIWEBAPP_SQLSERVER
-                regexMethod = typeof(Regex).GetMethod("IsMatch", [typeof(string), typeof(string), typeof(RegexOptions)]);
+                    regexMethod = typeof(Regex).GetMethod("IsMatch", [typeof(string), typeof(string), typeof(RegexOptions)]);
 #endif
+                }
                 if (regexMethod == null)
                 {
                     containsMethod = typeof(String).GetMethod("Contains", [typeof(string)]);
